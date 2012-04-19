@@ -12,7 +12,7 @@
 
 @end
 
-static NSString* const serverUrl = @"http://%@:8081/post?apk=%@&package=%@";
+static NSString* const serverUrl = @"http://%@:8081/post?apk=%@&layout=%@";
 
 void fsevents_callback(ConstFSEventStreamRef streamRef,
                        void *userData,
@@ -170,7 +170,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 			if([fileModDate compare:[self lastModificationDateForPath:path]] == NSOrderedDescending) {
                 NSLog(@"File change at: %@", fullPath);
                 [statusText setTitleWithMnemonic:[NSString stringWithFormat:@"%@ changed at %@", [fullPath lastPathComponent], [NSDate date]]];
-                [self androidProjectChangedWithPath:[self androidProjectDirectoryFromPath:fullPath]];
+                [self androidProjectChangedWithPath:[self androidProjectDirectoryFromPath:fullPath] layout:[fullPath lastPathComponent]];
                 break;
 			}
 		}
@@ -206,7 +206,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     return [self androidProjectDirectoryFromPath:[path stringByDeletingLastPathComponent]];
 }
 
-- (void)androidProjectChangedWithPath:(NSString *)path
+- (void)androidProjectChangedWithPath:(NSString *)path layout:(NSString *)layout
 {
     NSString *manifest = [NSString stringWithFormat:@"%@/AndroidManifest.xml", path];
 
@@ -214,20 +214,16 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
     [self buildAppWithManifest:manifest];
 
-    //[self buildAppWithBuildFile:[NSString stringWithFormat:@"%@/%@", path, @"build.xml"]];
     NSString *apkFile = [self apkPath];
     NSLog(@"Got apk file %@", apkFile);
     
-    NSString *appPackage = @"com.bignerdranch.franklin.roger.fakepackagename";
-    NSLog(@"Got app package %@", appPackage);
-    
     // Send it over to the server
-    [self sendChangesWithPath:apkFile classname:appPackage];
+    [self sendChangesWithPath:apkFile layout:layout];
 }
 
-- (void)sendChangesWithPath:(NSString *)apk classname:(NSString *)classname
+- (void)sendChangesWithPath:(NSString *)apk layout:(NSString *)layout
 {
-    NSString *reqUrl = [NSString stringWithFormat:serverUrl, [self currentIPAddress], apk, classname];
+    NSString *reqUrl = [NSString stringWithFormat:serverUrl, [self currentIPAddress], apk, layout];
     NSLog(@"Sending request: %@", reqUrl);
     
     NSURLRequest *req = [NSURLRequest requestWithURL:[NSURL URLWithString:reqUrl]]; 
@@ -410,6 +406,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
 - (void)stopServer
 {
+    NSLog(@"Stopping server");
     [nodeTask terminate];
 }
 
