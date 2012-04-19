@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		362A7AA01540643700CA25C6 /* build_fake_package.sh in Resources */ = {isa = PBXBuildFile; fileRef = 362A7A9F1540643700CA25C6 /* build_fake_package.sh */; };
+		362A7AA215406FFE00CA25C6 /* en1_addr.sh in Resources */ = {isa = PBXBuildFile; fileRef = 362A7AA115406FFE00CA25C6 /* en1_addr.sh */; };
 		8342C50B153F7274007B2447 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8342C50A153F7274007B2447 /* Cocoa.framework */; };
 		8342C515153F7274007B2447 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8342C513153F7274007B2447 /* InfoPlist.strings */; };
 		8342C517153F7274007B2447 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8342C516153F7274007B2447 /* main.m */; };
@@ -21,6 +22,7 @@
 /* Begin PBXFileReference section */
 		362A7A9D15405D2000CA25C6 /* scripting */ = {isa = PBXFileReference; lastKnownFileType = folder; path = scripting; sourceTree = SOURCE_ROOT; };
 		362A7A9F1540643700CA25C6 /* build_fake_package.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = build_fake_package.sh; path = scripting/build_fake_package.sh; sourceTree = "<group>"; };
+		362A7AA115406FFE00CA25C6 /* en1_addr.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = en1_addr.sh; path = scripting/en1_addr.sh; sourceTree = "<group>"; };
 		8342C506153F7274007B2447 /* Roger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Roger.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8342C50A153F7274007B2447 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		8342C50D153F7274007B2447 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -54,6 +56,7 @@
 		8342C4FB153F7274007B2447 = {
 			isa = PBXGroup;
 			children = (
+				362A7AA115406FFE00CA25C6 /* en1_addr.sh */,
 				362A7A9F1540643700CA25C6 /* build_fake_package.sh */,
 				8342C510153F7274007B2447 /* Roger */,
 				8342C509153F7274007B2447 /* Frameworks */,
@@ -172,6 +175,7 @@
 				8342C521153F7274007B2447 /* MainMenu.xib in Resources */,
 				8342C534153F73E6007B2447 /* FFileViewController.xib in Resources */,
 				362A7AA01540643700CA25C6 /* build_fake_package.sh in Resources */,
+				362A7AA215406FFE00CA25C6 /* en1_addr.sh in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
