@@ -16,6 +16,8 @@
     FSEventStreamRef stream;
     NSString *ipAddress;
     
+    NSTask *nodeTask;
+    
     IBOutlet NSTextField *statusText;
 }
 
@@ -37,5 +39,8 @@
 - (NSString *)packageForManifest:(NSString *)manifest;
 - (void)sendChangesWithPath:(NSString *)apkPath classname:(NSString *)classname;
 - (NSString *)currentIPAddress;
+
+- (void)startServer;
+- (void)stopServer;
 
 @end

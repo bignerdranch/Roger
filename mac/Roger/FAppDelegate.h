@@ -7,8 +7,11 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "FFileViewController.h"
 
-@interface FAppDelegate : NSObject <NSApplicationDelegate>
+@interface FAppDelegate : NSObject <NSApplicationDelegate> {
+    FFileViewController *controller;
+}
 
 @property (assign) IBOutlet NSWindow *window;
 
