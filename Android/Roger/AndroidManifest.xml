@@ -22,6 +22,7 @@
         </activity>
         
         <service android:name="com.bignerdranch.franklin.roger.DownloadService" />
+        <service android:name="com.bignerdranch.franklin.roger.FindServerService" />
         
     </application>
 
