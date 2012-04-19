@@ -7,7 +7,7 @@ filesys = require("fs");
 
 port = 8081;
 mobilePort = 8082;
-hostname = "10.1.10.108";
+hostname = process.argv[2];//"10.1.10.108";
 var clients = [];
 
 Array.prototype.remove = function(e) {
@@ -61,4 +61,4 @@ var server = net.createServer(function (stream) {
   	});
 });
 server.listen(mobilePort, hostname);
-sys.puts("Mobile server Running on " + mobilePort);
+sys.puts("Mobile server Running on " + hostname + ":" + mobilePort);
