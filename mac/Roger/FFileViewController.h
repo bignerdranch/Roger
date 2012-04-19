@@ -34,10 +34,10 @@
 - (BOOL)fileIsAndroidXml: (NSString *)path;
 - (NSString *)androidProjectDirectoryFromPath:(NSString *)path;
 - (void)buildAppWithBuildFile:(NSString *)buildFile;
-- (void)androidProjectChangedWithPath:(NSString *)path;
+- (void)androidProjectChangedWithPath:(NSString *)path layout:(NSString *)layout;
 - (NSString *)apkFileInPath:(NSString *)path;
 - (NSString *)packageForManifest:(NSString *)manifest;
-- (void)sendChangesWithPath:(NSString *)apkPath classname:(NSString *)classname;
+- (void)sendChangesWithPath:(NSString *)apkPath layout:(NSString *)layout;
 - (NSString *)currentIPAddress;
 
 - (void)startServer;

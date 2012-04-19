@@ -7,7 +7,7 @@ filesys = require("fs");
 
 port = 8081;
 mobilePort = 8082;
-hostname = process.argv[2];//"10.1.10.108";
+hostname = process.argv[2];
 var clients = [];
 
 Array.prototype.remove = function(e) {
@@ -23,8 +23,8 @@ http.createServer(function(request, response){
                   if (parts.pathname == "/post") {
                   // Desktop client is posting a file
                   var apk = parts.query['apk'];
-                  var pack = parts.query['package'];
-                  sys.puts("posting apk: " + apk + " package: " + pack);
+                  var pack = parts.query['layout'];
+                  sys.puts("posting apk: " + apk + " layout: " + pack);
                   response.writeHeader(200);
                   
                   filesys.readFile(apk, "binary", function(err, file) {  
