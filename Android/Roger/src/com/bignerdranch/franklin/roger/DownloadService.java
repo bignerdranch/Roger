@@ -59,9 +59,18 @@ public class DownloadService extends IntentService {
 			String data = new String(buffer);
 			Log.d(TAG, "Got data: " + data);
 			output.write(buffer, 0, bytesRead);
+			
+			if (input.available() <= 0) {
+				// The file is done
+				broadcastChange(filePath.getAbsolutePath());
+			}
 		}
 		long elapsed = System.currentTimeMillis() - start;
 		Log.d(TAG, "GET complete, " + elapsed + "ms");
 	}
 
+	private void broadcastChange(String apkPath) {
+//		Intent downloadIntent = new Intent(action);
+//		sendBroadcast(downloadIntent);
+	}
 }
