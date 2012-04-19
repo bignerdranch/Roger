@@ -15,13 +15,21 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-    FFileViewController *controller = [[FFileViewController alloc] initWithNibName:@"FFileViewController" bundle:nil];
+    controller = [[FFileViewController alloc] initWithNibName:@"FFileViewController" bundle:nil];
     [_window setContentView:[controller view]];
 
     NSDictionary *appDefaults = [NSDictionary
         dictionaryWithObject:@"" forKey:@"SdkDirKey"];
 
     [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
+    
+    [controller startServer];
+}
+
+- (void)applicationWillTerminate:(NSNotification *)notification
+{
+    [controller stopServer];
+    controller = nil;
 }
 
 @end

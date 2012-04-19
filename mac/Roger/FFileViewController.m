@@ -60,8 +60,6 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     [self update];
     NSString *ip = [self currentIPAddress];
     NSLog(@"Current ip: %@", ip);
-    
-    [self startServer];
 }
 
 - (void) initializeEventStream
@@ -387,7 +385,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 {
     NSOperationQueue *queue = [[NSOperationQueue alloc] init];
     [queue addOperationWithBlock:^(void) {
-        NSTask *aTask = [[NSTask alloc] init];
+        nodeTask = [[NSTask alloc] init];
         NSMutableArray *args = [NSMutableArray array];
      
         NSString *path = [self serverPath];
@@ -396,19 +394,23 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
         [args addObject:path];
         [args addObject:ipAddress];
         [args addObject:[self currentMulticastAddress]];
-        [aTask setLaunchPath:@"/usr/local/bin/node"];
-        [aTask setArguments:args];
+        [nodeTask setLaunchPath:@"/usr/local/bin/node"];
+        [nodeTask setArguments:args];
         
         NSPipe *output = [NSPipe pipe];
-        [aTask setStandardOutput:output];
-        [aTask setStandardInput:[NSPipe pipe]];
+        [nodeTask setStandardOutput:output];
+        [nodeTask setStandardInput:[NSPipe pipe]];
         
-        [aTask launch];
+        [nodeTask launch];
         
         NSData *data = [[output fileHandleForReading] availableData];
         NSLog(@"Output %@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
-        [aTask terminate];
     }];
+}
+
+- (void)stopServer
+{
+    [nodeTask terminate];
 }
 
 - (NSString *)currentIPAddress
