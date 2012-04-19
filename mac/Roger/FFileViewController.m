@@ -12,7 +12,7 @@
 
 @end
 
-static NSString* const serverUrl = @"http://127.0.0.1:8081/post?apk=%@&package=%@";
+static NSString* const serverUrl = @"http://%@:8081/post?apk=%@&package=%@";
 
 void fsevents_callback(ConstFSEventStreamRef streamRef,
                        void *userData,
@@ -54,7 +54,14 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     pathModificationDates = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"pathModificationDates"] mutableCopy];
 	lastEventId = [[NSUserDefaults standardUserDefaults] objectForKey:@"lastEventId"];
 	[self initializeEventStream];
+    
+    NSString *ip = [self currentIPAddress];
+    NSLog(@"Current ip: %@", ip);
+    
+    [self startServer];
 }
+
+vie
 
 - (void) initializeEventStream
 {
@@ -212,9 +219,9 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     [self sendChangesWithPath:apkFile classname:appPackage];
 }
 
-- (void)sendChangesWithPath:(NSString *)apkPath classname:(NSString *)classname
+- (void)sendChangesWithPath:(NSString *)apk classname:(NSString *)classname
 {
-    NSString *reqUrl = [NSString stringWithFormat:serverUrl, apkPath, classname];
+    NSString *reqUrl = [NSString stringWithFormat:serverUrl, [self currentIPAddress], apk, classname];
     NSLog(@"Sending request: %@", reqUrl);
     
     NSURLRequest *req = [NSURLRequest requestWithURL:[NSURL URLWithString:reqUrl]]; 
@@ -281,6 +288,18 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     return [bundle pathForResource:@"build_fake_package" ofType:@"sh"];
 }
 
+- (NSString *)ipAddressScriptPath
+{
+    NSBundle *bundle = [NSBundle mainBundle];
+    return [bundle pathForResource:@"en1_addr" ofType:@"sh"];
+}
+
+- (NSString *)serverPath
+{
+    NSBundle *bundle = [NSBundle mainBundle];
+    return [bundle pathForResource:@"RogerServer" ofType:@"js"];
+}
+
 - (void)buildAppWithManifest:(NSString *)manifest
 {
     NSLog(@"Building apk with manifest: %@", [manifest stringByDeletingLastPathComponent]);
@@ -343,6 +362,57 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     
     [aTask launch];
     [aTask waitUntilExit];
+}
+
+- (void)startServer
+{
+//    NSOperationQueue *queue = [[NSOperationQueue alloc] init];
+//    [queue addOperationWithBlock:^(void) {
+//        NSTask *aTask = [[NSTask alloc] init];
+//        NSMutableArray *args = [NSMutableArray array];
+//     
+//        NSString *path = [self serverPath];
+//        NSLog(@"Server path: %@", path);
+//        
+//        [args addObject:path];
+//        [args addObject:ipAddress];
+//        [aTask setLaunchPath:@"/usr/local/bin/node"];
+//        [aTask setArguments:args];
+//        
+//        NSPipe *output = [NSPipe pipe];
+//        [aTask setStandardOutput:output];
+//        [aTask setStandardInput:[NSPipe pipe]];
+//        
+//        [aTask launch];
+//        
+//        NSData *data = [[output fileHandleForReading] availableData];
+//        NSLog(@"Output %@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
+//        [aTask terminate];
+//    }];
+}
+
+- (NSString *)currentIPAddress
+{
+    if (ipAddress) {
+        return ipAddress;
+    }
+    
+    NSTask* task = [[NSTask alloc] init];
+    [task setStandardOutput:[NSPipe pipe]];
+    [task setLaunchPath:@"/bin/sh"];
+    [task setArguments:[NSArray arrayWithObjects:[self ipAddressScriptPath], nil]];
+    [task setStandardOutput:[NSPipe pipe]];
+    [task setStandardInput:[NSPipe pipe]];
+    [task launch];
+    [task waitUntilExit];
+    
+    NSData *data = [[[task standardOutput] fileHandleForReading] availableData];
+    if ((data != nil) && [data length]) {
+        ipAddress = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        ipAddress = [ipAddress stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+    }
+    
+    return ipAddress;
 }
 
 @end

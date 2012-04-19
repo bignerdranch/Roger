@@ -17,6 +17,8 @@
 		8342C521153F7274007B2447 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8342C51F153F7274007B2447 /* MainMenu.xib */; };
 		8342C533153F73E6007B2447 /* FFileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8342C531153F73E6007B2447 /* FFileViewController.m */; };
 		8342C534153F73E6007B2447 /* FFileViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8342C532153F73E6007B2447 /* FFileViewController.xib */; };
+		83FEA52815407D8900B40A11 /* RogerServer.js in Sources */ = {isa = PBXBuildFile; fileRef = 83FEA52715407D8900B40A11 /* RogerServer.js */; };
+		83FEA52B1540826600B40A11 /* RogerServer.js in Resources */ = {isa = PBXBuildFile; fileRef = 83FEA52715407D8900B40A11 /* RogerServer.js */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +41,7 @@
 		8342C530153F73E6007B2447 /* FFileViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FFileViewController.h; sourceTree = "<group>"; };
 		8342C531153F73E6007B2447 /* FFileViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FFileViewController.m; sourceTree = "<group>"; };
 		8342C532153F73E6007B2447 /* FFileViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FFileViewController.xib; sourceTree = "<group>"; };
+		83FEA52715407D8900B40A11 /* RogerServer.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = RogerServer.js; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,6 +112,7 @@
 		8342C511153F7274007B2447 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				83FEA52715407D8900B40A11 /* RogerServer.js */,
 				8342C512153F7274007B2447 /* Roger-Info.plist */,
 				8342C513153F7274007B2447 /* InfoPlist.strings */,
 				8342C516153F7274007B2447 /* main.m */,
@@ -170,6 +174,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				83FEA52B1540826600B40A11 /* RogerServer.js in Resources */,
 				8342C515153F7274007B2447 /* InfoPlist.strings in Resources */,
 				8342C51B153F7274007B2447 /* Credits.rtf in Resources */,
 				8342C521153F7274007B2447 /* MainMenu.xib in Resources */,
@@ -189,6 +194,7 @@
 				8342C517153F7274007B2447 /* main.m in Sources */,
 				8342C51E153F7274007B2447 /* FAppDelegate.m in Sources */,
 				8342C533153F73E6007B2447 /* FFileViewController.m in Sources */,
+				83FEA52815407D8900B40A11 /* RogerServer.js in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

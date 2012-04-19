@@ -14,6 +14,7 @@
     NSDate* appStartedTimestamp;
     NSNumber* lastEventId;
     FSEventStreamRef stream;
+    NSString *ipAddress;
     
     IBOutlet NSTextField *statusText;
 }
@@ -35,5 +36,6 @@
 - (NSString *)apkFileInPath:(NSString *)path;
 - (NSString *)packageForManifest:(NSString *)manifest;
 - (void)sendChangesWithPath:(NSString *)apkPath classname:(NSString *)classname;
+- (NSString *)currentIPAddress;
 
 @end
