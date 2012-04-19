@@ -372,6 +372,17 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     [aTask waitUntilExit];
 }
 
+- (NSString *)currentMulticastAddress
+{
+    NSMutableArray *components = [[[self currentIPAddress] componentsSeparatedByString:@"."] mutableCopy];
+    [components removeObjectAtIndex:3];
+    [components addObject:@"255"];
+
+    NSString *multicastAddress = [components componentsJoinedByString:@"."];
+    NSLog(@"multicastAddress: %@", multicastAddress);
+    return multicastAddress;
+}
+
 - (void)startServer
 {
     NSOperationQueue *queue = [[NSOperationQueue alloc] init];
@@ -384,6 +395,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
         
         [args addObject:path];
         [args addObject:ipAddress];
+        [args addObject:[self currentMulticastAddress]];
         [aTask setLaunchPath:@"/usr/local/bin/node"];
         [aTask setArguments:args];
         
