@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		362A7AA01540643700CA25C6 /* build_fake_package.sh in Resources */ = {isa = PBXBuildFile; fileRef = 362A7A9F1540643700CA25C6 /* build_fake_package.sh */; };
 		8342C50B153F7274007B2447 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8342C50A153F7274007B2447 /* Cocoa.framework */; };
 		8342C515153F7274007B2447 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8342C513153F7274007B2447 /* InfoPlist.strings */; };
 		8342C517153F7274007B2447 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8342C516153F7274007B2447 /* main.m */; };
@@ -18,6 +19,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		362A7A9D15405D2000CA25C6 /* scripting */ = {isa = PBXFileReference; lastKnownFileType = folder; path = scripting; sourceTree = SOURCE_ROOT; };
+		362A7A9F1540643700CA25C6 /* build_fake_package.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = build_fake_package.sh; path = scripting/build_fake_package.sh; sourceTree = "<group>"; };
 		8342C506153F7274007B2447 /* Roger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Roger.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8342C50A153F7274007B2447 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		8342C50D153F7274007B2447 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -51,6 +54,7 @@
 		8342C4FB153F7274007B2447 = {
 			isa = PBXGroup;
 			children = (
+				362A7A9F1540643700CA25C6 /* build_fake_package.sh */,
 				8342C510153F7274007B2447 /* Roger */,
 				8342C509153F7274007B2447 /* Frameworks */,
 				8342C507153F7274007B2447 /* Products */,
@@ -87,6 +91,7 @@
 		8342C510153F7274007B2447 /* Roger */ = {
 			isa = PBXGroup;
 			children = (
+				362A7A9D15405D2000CA25C6 /* scripting */,
 				8342C51C153F7274007B2447 /* FAppDelegate.h */,
 				8342C51D153F7274007B2447 /* FAppDelegate.m */,
 				8342C51F153F7274007B2447 /* MainMenu.xib */,
@@ -166,6 +171,7 @@
 				8342C51B153F7274007B2447 /* Credits.rtf in Resources */,
 				8342C521153F7274007B2447 /* MainMenu.xib in Resources */,
 				8342C534153F73E6007B2447 /* FFileViewController.xib in Resources */,
+				362A7AA01540643700CA25C6 /* build_fake_package.sh in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -300,6 +306,7 @@
 				8342C526153F7274007B2447 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

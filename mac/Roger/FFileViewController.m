@@ -32,11 +32,15 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
 @implementation FFileViewController
 
+@synthesize sdkPath;
+@synthesize apkPath;
+
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         fm = [NSFileManager defaultManager];
+        [self setApkPath:[NSString stringWithFormat:@"%@/stripped.apk", NSHomeDirectory()]];
     }
     
     return self;
@@ -72,7 +76,23 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 	FSEventStreamStart(stream);
 }
 
+- (IBAction)selectSdkClicked:(id)sender
+{
+    NSLog(@"selectSdkClicked");
+    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
 
+    [openPanel setCanChooseDirectories:YES];
+    [openPanel setCanChooseFiles:NO];
+
+    [openPanel beginWithCompletionHandler:^(NSInteger result) {
+        if (result != NSOKButton ) return;
+
+        for (NSURL *url in [openPanel URLs]) {
+            NSString *fileName = [url path];
+            [self setSdkPath:[fileName stringByReplacingOccurrencesOfString:@"file://localhost" withString:@""]];
+        }
+    }];
+}
 
 - (NSApplicationTerminateReply)applicationShouldTerminate: (NSApplication *)app
 {
@@ -127,7 +147,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     
 	NSString* fullPath = nil;
     
-	for(NSString* node in contents) {
+	for (NSString* node in contents) {
         fullPath = [NSString stringWithFormat:@"%@/%@",path,node];
         if ([self fileIsAndroidXml:fullPath])
 		{
@@ -136,7 +156,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 			if([fileModDate compare:[self lastModificationDateForPath:path]] == NSOrderedDescending) {
                 NSLog(@"File change at: %@", fullPath);
                 [statusText setTitleWithMnemonic:[NSString stringWithFormat:@"%@ changed at %@", [fullPath lastPathComponent], [NSDate date]]];
-                [self androidPojectChangedWithPath:[self androidProjectDirectoryFromPath:fullPath]];
+                [self androidProjectChangedWithPath:[self androidProjectDirectoryFromPath:fullPath]];
                 break;
 			}
 		}
@@ -172,13 +192,19 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     return [self androidProjectDirectoryFromPath:[path stringByDeletingLastPathComponent]];
 }
 
-- (void)androidPojectChangedWithPath:(NSString *)path
+- (void)androidProjectChangedWithPath:(NSString *)path
 {
-    [self buildAppWithBuildFile:[NSString stringWithFormat:@"%@/%@", path, @"build.xml"]];
-    NSString *apkFile = [self apkFileInPath:[NSString stringWithFormat:@"%@/bin", path]];
+    NSString *manifest = [NSString stringWithFormat:@"%@/AndroidManifest.xml", path];
+
+    if (![self sdkPath]) return;
+
+    [self buildAppWithManifest:manifest];
+
+    //[self buildAppWithBuildFile:[NSString stringWithFormat:@"%@/%@", path, @"build.xml"]];
+    NSString *apkFile = [self apkPath];
     NSLog(@"Got apk file %@", apkFile);
     
-    NSString *appPackage = [self packageForManifest:[NSString stringWithFormat:@"%@/AndroidManifest.xml", path]];
+    NSString *appPackage = @"com.bignerdranch.franklin.roger.fakepackagename";
     NSLog(@"Got app package %@", appPackage);
     
     // Send it over to the server
@@ -246,6 +272,46 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     }
     
     return nil;
+}
+
+- (NSString *)buildScriptPath
+{
+    NSBundle *bundle = [NSBundle mainBundle];
+    return [bundle pathForResource:@"build_fake_package" ofType:@"sh"];
+}
+
+- (void)buildAppWithManifest:(NSString *)manifest
+{
+    NSLog(@"Building apk with manifest: %@", [manifest stringByDeletingLastPathComponent]);
+    NSTask *aTask = [[NSTask alloc] init];
+    NSMutableArray *args = [NSMutableArray array];
+    
+    NSMutableDictionary *env = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                @"/usr/share/ant", @"ANT_HOME",
+                                nil];
+    
+    NSString *buildScriptPath = [self buildScriptPath];
+    NSLog(@"build script path: %@", buildScriptPath);
+    NSLog(@"sdkPath: %@", [self sdkPath]);
+    NSLog(@"apkPath: %@", [self apkPath]);
+
+    [args addObject:buildScriptPath];
+    [args addObject:[self sdkPath]];
+    [args addObject:manifest];
+    [args addObject:[self apkPath]];
+    [aTask setCurrentDirectoryPath:NSHomeDirectory()];
+    [aTask setEnvironment:env];
+    [aTask setLaunchPath:@"/bin/sh"];
+    [aTask setArguments:args];
+    
+    // If the output from this task is not piped somewhere else, regular NSLog messages will not show up
+    // after the task logs any messages
+    NSPipe *outputPipe = [NSPipe pipe];
+    [aTask setStandardInput:[NSPipe pipe]];
+    [aTask setStandardOutput:outputPipe];
+    
+    [aTask launch];
+    [aTask waitUntilExit];
 }
 
 - (void)buildAppWithBuildFile:(NSString *)buildFile 

@@ -18,6 +18,11 @@
     IBOutlet NSTextField *statusText;
 }
 
+@property (nonatomic, copy) NSString *sdkPath;
+@property (nonatomic, copy) NSString *apkPath;
+
+- (IBAction)selectSdkClicked:(id)sender;
+
 - (void) registerDefaults;
 - (void) initializeEventStream;
 - (void) addModifiedFilesAtPath: (NSString *)path;
@@ -25,7 +30,7 @@
 - (BOOL)fileIsAndroidXml: (NSString *)path;
 - (NSString *)androidProjectDirectoryFromPath:(NSString *)path;
 - (void)buildAppWithBuildFile:(NSString *)buildFile;
-- (void)androidPojectChangedWithPath:(NSString *)path;
+- (void)androidProjectChangedWithPath:(NSString *)path;
 - (NSString *)apkFileInPath:(NSString *)path;
 - (NSString *)packageForManifest:(NSString *)manifest;
 - (void)sendChangesWithPath:(NSString *)apkPath classname:(NSString *)classname;
