@@ -36,10 +36,8 @@ public class FindServerService extends IntentService {
 
     private void findServers() throws IOException {
         MulticastSocket socket = new MulticastSocket(OUTGOING_PORT);
-        InetAddress myAddress = socket.getLocalAddress();
-        byte[] multicastGroup = myAddress.getAddress();
-        multicastGroup[3] = (byte)255;
-        socket.joinGroup(InetAddress.getByAddress(multicastGroup));
+
+        socket.joinGroup(InetAddress.getByName("234.5.6.7"));
 
         socket.setTimeToLive(1);
         socket.setSoTimeout(TIMEOUT);
@@ -56,24 +54,27 @@ public class FindServerService extends IntentService {
 
     private void broadcastSelf(MulticastSocket socket) throws IOException {
         byte[] message = new byte[] { (byte)0xde, (byte)0xad, (byte)0xbe, (byte)0xef };
-        DatagramPacket packet = new DatagramPacket(message, message.length, socket.getLocalAddress(), OUTGOING_PORT);
+        InetAddress multicast = InetAddress.getByName("234.5.6.7");
+        DatagramPacket packet = new DatagramPacket(message, message.length, multicast, OUTGOING_PORT);
         socket.send(packet);
     }
 
     private ArrayList<InetAddress> waitForResponses(DatagramSocket socket) throws IOException {
         long startTime = System.currentTimeMillis();
 
-        ArrayList<InetAddress> addresses = new ArrayList<InetAddress>();
         byte[] responseMessage = new byte[128];
+
+        ArrayList<InetAddress> addresses = new ArrayList<InetAddress>();
 
         while (System.currentTimeMillis() < startTime + TIMEOUT) {
             DatagramPacket response = new DatagramPacket(responseMessage, responseMessage.length);
 
             try {
                 socket.receive(response);
-                Log.i(TAG, "received an address");
-                if (!response.getAddress().getHostName().equals("localhost")) 
+                if (!socket.getLocalAddress().getHostAddress().equals(response.getAddress().getHostAddress())) {
+                    Log.i(TAG, "received an address");
                     addresses.add(response.getAddress());
+                }
             } catch (SocketTimeoutException ste) {
                 // done
             } catch (IOException ioe) {
