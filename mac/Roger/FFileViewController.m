@@ -34,7 +34,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
 @synthesize sdkPath;
 @synthesize apkPath;
-@synthesize apkPathField;
+@synthesize sdkPathField;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -42,6 +42,8 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     if (self) {
         fm = [NSFileManager defaultManager];
         [self setApkPath:[NSString stringWithFormat:@"%@/stripped.apk", NSHomeDirectory()]];
+        [self setSdkPath:[[NSUserDefaults standardUserDefaults] stringForKey:@"SdkDirKey"]];
+        if (![self sdkPath]) [self setSdkPath:@""];
     }
     
     return self;
@@ -55,13 +57,12 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 	lastEventId = [[NSUserDefaults standardUserDefaults] objectForKey:@"lastEventId"];
 	[self initializeEventStream];
     
+    [self update];
     NSString *ip = [self currentIPAddress];
     NSLog(@"Current ip: %@", ip);
     
     [self startServer];
 }
-
-vie
 
 - (void) initializeEventStream
 {
@@ -84,6 +85,11 @@ vie
 	FSEventStreamStart(stream);
 }
 
+- (void)update
+{
+    [[self sdkPathField] setStringValue:[self sdkPath]];
+}
+
 - (IBAction)selectSdkClicked:(id)sender
 {
     NSLog(@"selectSdkClicked");
@@ -97,7 +103,9 @@ vie
 
         for (NSURL *url in [openPanel URLs]) {
             NSString *fileName = [url path];
-            [self setSdkPath:[fileName stringByReplacingOccurrencesOfString:@"file://localhost" withString:@""]];
+            [[NSUserDefaults standardUserDefaults] setObject:fileName forKey:@"SdkDirKey"];
+            [self setSdkPath:fileName];
+            [self update];
         }
     }];
 }
@@ -366,29 +374,29 @@ vie
 
 - (void)startServer
 {
-//    NSOperationQueue *queue = [[NSOperationQueue alloc] init];
-//    [queue addOperationWithBlock:^(void) {
-//        NSTask *aTask = [[NSTask alloc] init];
-//        NSMutableArray *args = [NSMutableArray array];
-//     
-//        NSString *path = [self serverPath];
-//        NSLog(@"Server path: %@", path);
-//        
-//        [args addObject:path];
-//        [args addObject:ipAddress];
-//        [aTask setLaunchPath:@"/usr/local/bin/node"];
-//        [aTask setArguments:args];
-//        
-//        NSPipe *output = [NSPipe pipe];
-//        [aTask setStandardOutput:output];
-//        [aTask setStandardInput:[NSPipe pipe]];
-//        
-//        [aTask launch];
-//        
-//        NSData *data = [[output fileHandleForReading] availableData];
-//        NSLog(@"Output %@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
-//        [aTask terminate];
-//    }];
+    NSOperationQueue *queue = [[NSOperationQueue alloc] init];
+    [queue addOperationWithBlock:^(void) {
+        NSTask *aTask = [[NSTask alloc] init];
+        NSMutableArray *args = [NSMutableArray array];
+     
+        NSString *path = [self serverPath];
+        NSLog(@"Server path: %@", path);
+        
+        [args addObject:path];
+        [args addObject:ipAddress];
+        [aTask setLaunchPath:@"/usr/local/bin/node"];
+        [aTask setArguments:args];
+        
+        NSPipe *output = [NSPipe pipe];
+        [aTask setStandardOutput:output];
+        [aTask setStandardInput:[NSPipe pipe]];
+        
+        [aTask launch];
+        
+        NSData *data = [[output fileHandleForReading] availableData];
+        NSLog(@"Output %@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
+        [aTask terminate];
+    }];
 }
 
 - (NSString *)currentIPAddress
