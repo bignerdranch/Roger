@@ -7,6 +7,7 @@ filesys = require("fs");
 
 port = 8081;
 mobilePort = 8082;
+hostname = "10.1.10.108";
 var clients = [];
 
 Array.prototype.remove = function(e) {
@@ -26,11 +27,16 @@ http.createServer(function(request, response){
 		sys.puts("posting apk: " + apk + " package: " + pack);
 		response.writeHeader(200);
 		
-		clients.forEach(function(s) {
-			sys.puts("sending data to a client");
-			s.write("new data\n");
-		});
-		
+		filesys.readFile(apk, "binary", function(err, file) {  
+			if(!err) {        
+				clients.forEach(function(s) {
+					sys.puts("sending data to a client");
+					s.write(file, "binary");
+				});  
+			} else {
+				sys.puts("unable to find file " + apk + " : " + err);
+			}
+		});  
 	} 
 	
 	response.end();
@@ -68,14 +74,16 @@ var server = net.createServer(function (stream) {
   	stream.setEncoding("utf8");
 
   	stream.addListener("connect", function () {
-		sys.puts("Registering mobile client");
-    	stream.write("Welcome\n");
+		sys.puts("Added mobile client. Total: " + clients.length);
+    	// stream.write("welcome\n");
+		stream.pipe(stream);
   	});
 
   	stream.addListener("end", function() {
     	clients.remove(stream);
+		sys.puts("Removed mobile client. Total: " + clients.length);
     	stream.end();
   	});
 });
-server.listen(mobilePort);
+server.listen(mobilePort, hostname);
 sys.puts("Mobile server Running on " + mobilePort);

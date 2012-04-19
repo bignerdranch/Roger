@@ -1,16 +1,12 @@
 package com.bignerdranch.franklin.roger;
 
 import android.app.Activity;
-
+import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
-
 import android.util.Log;
-
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-
 import android.widget.FrameLayout;
 
 public class RogerActivity extends Activity {
@@ -40,5 +36,12 @@ public class RogerActivity extends Activity {
         View v = inflater.inflate(id, container, false);
 
         container.addView(v);
+        
+        startService();
+    }
+    
+    private void startService() {
+    	Intent service = new Intent(RogerActivity.this, DownloadService.class);
+    	startService(service);
     }
 }

@@ -5,6 +5,8 @@
     android:versionName="1.0" >
 
     <uses-sdk android:minSdkVersion="7" />
+    
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:icon="@drawable/ic_launcher"
@@ -18,6 +20,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <service android:name="com.bignerdranch.franklin.roger.DownloadService" />
+        
     </application>
 
 </manifest>
