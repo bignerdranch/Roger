@@ -23,6 +23,6 @@ TARGET=$(cat "$PROJECT_PROPERTIES" | grep 'target=' | sed 's/^.*=//')
 
 PLATFORM_JAR="$ANDROID_SDK/platforms/$TARGET/android.jar"
 
-rm "$APK_NAME"
+rm -f "$APK_NAME"
 
 $AAPT package -F "$APK_NAME" -S "$PROJECT_RESOURCES" -M "$ANDROID_MANIFEST" -I "$PLATFORM_JAR" --rename-manifest-package "$PACKAGE_NAME"
