@@ -40,7 +40,7 @@ public class RogerActivity extends Activity {
         Resources r = apk.getResources();
         Log.i(TAG, "hmm, still alive");
 
-        Log.i(TAG, "let's try to get a resource id");
+        Log.i(TAG, "getting identifier for layoutName " + layoutName + ", packageName " + packageName + "");
         int id = r.getIdentifier(layoutName, "layout", packageName);
         Log.i(TAG, "here's what we got: " + id + "");
 
