@@ -37,7 +37,7 @@ http.createServer(function(request, response){
                                    if(!err) {        
                                    clients.forEach(function(s) {
                                                    sys.puts("sending data to a client");
-                                                   s.write("--" + layout + "--", "binary");
+                                                   s.write("-" + layout + "-", "binary");
                                                    s.write(file, "binary");
                                                    });  
                                    } else {

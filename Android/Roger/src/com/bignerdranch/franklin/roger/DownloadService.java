@@ -14,8 +14,8 @@ import android.util.Log;
 public class DownloadService extends IntentService {
 	private static final String TAG = "DownloadService";
 	
-	private static final String PACKAGE = "com.bignerdranch.franklin.roger";
-	private static final String INFO_PREFIX = "--";
+	private static final String PACKAGE = "com.bignerdranch.franklin.roger.dummypackage";
+	private static final char INFO_PREFIX = '-';
 	
 	private static final String SERVER_ADDRESS = "http://10.1.10.108:8082/";
 	private DownloadManager manager;
@@ -51,15 +51,27 @@ public class DownloadService extends IntentService {
 		byte[] buffer = new byte[1024];
 		int bytesRead = 0;
 		String layoutFile = "";
+		boolean firstPass = true;
 		
 		while ((bytesRead = input.read(buffer)) > 0) {
-			String response = new String(buffer);
 			int byteOffset = 0;
-			if (response.startsWith(INFO_PREFIX)) {
-				layoutFile = response.substring(INFO_PREFIX.length(), response.indexOf(INFO_PREFIX, 2));
+			if (firstPass && buffer[0] == INFO_PREFIX) {
 				
-				Log.d(TAG, "Got layout file name: " + layoutFile);
-				byteOffset = (INFO_PREFIX.length() * 2) + layoutFile.length();
+				int lastIndex;
+				for (lastIndex = 1; lastIndex < buffer.length; lastIndex++) {
+					if (buffer[lastIndex] == INFO_PREFIX) {
+						break;
+					}
+				}
+				
+				byte[] layoutBuffer = new byte[lastIndex - 1];
+				for (int i = 0; i < lastIndex - 1; i++) {
+					layoutBuffer[i] = buffer[i + 1];
+				}
+				
+				layoutFile = new String(layoutBuffer);
+				Log.d(TAG, "Got layout file: " + layoutFile + " length " + layoutFile.length());
+				byteOffset = 2 + layoutFile.length();
 				bytesRead -= byteOffset;
 				
 				if (layoutFile.endsWith(".xml")) {
@@ -76,6 +88,9 @@ public class DownloadService extends IntentService {
 				output = getOutputStream(filePath);
 				buffer = new byte[1024];
 				bytesRead = 0;
+				firstPass = true;
+			} else {
+				firstPass = false;
 			}
 		}
 		long elapsed = System.currentTimeMillis() - start;
