@@ -34,6 +34,15 @@ public abstract class LocalApk {
         Resources.Theme theme = null;
         int themeResource = 0;
 
+        @Override
+        public Object getSystemService(String name) {
+            try {
+                return super.getSystemService(name);
+            } catch (RuntimeException e) {
+                throw e;
+            }
+        }
+
         public int getThemeResId() {
             return themeResource;
         }
@@ -52,6 +61,11 @@ public abstract class LocalApk {
                 }
             }
             return theme;
+        }
+
+        @Override
+        public String getPackageName() {
+            return packageName;
         }
 
         @Override
