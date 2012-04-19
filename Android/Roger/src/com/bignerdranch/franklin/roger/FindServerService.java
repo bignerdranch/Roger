@@ -19,7 +19,6 @@ import android.util.Log;
 public class FindServerService extends IntentService {
     public static final String TAG = "FindServerService";
     public static final int OUTGOING_PORT = 8099;
-    public static final int INCOMING_PORT = 8100;
     public static final int TIMEOUT = 1000; //ms
 
     public FindServerService() {
@@ -37,6 +36,10 @@ public class FindServerService extends IntentService {
 
     private void findServers() throws IOException {
         MulticastSocket socket = new MulticastSocket(OUTGOING_PORT);
+        InetAddress myAddress = socket.getLocalAddress();
+        byte[] multicastGroup = myAddress.getAddress();
+        multicastGroup[3] = (byte)255;
+        socket.joinGroup(InetAddress.getByAddress(multicastGroup));
 
         socket.setTimeToLive(1);
         socket.setSoTimeout(TIMEOUT);
