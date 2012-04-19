@@ -34,6 +34,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
 @synthesize sdkPath;
 @synthesize apkPath;
+@synthesize apkPathField;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
