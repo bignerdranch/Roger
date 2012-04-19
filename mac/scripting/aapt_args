@@ -1,0 +1,1 @@
+package -F test.apk -S /Users/bphillips/src/android/consulting/yellowbook/res -M /Users/bphillips/src/android/competition/Roger/mac/scripting/AndroidManifest.xml
