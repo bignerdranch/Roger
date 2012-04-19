@@ -17,7 +17,7 @@ public class DownloadService extends IntentService {
 	private static final String PACKAGE = "com.bignerdranch.franklin.roger.dummypackage";
 	private static final char INFO_PREFIX = '-';
 	
-	private static final String SERVER_ADDRESS = "http://10.1.10.108:8082/";
+	private static final String SERVER_ADDRESS = "http://10.1.10.57:8082/";
 	private DownloadManager manager;
 	
 	public DownloadService() {

@@ -7,12 +7,17 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import android.app.IntentService;
 
+import android.content.Context;
 import android.content.Intent;
+
+import android.net.wifi.WifiManager;
 
 import android.util.Log;
 
@@ -33,6 +38,11 @@ public class FindServerService extends IntentService {
             Log.e(TAG, "failed to find servers", ioe);
         }
 	}
+
+    private InetAddress getWifiAddress() {
+        WifiManager wifi = (WifiManager)getSystemService(Context.WIFI_SERVICE);
+        return getInetAddress(wifi.getConnectionInfo().getIpAddress());
+    }
 
     private void findServers() throws IOException {
         MulticastSocket socket = new MulticastSocket(OUTGOING_PORT);
@@ -59,19 +69,36 @@ public class FindServerService extends IntentService {
         socket.send(packet);
     }
 
-    private ArrayList<InetAddress> waitForResponses(DatagramSocket socket) throws IOException {
+    private InetAddress getInetAddress(int ipAddress) {
+        byte[] bytes = new byte[] { (byte)(ipAddress >> 0), (byte)(ipAddress >> 8), (byte)(ipAddress >> 16), (byte) (ipAddress >> 24)};
+
+        try {
+            InetAddress address = InetAddress.getByAddress(bytes);
+            Log.i(TAG, "ip address from " + ipAddress + " is " + address.getHostAddress() + "");
+            return address;
+        } catch (UnknownHostException uhe) {
+            Log.e(TAG, "do not want", uhe);
+            return null;
+        }
+    }
+
+    private ArrayList<InetAddress> waitForResponses(MulticastSocket socket) throws IOException {
         long startTime = System.currentTimeMillis();
 
         byte[] responseMessage = new byte[128];
 
         ArrayList<InetAddress> addresses = new ArrayList<InetAddress>();
+        String localAddress = getWifiAddress().getHostAddress();
+        for (InetAddress a : Collections.list(socket.getNetworkInterface().getInetAddresses())) {
+            Log.i(TAG, "    " + a.getHostAddress() + "");
+        }
 
         while (System.currentTimeMillis() < startTime + TIMEOUT) {
             DatagramPacket response = new DatagramPacket(responseMessage, responseMessage.length);
 
             try {
                 socket.receive(response);
-                if (!socket.getLocalAddress().getHostAddress().equals(response.getAddress().getHostAddress())) {
+                if (!localAddress.equals(response.getAddress().getHostAddress())) {
                     Log.i(TAG, "received an address");
                     addresses.add(response.getAddress());
                 }

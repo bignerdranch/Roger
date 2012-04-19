@@ -8,6 +8,8 @@
 
 #import "FFileViewController.h"
 
+#define DEBUG_NODE 1
+
 @interface FFileViewController ()
 
 @end
@@ -290,6 +292,12 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     return [bundle pathForResource:@"build_fake_package" ofType:@"sh"];
 }
 
+- (NSString *)fakeManifestPath 
+{
+    NSBundle *bundle = [NSBundle mainBundle];
+    return [bundle pathForResource:@"AndroidManifest" ofType:@"xml"];
+}
+
 - (NSString *)ipAddressScriptPath
 {
     NSBundle *bundle = [NSBundle mainBundle];
@@ -321,6 +329,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     [args addObject:[self sdkPath]];
     [args addObject:manifest];
     [args addObject:[self apkPath]];
+    [args addObject:[self fakeManifestPath]];
     [aTask setCurrentDirectoryPath:NSHomeDirectory()];
     [aTask setEnvironment:env];
     [aTask setLaunchPath:@"/bin/sh"];
@@ -393,14 +402,19 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
         [nodeTask setLaunchPath:@"/usr/local/bin/node"];
         [nodeTask setArguments:args];
         
-//        NSPipe *output = [NSPipe pipe];
-//        [nodeTask setStandardOutput:output];
-//        [nodeTask setStandardInput:[NSPipe pipe]];
+#ifndef DEBUG_NODE
+        NSPipe *output = [NSPipe pipe];
+        [nodeTask setStandardOutput:output];
+        [nodeTask setStandardInput:[NSPipe pipe]];
+#endif
         
         [nodeTask launch];
         
-//        NSData *data = [[output fileHandleForReading] availableData];
-//        NSLog(@"Output %@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
+#ifndef DEBUG_NODE
+        NSData *data = [[output fileHandleForReading] availableData];
+        NSLog(@"Output %@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
+#endif
+
     }];
 }
 
@@ -420,6 +434,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     [task setStandardOutput:[NSPipe pipe]];
     [task setLaunchPath:@"/bin/sh"];
     [task setArguments:[NSArray arrayWithObjects:[self ipAddressScriptPath], nil]];
+
     [task setStandardOutput:[NSPipe pipe]];
     [task setStandardInput:[NSPipe pipe]];
     [task launch];
