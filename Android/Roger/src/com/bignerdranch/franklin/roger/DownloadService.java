@@ -1,7 +1,6 @@
 package com.bignerdranch.franklin.roger;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,11 +43,6 @@ public class DownloadService extends IntentService {
 		FileOutputStream output = getOutputStream(filePath);
 		HttpURLConnection conn = (HttpURLConnection) remoteUrl.openConnection();
 		conn.connect();
-
-//		if (conn.getResponseCode() != 200) {
-//			Log.d(TAG, "Detected bad response code: " + conn.getResponseCode());
-//			throw new HttpResponseException(conn.getResponseCode(), "Invalid response: " + conn.getResponseCode() + "");
-//		}
 
 		InputStream input = conn.getInputStream();
 		byte[] buffer = new byte[1024];

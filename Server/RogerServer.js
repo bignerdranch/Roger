@@ -51,7 +51,6 @@ var server = net.createServer(function (stream) {
 
   	stream.addListener("connect", function () {
 		sys.puts("Added mobile client. Total: " + clients.length);
-    	// stream.write("welcome\n");
 		stream.pipe(stream);
   	});
 
