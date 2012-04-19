@@ -12,6 +12,8 @@
 
 @end
 
+static NSString* const serverUrl = @"http://127.0.0.1:8081/post?apk=%@&package=%@";
+
 void fsevents_callback(ConstFSEventStreamRef streamRef,
                        void *userData,
                        size_t numEvents,
@@ -180,8 +182,24 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     NSLog(@"Got app package %@", appPackage);
     
     // Send it over to the server
+    [self sendChangesWithPath:apkFile classname:appPackage];
 }
 
+- (void)sendChangesWithPath:(NSString *)apkPath classname:(NSString *)classname
+{
+    NSString *reqUrl = [NSString stringWithFormat:serverUrl, apkPath, classname];
+    NSLog(@"Sending request: %@", reqUrl);
+    
+    NSURLRequest *req = [NSURLRequest requestWithURL:[NSURL URLWithString:reqUrl]]; 
+    [NSURLConnection sendAsynchronousRequest:req queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
+        
+        if (error) {
+            NSLog(@"Unable to send to server: %@", error);
+        }
+        
+    }];
+}
+ 
 - (NSString *)apkFileInPath:(NSString *)path
 {
     NSLog(@"apkFileInPath with path: %@", path);

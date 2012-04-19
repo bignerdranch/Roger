@@ -28,5 +28,6 @@
 - (void)androidPojectChangedWithPath:(NSString *)path;
 - (NSString *)apkFileInPath:(NSString *)path;
 - (NSString *)packageForManifest:(NSString *)manifest;
+- (void)sendChangesWithPath:(NSString *)apkPath classname:(NSString *)classname;
 
 @end
