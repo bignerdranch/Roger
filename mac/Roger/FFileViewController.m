@@ -366,6 +366,17 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     [aTask waitUntilExit];
 }
 
+- (NSString *)currentMulticastAddress
+{
+    return @"234.5.6.7";
+    //NSMutableArray *components = [[[self currentIPAddress] componentsSeparatedByString:@"."] mutableCopy];
+    //[components removeObjectAtIndex:3];
+    //[components addObject:@"255"];
+
+    //NSString *multicastAddress = [components componentsJoinedByString:@"."];
+    //return multicastAddress;
+}
+
 - (void)startServer
 {
     NSOperationQueue *queue = [[NSOperationQueue alloc] init];
@@ -378,17 +389,18 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
         
         [args addObject:path];
         [args addObject:ipAddress];
+        [args addObject:[self currentMulticastAddress]];
         [nodeTask setLaunchPath:@"/usr/local/bin/node"];
         [nodeTask setArguments:args];
         
-        NSPipe *output = [NSPipe pipe];
-        [nodeTask setStandardOutput:output];
-        [nodeTask setStandardInput:[NSPipe pipe]];
+//        NSPipe *output = [NSPipe pipe];
+//        [nodeTask setStandardOutput:output];
+//        [nodeTask setStandardInput:[NSPipe pipe]];
         
         [nodeTask launch];
         
-        NSData *data = [[output fileHandleForReading] availableData];
-        NSLog(@"%@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
+//        NSData *data = [[output fileHandleForReading] availableData];
+//        NSLog(@"Output %@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
     }];
 }
 

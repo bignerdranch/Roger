@@ -2,12 +2,18 @@ var sys = require("util"),
 net = require("net"),  
 http = require("http"),  
 path = require("path"),  
+dgram = require("dgram"),  
 url = require("url"),  
 filesys = require("fs");
 
 port = 8081;
 mobilePort = 8082;
+multicastPort = 8099;
+
 hostname = process.argv[2];
+multicast = process.argv[3];
+sys.puts("address for server: " + hostname);
+sys.puts("multicast address for server: " + multicast);
 var clients = [];
 
 Array.prototype.remove = function(e) {
@@ -43,6 +49,22 @@ http.createServer(function(request, response){
                   response.end();
                   }).listen(port);  
 sys.puts("Server Running on " + port);
+
+var udpSocket = dgram.createSocket("udp4");
+udpSocket.on("message", function(msg, rinfo) {
+    // send back a response
+    sys.puts("received something from address: " + rinfo.address);
+
+    var message = new Buffer("not significant");
+    udpSocket.send(message, 0, message.length, multicastPort, rinfo.address, function (err, bytes) {
+        sys.puts("error sending udp message: " + err);
+    });
+});
+
+udpSocket.bind(multicastPort);
+udpSocket.setBroadcast(true);
+udpSocket.addMembership(multicast);
+
 
 var server = net.createServer(function (stream) {
                               clients.push(stream);

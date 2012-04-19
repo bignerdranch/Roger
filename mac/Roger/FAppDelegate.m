@@ -28,6 +28,7 @@
 
 - (void)applicationWillTerminate:(NSNotification *)notification
 {
+    NSLog(@"stopping server");
     [controller stopServer];
     controller = nil;
 }
