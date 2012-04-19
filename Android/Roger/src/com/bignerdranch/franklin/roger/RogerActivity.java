@@ -34,8 +34,7 @@ public class RogerActivity extends Activity {
     private void loadApk(String apkPath, String layoutName, String packageName) {
     	container.removeAllViews();
     	
-//        String apkName = "YellowBook.apk";
-//        String packageName = "com.serco.yellowbook";
+    	Log.d(TAG, "Loading apk with path: " + apkPath + " layout: " + layoutName + " package: " + packageName);
         AssetsApk apk = new AssetsApk(this, packageName, apkPath);
         Log.i(TAG, "Did it work? " + apk.getFile().exists() + "");
         Resources r = apk.getResources();

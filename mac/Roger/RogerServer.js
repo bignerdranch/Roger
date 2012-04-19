@@ -23,14 +23,15 @@ http.createServer(function(request, response){
                   if (parts.pathname == "/post") {
                   // Desktop client is posting a file
                   var apk = parts.query['apk'];
-                  var pack = parts.query['layout'];
-                  sys.puts("posting apk: " + apk + " layout: " + pack);
+                  var layout = parts.query['layout'];
+                  sys.puts("posting apk: " + apk + " layout: " + layout);
                   response.writeHeader(200);
                   
                   filesys.readFile(apk, "binary", function(err, file) {  
                                    if(!err) {        
                                    clients.forEach(function(s) {
                                                    sys.puts("sending data to a client");
+                                                   s.write("--" + layout + "--", "binary");
                                                    s.write(file, "binary");
                                                    });  
                                    } else {

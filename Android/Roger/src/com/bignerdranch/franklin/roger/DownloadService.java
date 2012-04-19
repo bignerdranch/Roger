@@ -14,6 +14,9 @@ import android.util.Log;
 public class DownloadService extends IntentService {
 	private static final String TAG = "DownloadService";
 	
+	private static final String PACKAGE = "com.bignerdranch.franklin.roger";
+	private static final String INFO_PREFIX = "--";
+	
 	private static final String SERVER_ADDRESS = "http://10.1.10.108:8082/";
 	private DownloadManager manager;
 	
@@ -47,13 +50,28 @@ public class DownloadService extends IntentService {
 		InputStream input = conn.getInputStream();
 		byte[] buffer = new byte[1024];
 		int bytesRead = 0;
-
+		String layoutFile = "";
+		
 		while ((bytesRead = input.read(buffer)) > 0) {
-			output.write(buffer, 0, bytesRead);
+			String response = new String(buffer);
+			int byteOffset = 0;
+			if (response.startsWith(INFO_PREFIX)) {
+				layoutFile = response.substring(INFO_PREFIX.length(), response.indexOf(INFO_PREFIX, 2));
+				
+				Log.d(TAG, "Got layout file name: " + layoutFile);
+				byteOffset = (INFO_PREFIX.length() * 2) + layoutFile.length();
+				bytesRead -= byteOffset;
+				
+				if (layoutFile.endsWith(".xml")) {
+					layoutFile = layoutFile.substring(0, layoutFile.length() - 4);
+				}
+			}
+			
+			output.write(buffer, byteOffset, bytesRead);
 			
 			if (input.available() <= 0) {
 				// The file is done
-				broadcastChange(filePath);
+				broadcastChange(filePath, layoutFile);
 				filePath = getPath();
 				output = getOutputStream(filePath);
 				buffer = new byte[1024];
@@ -76,10 +94,7 @@ public class DownloadService extends IntentService {
 		return new FileOutputStream(filePath);
 	}
 
-	private void broadcastChange(String apkPath) {
-		// FIXME: Need to get these values from elsewhere
-		String layoutName = "main";
-		String packageName = "com.bignerdranch.Franklin.RogerTest";
-		manager.onDownloadComplete(apkPath, layoutName, packageName);
+	private void broadcastChange(String apkPath, String layoutName) {
+		manager.onDownloadComplete(apkPath, layoutName, PACKAGE);
 	}
 }
