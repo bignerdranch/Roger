@@ -326,6 +326,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
                                 nil];
     
     [args addObject:@"ant"];
+    [args addObject:@"clean"];
     [args addObject:@"debug"];
     [args addObject:@"-buildfile"];
     [args addObject:buildFile];

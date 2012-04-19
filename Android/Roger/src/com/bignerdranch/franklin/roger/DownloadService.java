@@ -1,15 +1,12 @@
 package com.bignerdranch.franklin.roger;
 
-import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import org.apache.http.HttpEntity;
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -19,6 +16,7 @@ public class DownloadService extends IntentService {
 	private static final String TAG = "DownloadService";
 	
 	private static final String SERVER_ADDRESS = "http://10.1.10.108:8082/";
+	private DownloadManager manager;
 	
 	public DownloadService() {
 		super("DownloadService");
@@ -26,7 +24,8 @@ public class DownloadService extends IntentService {
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
-
+		manager = DownloadManager.getInstance();
+		
 		try {
 			downloadApk();
 		} catch (IOException e) {
@@ -41,8 +40,8 @@ public class DownloadService extends IntentService {
 
 		long start = System.currentTimeMillis();
 
-		File filePath = File.createTempFile("roger", "", getFilesDir());
-		FileOutputStream output = new FileOutputStream(filePath);
+		String filePath = getPath();
+		FileOutputStream output = getOutputStream(filePath);
 		HttpURLConnection conn = (HttpURLConnection) remoteUrl.openConnection();
 		conn.connect();
 
@@ -56,12 +55,37 @@ public class DownloadService extends IntentService {
 		int bytesRead = 0;
 
 		while ((bytesRead = input.read(buffer)) > 0) {
-			String data = new String(buffer);
-			Log.d(TAG, "Got data: " + data);
 			output.write(buffer, 0, bytesRead);
+			
+			if (input.available() <= 0) {
+				// The file is done
+				broadcastChange(filePath);
+				filePath = getPath();
+				output = getOutputStream(filePath);
+				buffer = new byte[1024];
+				bytesRead = 0;
+			}
 		}
 		long elapsed = System.currentTimeMillis() - start;
 		Log.d(TAG, "GET complete, " + elapsed + "ms");
 	}
+	
+	private String getPath() {
+		String path = manager.getNextPath(this);
+		Log.d(TAG, "Downloading file with path: " + path);
+		return path;
+	}
+	
+	private FileOutputStream getOutputStream(String path) throws IOException {
+		File filePath = new File(path);
+		filePath.createNewFile();
+		return new FileOutputStream(filePath);
+	}
 
+	private void broadcastChange(String apkPath) {
+		// FIXME: Need to get these values from elsewhere
+		String layoutName = "main";
+		String packageName = "com.bignerdranch.Franklin.RogerTest";
+		manager.onDownloadComplete(apkPath, layoutName, packageName);
+	}
 }

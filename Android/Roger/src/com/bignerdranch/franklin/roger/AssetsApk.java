@@ -13,28 +13,28 @@ import android.util.Log;
 public class AssetsApk extends LocalApk {
     public static final String TAG = "AssetsApk";
 
-    private String assetName;
+    private String assetPath;
 
     @Override
     protected File getFile() {
-        File filePath = context.getFilesDir();
-        String assetPath = filePath.getPath() + "/" + assetName;
+//        File filePath = context.getFilesDir();
+//        String assetPath = filePath.getPath() + "/" + assetName;
 
         return new File(assetPath);
     }
 
-    public AssetsApk(Context c, String packageName, String assetName) {
+    public AssetsApk(Context c, String packageName, String assetPath) {
         super(c, packageName);
-        this.assetName = assetName;
+        this.assetPath = assetPath;
 
         File assetFile = getFile();
-        if (!assetFile.exists()) {
-            try {
-                copyAsset(assetFile, assetName);
-            } catch (Exception ex) {
-                Log.i(TAG, "failed to copy over asset", ex);
-            }
-        }
+//        if (!assetFile.exists()) {
+//            try {
+//                copyAsset(assetFile, assetName);
+//            } catch (Exception ex) {
+//                Log.i(TAG, "failed to copy over asset", ex);
+//            }
+//        }
     }
 
     private void copyAsset(File assetFile, String assetName) throws IOException {
