@@ -13,8 +13,10 @@ import android.util.Log;
 
 public class DownloadService extends IntentService {
 	private static final String TAG = "DownloadService";
-	
-	private static final String PACKAGE = "com.bignerdranch.franklin.roger.dummypackage";
+
+    private static final String PACKAGE = "com.bignerdranch.franklin.roger.dummypackage";
+	//private static final String PACKAGE = "com.bignerdranch.franklin.roger";
+	//private static final String PACKAGE = "com.att.labs.uversetv.android.tablet";
 	private static final char INFO_PREFIX = '-';
 	
 	private static final String SERVER_ADDRESS = "http://10.1.10.57:8082/";
@@ -30,6 +32,7 @@ public class DownloadService extends IntentService {
 		
 		try {
 			downloadApk();
+            startService(new Intent(this, this.getClass()));
 		} catch (IOException e) {
 			Log.e(TAG, "Unable to download file", e);
 		}
@@ -52,10 +55,41 @@ public class DownloadService extends IntentService {
 		int bytesRead = 0;
 		String layoutFile = "";
 		boolean firstPass = true;
+        int totalBytesRead = 0;
+
+        //while ((bytesRead = input.read(buffer)) > 0) {
+        //    int i = 0;
+
+        //    if (firstPass) {
+        //        i++;
+        //        int firstIndex = i;
+
+        //        while (buffer[i] != INFO_PREFIX) i++;
+
+        //        byte[] layoutNameBuffer = new byte[i - firstIndex];
+        //        int j = 0;
+        //        int k = firstIndex;
+        //        while (k < i - 1) {
+        //            layoutNameBuffer[j++] = buffer[k++];
+        //        }
+
+        //        layoutFile = new String(layoutNameBuffer);
+
+        //        Log.i(TAG, "got layout file: " + layoutFile + "");
+
+        //        i++;
+        //        output.write(buffer, i, bytesRead - i);
+        //        firstPass = false;
+        //        totalBytesRead += bytesRead - i;
+        //    } else {
+        //        output.write(buffer, 0, bytesRead);
+        //        totalBytesRead += bytesRead;
+        //    }
+        //}
 		
 		while ((bytesRead = input.read(buffer)) > 0) {
 			int byteOffset = 0;
-			if (firstPass && buffer[0] == INFO_PREFIX) {
+			if (firstPass) {
 				
 				int lastIndex;
 				for (lastIndex = 1; lastIndex < buffer.length; lastIndex++) {
@@ -77,24 +111,19 @@ public class DownloadService extends IntentService {
 				if (layoutFile.endsWith(".xml")) {
 					layoutFile = layoutFile.substring(0, layoutFile.length() - 4);
 				}
+                firstPass = false;
 			}
 			
 			output.write(buffer, byteOffset, bytesRead);
-			
-			if (input.available() <= 0) {
-				// The file is done
-				broadcastChange(filePath, layoutFile);
-				filePath = getPath();
-				output = getOutputStream(filePath);
-				buffer = new byte[1024];
-				bytesRead = 0;
-				firstPass = true;
-			} else {
-				firstPass = false;
-			}
+            totalBytesRead += bytesRead;
 		}
+
+        filePath = getPath();
+        output = getOutputStream(filePath);
+        broadcastChange(filePath, layoutFile);
+
 		long elapsed = System.currentTimeMillis() - start;
-		Log.d(TAG, "GET complete, " + elapsed + "ms");
+		Log.d(TAG, "GET complete, " + elapsed + "ms, total bytes: " + totalBytesRead + "");
 	}
 	
 	private String getPath() {

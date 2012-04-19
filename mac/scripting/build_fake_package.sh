@@ -3,7 +3,7 @@
 ANDROID_SDK=$1
 ANDROID_MANIFEST=$2
 APK_NAME=$3
-MANIFEST=$4
+FAKE_MANIFEST=$4
 
 
 AAPT="$ANDROID_SDK"/platform-tools/aapt
@@ -23,4 +23,8 @@ PLATFORM_JAR="$ANDROID_SDK/platforms/$TARGET/android.jar"
 
 rm -f "$APK_NAME"
 
-$AAPT package -F "$APK_NAME" -S "$PROJECT_RESOURCES" -M "$MANIFEST" -I "$PLATFORM_JAR" 
+# fake manifest
+$AAPT package -F "$APK_NAME" -S "$PROJECT_RESOURCES" -M "$FAKE_MANIFEST" -I "$PLATFORM_JAR" 
+
+# real manifest
+#$AAPT package -F "$APK_NAME" -S "$PROJECT_RESOURCES" -M "$ANDROID_MANIFEST" -I "$PLATFORM_JAR" 

@@ -23,33 +23,56 @@ Array.prototype.remove = function(e) {
 };
 
 http.createServer(function(request, response){  
-                  var parts = url.parse(request.url, true);
-                  sys.puts("got path: " + parts.pathname + " query: " + parts.query);
-                  
-                  if (parts.pathname == "/post") {
-                  // Desktop client is posting a file
-                  var apk = parts.query['apk'];
-                  var layout = parts.query['layout'];
-                  sys.puts("posting apk: " + apk + " layout: " + layout);
-                  response.writeHeader(200);
-                  
-                  filesys.readFile(apk, "binary", function(err, file) {  
-                                   if(!err) {        
-                                   clients.forEach(function(s) {
-                                                   sys.puts("sending data to a client");
-                                                   s.write("-" + layout + "-", "binary");
-                                                   s.write(file, "binary");
-                                                   });  
-                                   } else {
-                                   sys.puts("unable to find file " + apk + " : " + err);
-                                   }
-                                   });  
-                  } 
-                  
-                  response.end();
-                  }).listen(port);  
+    var parts = url.parse(request.url, true);
+    sys.puts("got path: " + parts.pathname + " query: " + parts.query);
+
+    if (parts.pathname == "/post") {
+    // Desktop client is posting a file
+    var apk = parts.query['apk'];
+    var layout = parts.query['layout'];
+    sys.puts("posting apk: " + apk + " layout: " + layout);
+    response.writeHeader(200);
+
+    filesys.readFile(apk, "binary", function(err, file) {  
+        if(!err) {        
+            clients.forEach(function(client) {
+                sys.puts("sending data to a client");
+                client.write("-" + layout + "-", "binary");
+                client.write(file, "binary");
+                client.end();
+                clients.remove(client);
+            });  
+        } else {
+        sys.puts("unable to find file " + apk + " : " + err);
+        }
+        });  
+    } 
+
+    response.end();
+}).listen(port);  
 sys.puts("Server Running on " + port);
 
+var server = net.createServer(function (stream) {
+    clients.push(stream);
+
+    stream.setTimeout(0);
+    stream.setEncoding("utf8");
+
+    stream.addListener("connect", function () {
+        sys.puts("Added mobile client. Total: " + clients.length);
+        stream.pipe(stream);
+    });
+
+    stream.addListener("end", function() {
+        clients.remove(stream);
+        sys.puts("Removed mobile client. Total: " + clients.length);
+        stream.end();
+    });
+});
+server.listen(mobilePort, hostname);
+sys.puts("Mobile server Running on " + hostname + ":" + mobilePort);
+
+// setup server discovery listener
 var udpSocket = dgram.createSocket("udp4");
 udpSocket.on("message", function(msg, rinfo) {
     // send back a response
@@ -66,22 +89,3 @@ udpSocket.setBroadcast(true);
 udpSocket.addMembership(multicast);
 
 
-var server = net.createServer(function (stream) {
-                              clients.push(stream);
-                              
-                              stream.setTimeout(0);
-                              stream.setEncoding("utf8");
-                              
-                              stream.addListener("connect", function () {
-                                                 sys.puts("Added mobile client. Total: " + clients.length);
-                                                 stream.pipe(stream);
-                                                 });
-                              
-                              stream.addListener("end", function() {
-                                                 clients.remove(stream);
-                                                 sys.puts("Removed mobile client. Total: " + clients.length);
-                                                 stream.end();
-                                                 });
-                              });
-server.listen(mobilePort, hostname);
-sys.puts("Mobile server Running on " + hostname + ":" + mobilePort);

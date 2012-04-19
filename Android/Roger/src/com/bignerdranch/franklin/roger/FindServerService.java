@@ -3,7 +3,6 @@ package com.bignerdranch.franklin.roger;
 import java.io.IOException;
 
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketTimeoutException;
@@ -19,12 +18,19 @@ import android.content.Intent;
 
 import android.net.wifi.WifiManager;
 
+import android.support.v4.content.LocalBroadcastManager;
+
 import android.util.Log;
 
 public class FindServerService extends IntentService {
     public static final String TAG = "FindServerService";
     public static final int OUTGOING_PORT = 8099;
     public static final int TIMEOUT = 1000; //ms
+
+    public static String ACTION_FOUND_SERVERS = 
+        FindServerService.class.getPackage() + ".ACTION_FOUND_SERVERS";
+    public static String EXTRA_IP_ADDRESSES = 
+        FindServerService.class.getPackage() + ".EXTRA_IP_ADDRESSES";
 
     public FindServerService() {
         super("FindServerService");
@@ -60,6 +66,21 @@ public class FindServerService extends IntentService {
         for (InetAddress address : addresses) {
             Log.i(TAG, "    " + address.getHostName() + "");
         }
+
+        broadcastAddresses(addresses);
+    }
+
+    private void broadcastAddresses(ArrayList<InetAddress> addresses) {
+        ArrayList<String> hostAddresses = new ArrayList<String>();
+        for (InetAddress address : addresses) {
+            hostAddresses.add(address.getHostAddress());
+        }
+
+        Intent i = new Intent(ACTION_FOUND_SERVERS);
+        i.putExtra(EXTRA_IP_ADDRESSES, hostAddresses);
+        
+        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
+        manager.sendBroadcast(i);
     }
 
     private void broadcastSelf(MulticastSocket socket) throws IOException {
