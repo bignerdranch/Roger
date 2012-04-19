@@ -34,7 +34,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
 @synthesize sdkPath;
 @synthesize apkPath;
-@synthesize apkPathField;
+@synthesize sdkPathField;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -42,6 +42,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     if (self) {
         fm = [NSFileManager defaultManager];
         [self setApkPath:[NSString stringWithFormat:@"%@/stripped.apk", NSHomeDirectory()]];
+        [self setSdkPath:[[NSUserDefaults standardUserDefaults] stringForKey:@"SdkDirKey"]];
     }
     
     return self;
@@ -54,6 +55,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     pathModificationDates = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"pathModificationDates"] mutableCopy];
 	lastEventId = [[NSUserDefaults standardUserDefaults] objectForKey:@"lastEventId"];
 	[self initializeEventStream];
+    [self update];
 }
 
 - (void) initializeEventStream
@@ -77,6 +79,11 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 	FSEventStreamStart(stream);
 }
 
+- (void)update
+{
+    [[self sdkPathField] setStringValue:[self sdkPath]];
+}
+
 - (IBAction)selectSdkClicked:(id)sender
 {
     NSLog(@"selectSdkClicked");
@@ -90,7 +97,9 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
         for (NSURL *url in [openPanel URLs]) {
             NSString *fileName = [url path];
-            [self setSdkPath:[fileName stringByReplacingOccurrencesOfString:@"file://localhost" withString:@""]];
+            [[NSUserDefaults standardUserDefaults] setObject:fileName forKey:@"SdkDirKey"];
+            [self setSdkPath:fileName];
+            [self update];
         }
     }];
 }

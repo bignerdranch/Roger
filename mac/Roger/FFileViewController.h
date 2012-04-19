@@ -20,7 +20,7 @@
 
 @property (nonatomic, copy) NSString *sdkPath;
 @property (nonatomic, copy) NSString *apkPath;
-@property (nonatomic, strong) IBOutlet NSTextField *apkPathField;
+@property (nonatomic, strong) IBOutlet NSTextField *sdkPathField;
 
 - (IBAction)selectSdkClicked:(id)sender;
 

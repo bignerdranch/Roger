@@ -17,6 +17,11 @@
 {
     FFileViewController *controller = [[FFileViewController alloc] initWithNibName:@"FFileViewController" bundle:nil];
     [_window setContentView:[controller view]];
+
+    NSDictionary *appDefaults = [NSDictionary
+        dictionaryWithObject:@"" forKey:@"SdkDirKey"];
+
+    [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
 }
 
 @end
