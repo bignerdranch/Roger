@@ -1,5 +1,6 @@
 package com.bignerdranch.franklin.roger;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.text.Editable;
@@ -15,11 +16,13 @@ import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.TextView;
 
+import com.bignerdranch.franklin.roger.model.RogerParams;
+
 public class LayoutEditDialogFragment extends DialogFragment {
 	private static final String TAG = "LayoutEditDialogFragment";
 	
-	private static final String ARG_TITLE = "LayoutEditDialogFragment.title";
-	private static final String ARG_LAYOUT_VALUE = "LayoutEditDialogFragment.LayoutValue";
+	private static final String ARG_PARAM_TYPE = "LayoutEditDialogFragment.paramType";
+	private static final String ARG_ROGER_PARAMS = "LayoutEditDialogFragment.rogerParams";
 	
 	private TextView titleText;
 	private RadioGroup radioGroup;
@@ -28,21 +31,21 @@ public class LayoutEditDialogFragment extends DialogFragment {
 	private RadioButton pixelButton;
 	private EditText pixelText;
 	
-	private String title;
-	private int layoutValue;
+	private ParamType type;
+	private RogerParams params;
 	
-	private ValueChangeListener listener;
-	public interface ValueChangeListener {
-		public void onValueChanged(int value);
+	public enum ParamType {
+		WIDTH, HEIGHT
 	}
 	
-	public static LayoutEditDialogFragment newInstance(String title, int layoutValue) {
+	public static LayoutEditDialogFragment newInstance(ParamType type, RogerParams params) {
 		
 		LayoutEditDialogFragment fragment = new LayoutEditDialogFragment();
 		
 		Bundle args = new Bundle();
-		args.putString(ARG_TITLE, title);
-		args.putInt(ARG_LAYOUT_VALUE, layoutValue);
+		args.putSerializable(ARG_PARAM_TYPE, type);
+		args.putSerializable(ARG_ROGER_PARAMS, params);
+		
 		fragment.setArguments(args);
 		
 		return fragment;
@@ -55,8 +58,8 @@ public class LayoutEditDialogFragment extends DialogFragment {
 		setStyle(DialogFragment.STYLE_NO_TITLE, android.R.style.Theme_Dialog);
 		
 		Bundle args = getArguments();
-		layoutValue = args.getInt(ARG_LAYOUT_VALUE);
-		title = args.getString(ARG_TITLE);
+		type = (ParamType) args.getSerializable(ARG_PARAM_TYPE);
+		params = (RogerParams) args.getSerializable(ARG_ROGER_PARAMS);
 	}
 
 	@Override
@@ -85,20 +88,57 @@ public class LayoutEditDialogFragment extends DialogFragment {
 		updateView();
 	}
 	
-	public void setOnValueChangeListener(ValueChangeListener listener) {
-		this.listener = listener;
+	private void updateParam(int value) {
+		
+		if (type == ParamType.HEIGHT) {
+			params.setHeightParam(value);
+		} else if (type == ParamType.WIDTH) {
+			params.setWidthParam(value);
+		}
+	}
+	
+	private int getLayoutValue() {
+		int value = 0;
+		
+		if (type == ParamType.HEIGHT) {
+			value = params.getHeightParam();
+		} else if (type == ParamType.WIDTH) {
+			value = params.getWidthParam();
+		}
+		
+		return value;
+	}
+	
+	private int getLayoutPixelValue() {
+		int value = 0;
+		
+		if (type == ParamType.HEIGHT) {
+			value = params.getPixelHeight();
+		} else if (type == ParamType.WIDTH) {
+			value = params.getPixelWidth();
+		}
+		
+		return value;
 	}
 	
 	private void updateView() {
+		
+		String title = "";
+		if (type == ParamType.HEIGHT) {
+			title = "Height";
+		} else if (type == ParamType.WIDTH) {
+			title = "Width";
+		}
 		titleText.setText(title);
 		
+		int layoutValue = getLayoutValue();
 		if (layoutValue == ViewGroup.LayoutParams.FILL_PARENT) {
 			radioGroup.check(fillButton.getId());
 		} else if (layoutValue == ViewGroup.LayoutParams.WRAP_CONTENT) {
 			radioGroup.check(wrapButton.getId());
 		} else {
 			radioGroup.check(pixelButton.getId());
-			pixelText.setText(layoutValue + "");
+			pixelText.setText(getLayoutPixelValue() + "");
 		}
 	}
 	
@@ -106,13 +146,17 @@ public class LayoutEditDialogFragment extends DialogFragment {
 		try {
 			String text = pixelText.getText().toString();
 			int value = Integer.parseInt(text);
-			layoutValue = value;			
-			
-			if (listener != null) {
-				listener.onValueChanged(layoutValue);
-			}
+			updateParam(value);
+			valueChanged();
 		} catch (NumberFormatException e) {
 			Log.e(TAG, "Unable to parse number ", e);
+		}
+	}
+	
+	private void valueChanged() {
+		Activity activity = getActivity();
+		if (activity instanceof RogerActivity) {
+			((RogerActivity) activity).setRogerParams(params);
 		}
 	}
 	
@@ -122,17 +166,14 @@ public class LayoutEditDialogFragment extends DialogFragment {
 		public void onCheckedChanged(RadioGroup group, int checkedId) {
 			
 			if (checkedId == fillButton.getId()) {
-				layoutValue = ViewGroup.LayoutParams.FILL_PARENT;
+				updateParam(ViewGroup.LayoutParams.FILL_PARENT);
 			} else if (checkedId == wrapButton.getId()) {
-				layoutValue = ViewGroup.LayoutParams.WRAP_CONTENT;
+				updateParam(ViewGroup.LayoutParams.WRAP_CONTENT);
 			} else {
 				parsePixelValue();
 			}
 			
-			if (listener != null) {
-				listener.onValueChanged(layoutValue);
-			}
-			
+			valueChanged();
 		}
 	};
 	

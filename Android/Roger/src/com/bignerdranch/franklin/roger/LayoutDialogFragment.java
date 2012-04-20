@@ -9,13 +9,13 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 
+import com.bignerdranch.franklin.roger.LayoutEditDialogFragment.ParamType;
 import com.bignerdranch.franklin.roger.model.RogerParams;
 
 public class LayoutDialogFragment extends DialogFragment {
 	private static final String PARAM_PARAMS = "LayoutDialogFragment.RogerParam";
 	private static final String TAG_EDIT_DIALOG = "LayoutDialogFragment.EditDialog";
 	
-	private boolean lastValueIsHeight;
 	private RogerParams params;
 	
 	private Button widthButton;
@@ -67,20 +67,11 @@ public class LayoutDialogFragment extends DialogFragment {
 		}
 	}
 	
-	private void updateValue(int value) {
-		if (lastValueIsHeight) {
-			params.setHeightParam(value);
-		} else {
-			params.setWidthParam(value);
-		}
-	}
-	
-	private void showEditDialog(String title, int layoutValue) {
-		LayoutEditDialogFragment fragment = LayoutEditDialogFragment.newInstance(title, layoutValue);
-		
-		// FIXME: I think there is a memory leak here
-		fragment.setOnValueChangeListener(editListener);
+	private void showEditDialog(ParamType type) {
+		LayoutEditDialogFragment fragment = LayoutEditDialogFragment.newInstance(type, params);
 		fragment.show(getFragmentManager(), TAG_EDIT_DIALOG);
+		
+		dismiss();
 	}
 	
 	private void updateButtons() {
@@ -98,22 +89,11 @@ public class LayoutDialogFragment extends DialogFragment {
 		else return value + " dip";
 	}
 	
-	private LayoutEditDialogFragment.ValueChangeListener editListener = new LayoutEditDialogFragment.ValueChangeListener() {
-
-		@Override
-		public void onValueChanged(int value) {
-			updateValue(value);
-			updateButtons();
-		}
-		
-	};
-	
 	private View.OnClickListener widthButtonClick = new View.OnClickListener() {
 		
 		@Override
 		public void onClick(View v) {
-			lastValueIsHeight = false;
-			showEditDialog("Width", params.getPixelWidth());
+			showEditDialog(ParamType.WIDTH);
 		}
 	};
 	
@@ -122,8 +102,7 @@ public class LayoutDialogFragment extends DialogFragment {
 		
 		@Override
 		public void onClick(View v) {
-			lastValueIsHeight = true;
-			showEditDialog("Height", params.getPixelHeight());
+			showEditDialog(ParamType.HEIGHT);
 		}
 	};
 }
