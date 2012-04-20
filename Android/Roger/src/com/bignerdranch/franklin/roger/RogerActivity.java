@@ -284,9 +284,10 @@ public class RogerActivity extends FragmentActivity {
     private void loadLayout(LayoutDescription description) {
         management.layoutDescription = description;
 
-        if (description.getMinVersion() < Build.VERSION.SDK_INT) {
+        if (description.getMinVersion() != 0 && description.getMinVersion() > Build.VERSION.SDK_INT) {
         	Log.e(TAG, "invalid version of Android");
-        	ErrorManager.show(getApplicationContext(), rootContainer, "This view requires Android version " + description.getMinVersion());
+        	ErrorManager.show(getApplicationContext(), 
+                    rootContainer, "This view requires Android version " + description.getMinVersion());
         	containerBorder.setVisibility(View.GONE);
         	return;
         }

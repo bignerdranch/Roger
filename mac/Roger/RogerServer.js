@@ -34,6 +34,7 @@ http.createServer(function(request, response){
         var apk = parts.query['apk'];
         var layout = parts.query['layout'];
 		var pack = parts.query['pack'];
+		var minSdk = parts.query['minSdk'];
         sys.puts("posting apk: " + apk + " layout: " + layout);
         response.writeHeader(200);
 		response.end();
@@ -42,7 +43,7 @@ http.createServer(function(request, response){
 		files[fileIndex] = apk;
         clients.forEach(function(s) {
 			sys.puts("sending data to a client");
-			s.write(layout + "\n" + fileIndex + "\n" + pack +  "--", "utf8");
+			s.write(layout + "\n" + fileIndex + "\n" + pack + "\n" + minSdk + "--", "utf8");
 			s.end();
         });  
     } else if (parts.pathname == "/get") {
@@ -67,19 +68,6 @@ http.createServer(function(request, response){
                 sys.puts("error writing " + fileName + " to client: " + err);
             }
         });
-
-	  	//filesys.readFile(fileName, "binary", function(err, file) {  
-        //  	if(!err) {        
-	    //        sys.puts("sending " + fileName + " to a client with length " + file.length);
-        //        response.writeHead(200, {'Transfer-Encoding' : 'chunked'})
-	    //        response.write(file, "binary");
-	  	//	  response.end();
-	    //    } else {
-	  	//	  response.writeHeader(200);
-	    //        sys.puts("unable to find file " + apk + " : " + err);
-	  	//	  response.end();
-	    //    }
-	    //  });
     }
 }).listen(port);  
 sys.puts("Server Running on " + port);

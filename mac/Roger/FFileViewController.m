@@ -14,7 +14,7 @@
 
 @end
 
-static NSString* const serverUrl = @"http://%@:8081/post?apk=%@&layout=%@&pack=%@";
+static NSString* const serverUrl = @"http://%@:8081/post?apk=%@&layout=%@&pack=%@&minSdk=%d";
 
 void fsevents_callback(ConstFSEventStreamRef streamRef,
                        void *userData,
@@ -240,6 +240,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     [self buildAppWithManifest:manifest];
 
     NSString *package = [self packageForManifest:manifest];
+    int minSdkVersion = [self minSdkForManifest:manifest];
     NSLog(@"Got package %@", package);
     
     NSString *apkFile = [self apkPath];
@@ -247,12 +248,12 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     
     [self updateStatusWithText:@"Uploading"];
     // Send it over to the server
-    [self sendChangesWithPath:apkFile layout:layout package:package];
+    [self sendChangesWithPath:apkFile layout:layout package:package minSdk:minSdkVersion];
 }
 
-- (void)sendChangesWithPath:(NSString *)apk layout:(NSString *)layout package:(NSString *)package
+- (void)sendChangesWithPath:(NSString *)apk layout:(NSString *)layout package:(NSString *)package minSdk:(int)minSdk
 {
-    NSString *reqUrl = [NSString stringWithFormat:serverUrl, [self currentIPAddress], apk, layout, package];
+    NSString *reqUrl = [NSString stringWithFormat:serverUrl, [self currentIPAddress], apk, layout, package, minSdk];
     NSLog(@"Sending request: %@", reqUrl);
     NSLog(@"Our file is this many bytes: %ld", [[NSData dataWithContentsOfFile:apk] length]);
     
@@ -284,6 +285,40 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     }
 
     return nil;
+}
+
+- (int)minSdkForManifest:(NSString *)manifest
+{
+    NSLog(@"Package for manifest: %@", manifest);
+    NSError *err = nil;
+    NSString *manifestContents = [NSString stringWithContentsOfFile:manifest encoding:NSUTF8StringEncoding error:&err];
+    
+    if (err) {
+        NSLog(@"Unable to read file: %@ error %@", manifest, err);
+        return 0;
+    }
+    
+    NSRegularExpression *regex = [NSRegularExpression         
+        regularExpressionWithPattern:@"android:minSdkVersion=\"([^\"]*)\""
+        options:NSRegularExpressionCaseInsensitive
+        error:&err];
+
+    NSArray *matches = [regex matchesInString:manifestContents 
+                                      options:NSRegularExpressionCaseInsensitive 
+                                        range:NSMakeRange(0, [manifestContents length])];
+    
+    if (err) {
+        NSLog(@"Got regex error: %@", err);
+        return nil;
+    }
+    
+    for (NSTextCheckingResult *match in matches) {
+        NSString *sdkVersionString = [manifestContents substringWithRange:[match rangeAtIndex:1]];
+
+        return [sdkVersionString intValue];
+    }
+    
+    return 0;
 }
 
 - (NSString *)packageForManifest:(NSString *)manifest
