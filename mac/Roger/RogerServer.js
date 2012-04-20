@@ -15,6 +15,8 @@ multicast = process.argv[3];
 sys.puts("address for server: " + hostname);
 sys.puts("multicast address for server: " + multicast);
 var clients = [];
+var files = {};
+var fileIndex = 0;
 
 Array.prototype.remove = function(e) {
     for (var i = 0; i < this.length; i++) {
@@ -27,28 +29,40 @@ http.createServer(function(request, response){
     sys.puts("got path: " + parts.pathname + " query: " + parts.query);
 
     if (parts.pathname == "/post") {
-    // Desktop client is posting a file
-    var apk = parts.query['apk'];
-    var layout = parts.query['layout'];
-    sys.puts("posting apk: " + apk + " layout: " + layout);
-    response.writeHeader(200);
+        // Desktop client is posting a file
+        var apk = parts.query['apk'];
+        var layout = parts.query['layout'];
+        sys.puts("posting apk: " + apk + " layout: " + layout);
+        response.writeHeader(200);
+		response.end();
 
-    filesys.readFile(apk, "binary", function(err, file) {  
-        if(!err) {        
-            clients.forEach(function(client) {
-                sys.puts("sending data to a client");
-                client.write("-" + layout + "-", "binary");
-                client.write(file, "binary");
-                client.end();
-                clients.remove(client);
-            });  
-        } else {
-        sys.puts("unable to find file " + apk + " : " + err);
-        }
+		fileIndex++;
+		files[fileIndex] = apk;
+        clients.forEach(function(s) {
+			sys.puts("sending data to a client");
+			s.write(layout + "\n" + fileIndex + "--", "utf8");
+			s.end();
         });  
-    } 
-
-    response.end();
+      } else if (parts.pathname == "/get") {
+          	var hash = parts.query['hash'];
+          	var fileName = files[hash];
+                  
+			filesys.readFile(fileName, "binary", function(err, file) {  
+            	if(!err) {        
+	                sys.puts("sending " + fileName + " to a client with length " + file.length);
+		          	// response.writeHeader(200, {'Content-Length' : file.length});
+					// response.writeHead(200, {
+					// 					  'Content-Length': file.length,
+					// 					  'Content-Type': 'text/plain' });
+	                response.write(file, "binary");
+					response.end();
+	            } else {
+					response.writeHeader(200);
+	                sys.puts("unable to find file " + apk + " : " + err);
+					response.end();
+	            }
+	        });
+      }
 }).listen(port);  
 sys.puts("Server Running on " + port);
 
