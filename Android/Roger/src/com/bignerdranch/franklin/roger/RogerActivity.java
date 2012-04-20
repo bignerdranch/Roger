@@ -174,6 +174,9 @@ public class RogerActivity extends FragmentActivity {
             case ConnectionHelper.STATE_DISCONNECTED:
                 state = "Disconnected";
                 break;
+            case ConnectionHelper.STATE_DOWNLOADING:
+                state = "Downloading...";
+                break;
             default:
                 break;
         }

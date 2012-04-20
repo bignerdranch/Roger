@@ -36,6 +36,7 @@ public class ConnectionHelper {
     public static final int STATE_CONNECTED = 1;
     public static final int STATE_FAILED = 2;
     public static final int STATE_DISCONNECTED = 3;
+    public static final int STATE_DOWNLOADING = 4;
 
     ServerDescription connectedServer;
     int connectionState = STATE_DISCONNECTED;
@@ -58,8 +59,20 @@ public class ConnectionHelper {
         return connectedServer;
     }
 
+    public void setDownloading(ServerDescription server) {
+        if (!server.equals(connectedServer)) return;
+
+        notifyConnectionStateChange(STATE_DOWNLOADING);
+    }
+
+    public void setFinishDownload(ServerDescription server) {
+        if (!server.equals(connectedServer)) return;
+
+        notifyConnectionStateChange(STATE_CONNECTED);
+    }
+
     public void setConnectionSuccess(ServerDescription server) {
-        if (!server.getHostAddress().equals(connectedServer.getHostAddress())) return;
+        if (!server.equals(connectedServer)) return;
 
         notifyConnectionStateChange(STATE_CONNECTED);
     }

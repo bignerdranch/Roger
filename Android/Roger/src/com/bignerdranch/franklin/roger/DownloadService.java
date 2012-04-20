@@ -67,6 +67,7 @@ public class DownloadService extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		manager = DownloadManager.getInstance();
+        ConnectionHelper connector = ConnectionHelper.getInstance(this);
 
         if (ACTION_DISCONNECT.equals(intent.getAction())) {
             // do nothing
@@ -78,7 +79,9 @@ public class DownloadService extends IntentService {
                 data.desc = (ServerDescription)intent.getSerializableExtra(EXTRA_SERVER_DESCRIPTION);
             }
 			FileDescriptor descriptor = getDescriptor();
+            connector.setDownloading(data.desc);
 			String filePath = getApk(descriptor.identifier);
+            connector.setFinishDownload(data.desc);
 			broadcastChange(filePath, descriptor.layout, descriptor.pack);
 
             // still connected, presumably
@@ -90,8 +93,7 @@ public class DownloadService extends IntentService {
             // should start up again soon
 		} catch (IOException e) {
 			Log.e(TAG, "Unable to download file", e);
-            ConnectionHelper.getInstance(this)
-                .setConnectionError(data.desc, e);
+            connector.setConnectionError(data.desc, e);
 		}
 
 	}
