@@ -27,7 +27,7 @@ public class DownloadService extends IntentService {
     public static final String EXTRA_SERVER_DESCRIPTION = 
         DownloadService.class.getPackage() + ".EXTRA_SERVER_DESCRIPTION";
 
-    private static final String HOSTNAME = "http://10.1.10.57";
+    private static final String HOSTNAME = "http://10.1.10.108";
 	
 	private static final String SERVER_ADDRESS = HOSTNAME + ":8082/";
 	private static final String SERVER_APK_ADDRESS = HOSTNAME + ":8081/get?hash=%1$s";
