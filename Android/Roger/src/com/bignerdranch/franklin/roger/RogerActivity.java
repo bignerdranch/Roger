@@ -35,8 +35,6 @@ public class RogerActivity extends FragmentActivity {
 
     private DownloadManager manager;
     private TheManagement management;
-    private boolean textFillSet;
-    private boolean textFillEnabled;
     
     private TextView serverNameTextView;
     private TextView connectionStatusTextView;
@@ -48,6 +46,8 @@ public class RogerActivity extends FragmentActivity {
     private static class TheManagement extends Fragment {
         public LayoutDescription layoutDescription;
         public RogerParams rogerParams;
+        public boolean textFillSet;
+        public boolean textFillEnabled;
 
         @Override
         public void onCreate(Bundle sharedInstanceState) {
@@ -307,7 +307,7 @@ public class RogerActivity extends FragmentActivity {
     
     private void addTextFill() {
     	
-    	if (!textFillSet) {
+    	if (!management.textFillSet) {
     		return;
     	}
     	
@@ -315,7 +315,7 @@ public class RogerActivity extends FragmentActivity {
     	ArrayList<TextView> views = ViewUtils.findViewsByClass(container, TextView.class);
     	for (TextView textView : views) {
     		
-    		if (textFillEnabled) {
+    		if (management.textFillEnabled) {
     			textView.setText(dummyText);
     		} else {
     			textView.setText("");
@@ -334,8 +334,8 @@ public class RogerActivity extends FragmentActivity {
     }
 
     private void updateTextFill() {
-    	textFillSet = true;
-    	textFillEnabled = !textFillEnabled;
+    	management.textFillSet = true;
+    	management.textFillEnabled = !management.textFillEnabled;
     	addTextFill();
     }
     
