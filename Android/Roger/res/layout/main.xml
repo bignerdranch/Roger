@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="@drawable/checker"
     android:id="@+id/main_root"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
-    
+    android:layout_height="fill_parent"
+    android:background="@drawable/checker" >
+
     <FrameLayout
-	    android:id="@+id/container"
+        android:id="@+id/main_container_border"
         android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-    	android:layout_gravity="center" />
-    
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@drawable/transparent_border"
+        android:padding="20dp">
+
+        <FrameLayout
+            android:id="@+id/container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </FrameLayout>
+
 </FrameLayout>

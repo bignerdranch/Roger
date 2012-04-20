@@ -30,6 +30,7 @@ public class RogerActivity extends FragmentActivity {
     
     private FrameLayout container;
     private ViewGroup rootContainer;
+    private ViewGroup containerBorder;
     
     /** Called when the activity is first created. */
     @Override
@@ -41,8 +42,11 @@ public class RogerActivity extends FragmentActivity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         
         setContentView(R.layout.main);
+        
         rootContainer = (ViewGroup)findViewById(R.id.main_root);
         container = (FrameLayout)findViewById(R.id.container);
+        containerBorder = (ViewGroup)findViewById(R.id.main_container_border);
+        containerBorder.setVisibility(View.GONE);
         
         startService();
     }
@@ -104,6 +108,7 @@ public class RogerActivity extends FragmentActivity {
         View v = inflater.inflate(id, container, false);
 
         container.addView(v);
+        containerBorder.setVisibility(View.VISIBLE);
     }
 
     @Override
