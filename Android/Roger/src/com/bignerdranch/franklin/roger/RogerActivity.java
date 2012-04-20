@@ -8,17 +8,17 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.os.Bundle;
-
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.FrameLayout;
 
 public class RogerActivity extends FragmentActivity {
@@ -29,6 +29,7 @@ public class RogerActivity extends FragmentActivity {
     private DownloadManager manager;
     
     private FrameLayout container;
+    private ViewGroup rootContainer;
     
     /** Called when the activity is first created. */
     @Override
@@ -37,7 +38,10 @@ public class RogerActivity extends FragmentActivity {
         
         manager = DownloadManager.getInstance();
         
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        
         setContentView(R.layout.main);
+        rootContainer = (ViewGroup)findViewById(R.id.main_root);
         container = (FrameLayout)findViewById(R.id.container);
         
         startService();
@@ -90,7 +94,7 @@ public class RogerActivity extends FragmentActivity {
 
         if (id == 0) {
         	Log.e(TAG, "ID is 0. Not inflating.");
-        	ErrorManager.show(RogerActivity.this, container, "Error loading view");
+        	ErrorManager.show(getApplicationContext(), rootContainer, "Unable to load view");
         	return;
         }
         
