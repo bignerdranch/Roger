@@ -55,7 +55,11 @@ public class RogerActivity extends FragmentActivity {
 
     private ConnectionHelper.Listener connectionStateListener = new ConnectionHelper.Listener() {
         public void onStateChanged(int state, ServerDescription desc) {
-            updateServerStatus();
+            if (container != null) {
+                container.post(new Runnable() { public void run() {
+                    updateServerStatus();
+                }});
+            }
         }
     };
     
