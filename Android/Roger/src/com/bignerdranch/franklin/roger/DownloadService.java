@@ -15,10 +15,10 @@ import android.util.Pair;
 public class DownloadService extends IntentService {
 	private static final String TAG = "DownloadService";
 
-    //private static final String PACKAGE = "com.bignerdranch.franklin.roger.dummypackage";
+    private static final String PACKAGE = "com.bignerdranch.franklin.roger.dummypackage";
 	//private static final String PACKAGE = "com.bignerdranch.franklin.roger";
 	//private static final String PACKAGE = "com.att.labs.uversetv.android.tablet";
-	private static final String PACKAGE = "com.bignerdranch.Franklin.RogerTest";
+	//private static final String PACKAGE = "com.bignerdranch.Franklin.RogerTest";
 
 	private static final char INFO_PREFIX = '-';
 
@@ -26,9 +26,11 @@ public class DownloadService extends IntentService {
         DownloadService.class.getPackage() + ".ACTION_CONNECT";
     public static final String EXTRA_SERVER_DESCRIPTION = 
         DownloadService.class.getPackage() + ".EXTRA_SERVER_DESCRIPTION";
+
+    private static final String HOSTNAME = "http://10.1.10.57";
 	
-	private static final String SERVER_ADDRESS = "http://10.1.10.108:8082/";
-	private static final String SERVER_APK_ADDRESS = "http://10.1.10.108:8081/get?hash=%1$s";
+	private static final String SERVER_ADDRESS = HOSTNAME + ":8082/";
+	private static final String SERVER_APK_ADDRESS = HOSTNAME + ":8081/get?hash=%1$s";
 	private DownloadManager manager;
     private HttpURLConnection connection;
 	
@@ -91,6 +93,7 @@ public class DownloadService extends IntentService {
 			
 			String[] values = response.split("\n");
 			layoutFile = values[0];
+            layoutFile = layoutFile.split("\\.")[0];
 			identifier = values[1];
 			
 			Log.d(TAG, "Layout file: " + layoutFile + " identifier " + identifier);
