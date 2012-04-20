@@ -10,17 +10,9 @@ import java.net.URL;
 import android.app.IntentService;
 import android.content.Intent;
 import android.util.Log;
-import android.util.Pair;
 
 public class DownloadService extends IntentService {
 	private static final String TAG = "DownloadService";
-
-    //private static final String PACKAGE = "com.bignerdranch.franklin.roger.dummypackage";
-	//private static final String PACKAGE = "com.bignerdranch.franklin.roger";
-//	private static final String PACKAGE = "com.att.labs.uversetv.android.tablet";
-	//private static final String PACKAGE = "com.bignerdranch.Franklin.RogerTest";
-
-	private static final char INFO_PREFIX = '-';
 
     private static final int CHUNK_SIZE = 32768;
     private static final int BUFFER_SIZE = CHUNK_SIZE;
@@ -86,12 +78,11 @@ public class DownloadService extends IntentService {
         }
 
 		byte[] buffer = new byte[BUFFER_SIZE];
-		int bytesRead = 0;
 		String layoutFile = "main";
 		String identifier = "";
 		String pack = "";
 		
-		while ((bytesRead = input.read(buffer)) > 0) {
+		while ((input.read(buffer)) > 0) {
 			String data = new String(buffer);
 			
 			String response = data.substring(0, data.indexOf("--"));
