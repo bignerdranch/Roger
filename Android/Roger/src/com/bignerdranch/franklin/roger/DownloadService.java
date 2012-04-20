@@ -15,9 +15,9 @@ import android.util.Pair;
 public class DownloadService extends IntentService {
 	private static final String TAG = "DownloadService";
 
-    private static final String PACKAGE = "com.bignerdranch.franklin.roger.dummypackage";
+    //private static final String PACKAGE = "com.bignerdranch.franklin.roger.dummypackage";
 	//private static final String PACKAGE = "com.bignerdranch.franklin.roger";
-	//private static final String PACKAGE = "com.att.labs.uversetv.android.tablet";
+	private static final String PACKAGE = "com.att.labs.uversetv.android.tablet";
 	//private static final String PACKAGE = "com.bignerdranch.Franklin.RogerTest";
 
 	private static final char INFO_PREFIX = '-';
