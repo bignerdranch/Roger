@@ -24,9 +24,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|right"
-        android:background="@color/transparent_gray"
+        android:background="@drawable/transparent_border_top"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp">
         <TextView 
             android:id="@+id/serverNameTextView"
             android:layout_width="wrap_content"
