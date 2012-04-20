@@ -17,7 +17,7 @@ public class DownloadService extends IntentService {
 
     //private static final String PACKAGE = "com.bignerdranch.franklin.roger.dummypackage";
 	//private static final String PACKAGE = "com.bignerdranch.franklin.roger";
-	private static final String PACKAGE = "com.att.labs.uversetv.android.tablet";
+//	private static final String PACKAGE = "com.att.labs.uversetv.android.tablet";
 	//private static final String PACKAGE = "com.bignerdranch.Franklin.RogerTest";
 
 	private static final char INFO_PREFIX = '-';
@@ -32,7 +32,7 @@ public class DownloadService extends IntentService {
     public static final String EXTRA_SERVER_DESCRIPTION = 
         DownloadService.class.getPackage() + ".EXTRA_SERVER_DESCRIPTION";
 
-    private static final String HOSTNAME = "http://10.1.10.57";
+    private static final String HOSTNAME = "http://10.1.10.108";
 	
 	private static final String SERVER_ADDRESS = HOSTNAME + ":8082/";
 	private static final String SERVER_APK_ADDRESS = HOSTNAME + ":8081/get?hash=%1$s";
@@ -62,9 +62,9 @@ public class DownloadService extends IntentService {
 		manager = DownloadManager.getInstance();
 		
 		try {
-			Pair<String, String> descriptors = getDescriptor();
-			String filePath = getApk(descriptors.second);
-			broadcastChange(filePath, descriptors.first);
+			FileDescriptor descriptor = getDescriptor();
+			String filePath = getApk(descriptor.identifier);
+			broadcastChange(filePath, descriptor.layout, descriptor.pack);
 		} catch (IOException e) {
 			Log.e(TAG, "Unable to download file", e);
 		}
@@ -72,7 +72,7 @@ public class DownloadService extends IntentService {
 		startService(new Intent(this, DownloadService.class));
 	}
 
-	private Pair<String, String> getDescriptor() throws IOException {
+	private FileDescriptor getDescriptor() throws IOException {
 
 		URL remoteUrl = new URL(SERVER_ADDRESS);
 		Log.d(TAG, "Connecting to " + SERVER_ADDRESS);
@@ -89,6 +89,7 @@ public class DownloadService extends IntentService {
 		int bytesRead = 0;
 		String layoutFile = "main";
 		String identifier = "";
+		String pack = "";
 		
 		while ((bytesRead = input.read(buffer)) > 0) {
 			String data = new String(buffer);
@@ -100,52 +101,12 @@ public class DownloadService extends IntentService {
 			layoutFile = values[0];
             layoutFile = layoutFile.split("\\.")[0];
 			identifier = values[1];
+			pack = values[2];
 			
-			Log.d(TAG, "Layout file: " + layoutFile + " identifier " + identifier);
+			Log.d(TAG, "Layout file: " + layoutFile + " identifier " + identifier + " package: " + pack);
 		}
 		
-		return new Pair<String, String>(layoutFile, identifier);
-//			int byteOffset = 0;
-//			if (firstPass && buffer[0] == INFO_PREFIX) {
-//				
-//				int lastIndex;
-//				for (lastIndex = 1; lastIndex < buffer.length; lastIndex++) {
-//					if (buffer[lastIndex] == INFO_PREFIX) {
-//						break;
-//					}
-//				}
-//				
-//				byte[] layoutBuffer = new byte[lastIndex - 1];
-//				for (int i = 0; i < lastIndex - 1; i++) {
-//					layoutBuffer[i] = buffer[i + 1];
-//				}
-//				
-//				layoutFile = new String(layoutBuffer);
-//				Log.d(TAG, "Got layout file: " + layoutFile + " length " + layoutFile.length());
-//				byteOffset = 2 + layoutFile.length();
-//				bytesRead -= byteOffset;
-//				
-//				if (layoutFile.endsWith(".xml")) {
-//					layoutFile = layoutFile.substring(0, layoutFile.length() - 4);
-//				}
-//			}
-//			
-//			output.write(buffer, byteOffset, bytesRead);
-//			
-//			if (input.available() <= 0) {
-//				// The file is done
-//				broadcastChange(filePath, layoutFile);
-//				filePath = getPath();
-//				output = getOutputStream(filePath);
-//				buffer = new byte[1024];
-//				bytesRead = 0;
-//				firstPass = true;
-//			} else {
-//				firstPass = false;
-//			}
-//		}
-//		long elapsed = System.currentTimeMillis() - start;
-//		Log.d(TAG, "GET complete, " + elapsed + "ms");
+		return new FileDescriptor(identifier, pack, layoutFile);
 	}
 	
 	private String getApk(String identifier) throws IOException {
@@ -193,7 +154,19 @@ public class DownloadService extends IntentService {
 		return new FileOutputStream(filePath);
 	}
 
-	private void broadcastChange(String apkPath, String layoutName) {
-		manager.onDownloadComplete(apkPath, layoutName, PACKAGE);
+	private void broadcastChange(String apkPath, String layoutName, String pack) {
+		manager.onDownloadComplete(apkPath, layoutName, pack);
+	}
+	
+	private class FileDescriptor {
+		public String identifier;
+		public String pack;
+		public String layout;
+		
+		public FileDescriptor(String identifier, String pack, String layout) {
+			this.identifier = identifier;
+			this.pack = pack;
+			this.layout = layout;
+		}
 	}
 }
