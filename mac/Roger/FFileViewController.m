@@ -8,7 +8,7 @@
 
 #import "FFileViewController.h"
 
-#define DEBUG_NODE 1
+//#define DEBUG_NODE 1
 
 @interface FFileViewController ()
 
@@ -190,9 +190,23 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 	[self updateLastModificationDateForPath:path];
 }
 
+- (BOOL)isLayoutPath:(NSString *)path
+{
+    NSError *err = nil;
+    NSRegularExpression *regex = [NSRegularExpression         
+        regularExpressionWithPattern:@"res/layout[-a-z0-9]*//*[^/]*\\.xml$"
+        options:NSRegularExpressionCaseInsensitive
+        error:&err];
+    NSArray *matches = [regex matchesInString:path options:NSRegularExpressionCaseInsensitive range:NSMakeRange(0, [path length])];
+    
+    BOOL isLayout = matches && [matches count];
+    return isLayout;
+}
+
 - (BOOL)fileIsAndroidXml: (NSString *)path
 {
-    return ([path hasSuffix:@".xml"] && [self androidProjectDirectoryFromPath:[path stringByDeletingLastPathComponent]]);
+    return [self isLayoutPath:path] && 
+        [self androidProjectDirectoryFromPath:[path stringByDeletingLastPathComponent]];
 }
 
 - (NSString *)androidProjectDirectoryFromPath:(NSString *)path;

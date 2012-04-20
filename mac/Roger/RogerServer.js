@@ -111,7 +111,7 @@ udpSocket.on("message", function(msg, rinfo) {
     sys.puts("received something from address: " + rinfo.address);
 	sys.puts("Host name " + os.hostname());
 
-    var message = new Buffer(os.hostname());
+    var message = new Buffer("SECRETS!" + os.hostname());
     udpSocket.send(message, 0, message.length, multicastPort, rinfo.address, function (err, bytes) {
         sys.puts("error sending udp message: " + err);
     });

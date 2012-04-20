@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import com.bignerdranch.franklin.roger.LocalApk;
 
-import android.content.Context;
+import android.app.Activity;
 
 import android.content.res.Resources;
 
@@ -45,27 +45,27 @@ public class LayoutDescription implements Serializable {
         this.packageName = packageName;
     }
 
-    public Resources getResources(Context c) {
+    public Resources getResources(Activity a) {
         if (resources != null) return resources;
 
-        resources = getApk(c).getResources();
-        Log.i(TAG, "Did it work? " + getApk(c).getFile().exists() + "");
+        resources = getApk(a).getResources();
+        Log.i(TAG, "Did it work? " + getApk(a).getFile().exists() + "");
 
         return resources;
     }
 
-    public int getResId(Context c) {
+    public int getResId(Activity a) {
         Log.i(TAG, "getting identifier for layoutName " + layoutName + ", packageName " + packageName + "");
-        int id = getResources(c).getIdentifier(layoutName, "layout", packageName);
+        int id = getResources(a).getIdentifier(layoutName, "layout", packageName);
         Log.i(TAG, "here's what we got: " + id + "");
         return id;
     }
 
-    public LocalApk getApk(Context context) {
+    public LocalApk getApk(Activity activity) {
         if (apk != null) return apk;
 
     	Log.d(TAG, "Loading apk with path: " + apkPath + " layout: " + layoutName + " package: " + packageName);
-        apk = new FileApk(context, packageName, apkPath);
+        apk = new FileApk(activity, packageName, apkPath);
 
         return apk;
     }

@@ -8,6 +8,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+import android.app.Activity;
+
 import android.content.Context;
 import android.content.ContextWrapper;
 
@@ -48,19 +50,21 @@ public abstract class LocalApk {
         }
 
         public Resources.Theme getTheme() {
-            if (theme == null) {
-                Method selectDefaultTheme = getMethod(Resources.class, 
-                        "selectDefaultTheme", int.class, int.class);
-                try {
-                    themeResource = (int)(Integer)selectDefaultTheme.invoke(null, 
-                            themeResource, getApplicationInfo().targetSdkVersion);
-                    theme = getResources().newTheme();
-                    theme.applyStyle(themeResource, true);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            return theme;
+            return activity.getTheme();
+            // hack around it?
+            //if (theme == null) {
+            //    Method selectDefaultTheme = getMethod(Resources.class, 
+            //            "selectDefaultTheme", int.class, int.class);
+            //    try {
+            //        themeResource = (int)(Integer)selectDefaultTheme.invoke(null, 
+            //                themeResource, getApplicationInfo().targetSdkVersion);
+            //        theme = getResources().newTheme();
+            //        theme.applyStyle(themeResource, true);
+            //    } catch (Exception e) {
+            //        throw new RuntimeException(e);
+            //    }
+            //}
+            //return theme;
         }
 
         @Override
@@ -91,11 +95,13 @@ public abstract class LocalApk {
 
     public static final String TAG = "LocalApk";
 
+    protected Activity activity;
     protected Context context;
     protected String packageName;
 
-    public LocalApk(Context c, String packageName) {
-        this.context = c.getApplicationContext();
+    public LocalApk(Activity a, String packageName) {
+        this.activity = a;
+        this.context = a.getApplicationContext();
         this.packageName = packageName;
     }
 

@@ -31,6 +31,8 @@ public class FindServerService extends IntentService {
     public static final int TIMEOUT = 1000; //ms
     public static final int BROADCAST_TRIES = 3; 
 
+    public static final String SECRET_STRING = "SECRETS!";
+
     public static String ACTION_FOUND_SERVERS = 
         FindServerService.class.getPackage() + ".ACTION_FOUND_SERVERS";
     public static String EXTRA_IP_ADDRESSES = 
@@ -132,20 +134,24 @@ public class FindServerService extends IntentService {
                 if (!localAddress.equals(response.getAddress().getHostAddress())) {
                 	String hostname = new String(response.getData());
                 	hostname = hostname.substring(0, response.getLength());
-                    ArrayList<String> parts = new ArrayList<String>(Arrays.asList(hostname.split("\\.")));
+                    if (hostname.startsWith(SECRET_STRING)) {
+                        hostname = hostname.substring(SECRET_STRING.length(), hostname.length() - SECRET_STRING.length());
 
-                    if (parts.get(parts.size() - 1).equals("local")) {
-                        parts.remove(parts.size() - 1);
+                        ArrayList<String> parts = new ArrayList<String>(Arrays.asList(hostname.split("\\.")));
+
+                        if (parts.get(parts.size() - 1).equals("local")) {
+                            parts.remove(parts.size() - 1);
+                        }
+
+                        hostname = TextUtils.join(".", parts);
+
+                        Log.i(TAG, "received an address with hostname " + hostname);
+                        
+                        ServerDescription description = new ServerDescription();
+                        description.setName(hostname);
+                        description.setHostAddress(response.getAddress().getHostAddress());
+                        addresses.add(description);
                     }
-
-                    hostname = TextUtils.join(".", parts);
-
-                    Log.i(TAG, "received an address with hostname " + hostname);
-                    
-                    ServerDescription description = new ServerDescription();
-                    description.setName(hostname);
-                    description.setHostAddress(response.getAddress().getHostAddress());
-                    addresses.add(description);
                 }
             } catch (SocketTimeoutException ste) {
                 // done
