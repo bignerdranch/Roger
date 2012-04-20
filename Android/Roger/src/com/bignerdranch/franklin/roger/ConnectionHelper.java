@@ -65,6 +65,8 @@ public class ConnectionHelper {
     }
 
     public void setConnectionError(ServerDescription server, Exception error) {
+        if (connectedServer == null) return;
+
         if (!server.getHostAddress().equals(connectedServer.getHostAddress())) return;
 
         notifyConnectionStateChange(STATE_FAILED);
@@ -94,6 +96,7 @@ public class ConnectionHelper {
         Intent i = new Intent(context, DownloadService.class);
         i.setAction(DownloadService.ACTION_DISCONNECT);
         context.startService(i);
+        connectedServer = null;
         notifyDisconnect();
     }
 
