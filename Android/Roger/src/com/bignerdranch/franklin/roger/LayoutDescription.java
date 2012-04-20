@@ -18,6 +18,7 @@ public class LayoutDescription implements Serializable {
     String apkPath;
     String layoutName;
     String packageName;
+    int minVersion;
     transient LocalApk apk;
     transient Resources resources;
 
@@ -69,4 +70,13 @@ public class LayoutDescription implements Serializable {
 
         return apk;
     }
+
+	public int getMinVersion() {
+		return minVersion;
+	}
+
+	public void setMinVersion(int minVersion) {
+		this.minVersion = minVersion;
+	}
+
 }

@@ -82,7 +82,7 @@ public class DownloadService extends IntentService {
             connector.setDownloading(data.desc);
 			String filePath = getApk(descriptor.identifier);
             connector.setFinishDownload(data.desc);
-			broadcastChange(filePath, descriptor.layout, descriptor.pack);
+			broadcastChange(filePath, descriptor.layout, descriptor.pack, descriptor.minVersion);
 
             // still connected, presumably
             Intent i = new Intent(this, this.getClass());
@@ -118,6 +118,7 @@ public class DownloadService extends IntentService {
 		String layoutFile = "main";
 		String identifier = "";
 		String pack = "";
+		String minVersionText = "";
 		
 		while ((input.read(buffer)) > 0) {
 			String data = new String(buffer);
@@ -130,6 +131,7 @@ public class DownloadService extends IntentService {
 			layoutFile = layoutFile.split("\\.")[0];
 			identifier = values[1];
 			pack = values[2];
+			minVersionText = values[3];
 
 			Log.d(TAG, "Layout file: " + layoutFile + " identifier " + identifier + " package: " + pack);
 		}
@@ -138,8 +140,16 @@ public class DownloadService extends IntentService {
             data.conn.disconnect();
             data.conn = null;
         }
+        
+        int minVersion = 0;
+        try {
+        	minVersion = Integer.parseInt(minVersionText);
+        } catch (NumberFormatException e) {
+        	Log.e(TAG, "Unable to parse min version from " + minVersionText, e);
+        }
+        
 
-		return new FileDescriptor(identifier, pack, layoutFile);
+		return new FileDescriptor(identifier, pack, layoutFile, minVersion);
 	}
 
 	private String getApk(String identifier) throws IOException {
@@ -196,19 +206,21 @@ public class DownloadService extends IntentService {
 		return new FileOutputStream(filePath);
 	}
 
-	private void broadcastChange(String apkPath, String layoutName, String pack) {
-		manager.onDownloadComplete(apkPath, layoutName, pack);
+	private void broadcastChange(String apkPath, String layoutName, String pack, int minimumVersion) {
+		manager.onDownloadComplete(apkPath, layoutName, pack, minimumVersion);
 	}
 
 	private class FileDescriptor {
 		public String identifier;
 		public String pack;
 		public String layout;
+		public int minVersion;
 
-		public FileDescriptor(String identifier, String pack, String layout) {
+		public FileDescriptor(String identifier, String pack, String layout, int minVersion) {
 			this.identifier = identifier;
 			this.pack = pack;
 			this.layout = layout;
+			this.minVersion = minVersion;
 		}
 	}
 }

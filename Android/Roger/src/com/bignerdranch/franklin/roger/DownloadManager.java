@@ -42,13 +42,14 @@ public class DownloadManager {
 		this.listener = listener;
 	}
 	
-	public void onDownloadComplete(String apkPath, String layoutName, String packageName) {
+	public void onDownloadComplete(String apkPath, String layoutName, String packageName, int minimumVersion) {
 		if (listener != null) {
             LayoutDescription desc = new LayoutDescription();
 
             desc.setApkPath(apkPath);
             desc.setLayoutName(layoutName);
             desc.setPackageName(packageName);
+            desc.setMinVersion(minimumVersion);
 			listener.onApkDownloaded(desc);
 		}
 	}
