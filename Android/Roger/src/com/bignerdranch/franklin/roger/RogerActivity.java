@@ -51,6 +51,7 @@ public class RogerActivity extends FragmentActivity {
         public RogerParams rogerParams;
         public boolean textFillSet;
         public boolean textFillEnabled;
+        public boolean isListView;
 
         @Override
         public void onCreate(Bundle sharedInstanceState) {
@@ -163,6 +164,7 @@ public class RogerActivity extends FragmentActivity {
     public void setRogerParams(RogerParams params) {
     	management.rogerParams = params;
     	updateLayoutParams(params);
+        loadLayout();
     }
     
     private void updateLayoutParams(RogerParams params) {
@@ -272,6 +274,12 @@ public class RogerActivity extends FragmentActivity {
         LocalBroadcastManager.getInstance(this)
             .unregisterReceiver(foundServersReceiver);
     }
+
+    private void loadLayout() {
+        if (management.layoutDescription != null) {
+            loadLayout(management.layoutDescription);
+        }
+    }
     
     private void loadLayout(LayoutDescription description) {
         management.layoutDescription = description;
@@ -279,7 +287,7 @@ public class RogerActivity extends FragmentActivity {
     	container.removeAllViews();
     	updateLayoutParams(management.rogerParams);
 
-        int id = description.getResId(this);
+        final int id = description.getResId(this);
     	
         if (id == 0) {
         	Log.e(TAG, "ID is 0. Not inflating.");
@@ -289,12 +297,36 @@ public class RogerActivity extends FragmentActivity {
         }
         
         Log.i(TAG, "getting a layout inflater...");
-        LayoutInflater inflater = description.getApk(this).getLayoutInflater(getLayoutInflater());
+        final LayoutInflater inflater = description.getApk(this).getLayoutInflater(getLayoutInflater());
         Log.i(TAG, "inflating???");
         try {
-            View v = inflater.inflate(id, container, false);
+            if (management.isListView) {
+                FrameLayout.LayoutParams params = 
+                    new FrameLayout.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.FILL_PARENT);
 
-            container.addView(v);
+                ListView listView = new ListView(this);
+
+                ArrayList<String> items = new ArrayList<String>();
+                for (int i = 0; i < 100; i++) {
+                    items.add("" + i);
+                }
+
+                listView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items) {
+                    @Override
+                    public View getView(int position, View convertView, ViewGroup parent) {
+                        if (convertView != null) {
+                            return convertView;
+                        } else {
+                            return inflater.inflate(id, parent, false);
+                        }
+                    }
+                });
+
+                container.addView(listView, params);
+            } else {
+                View v = inflater.inflate(id, container, false);
+                container.addView(v);
+            }
 
             addTextFill();
             containerBorder.setVisibility(View.VISIBLE);
@@ -309,7 +341,6 @@ public class RogerActivity extends FragmentActivity {
     }
     
     private void addTextFill() {
-    	
     	if (!management.textFillSet) {
     		return;
     	}
@@ -339,7 +370,12 @@ public class RogerActivity extends FragmentActivity {
     private void updateTextFill() {
     	management.textFillSet = true;
     	management.textFillEnabled = !management.textFillEnabled;
-    	addTextFill();
+        loadLayout();
+    }
+
+    private void toggleListView() {
+        management.isListView = !management.isListView;
+        loadLayout();
     }
     
     @Override
@@ -365,6 +401,10 @@ public class RogerActivity extends FragmentActivity {
 	    	case R.id.menu_layout_fill_text:
 	    		updateTextFill();
 	    		break;
+
+            case R.id.menu_toggle_list_view:
+                toggleListView();
+                break;
     	}
     	
         return true;

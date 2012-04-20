@@ -15,5 +15,8 @@
         android:title="Fill Text" 
         android:icon="@android:drawable/ic_menu_set_as"/>
     
+    <item
+        android:id="@+id/menu_toggle_list_view"
+        android:title="Toggle List"
+        android:icon="@android:drawable/ic_menu_gallery"/>
 </menu>
-
