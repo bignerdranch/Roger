@@ -99,6 +99,7 @@ public class RogerActivity extends FragmentActivity {
         if (id == 0) {
         	Log.e(TAG, "ID is 0. Not inflating.");
         	ErrorManager.show(getApplicationContext(), rootContainer, "Unable to load view");
+        	containerBorder.setVisibility(View.GONE);
         	return;
         }
         
