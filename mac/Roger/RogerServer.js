@@ -45,26 +45,23 @@ http.createServer(function(request, response){
 			s.write(layout + "\n" + fileIndex + "\n" + pack +  "--", "utf8");
 			s.end();
         });  
-      } else if (parts.pathname == "/get") {
-          	var hash = parts.query['hash'];
-          	var fileName = files[hash];
-                  
-			filesys.readFile(fileName, "binary", function(err, file) {  
-            	if(!err) {        
-	                sys.puts("sending " + fileName + " to a client with length " + file.length);
-		          	// response.writeHeader(200, {'Content-Length' : file.length});
-					// response.writeHead(200, {
-					// 					  'Content-Length': file.length,
-					// 					  'Content-Type': 'text/plain' });
-	                response.write(file, "binary");
-					response.end();
-	            } else {
-					response.writeHeader(200);
-	                sys.puts("unable to find file " + apk + " : " + err);
-					response.end();
-	            }
-	        });
-      }
+    } else if (parts.pathname == "/get") {
+        var hash = parts.query['hash'];
+        var fileName = files[hash];
+                
+	  	filesys.readFile(fileName, "binary", function(err, file) {  
+          	if(!err) {        
+	            sys.puts("sending " + fileName + " to a client with length " + file.length);
+                response.writeHead(200, {'Transfer-Encoding' : 'chunked'})
+	            response.write(file, "binary");
+	  		  response.end();
+	        } else {
+	  		  response.writeHeader(200);
+	            sys.puts("unable to find file " + apk + " : " + err);
+	  		  response.end();
+	        }
+	      });
+    }
 }).listen(port);  
 sys.puts("Server Running on " + port);
 
