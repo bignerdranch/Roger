@@ -10,5 +10,10 @@
         android:title="Layout Params" 
         android:icon="@android:drawable/ic_menu_edit"/>
     
+    <item 
+        android:id="@+id/menu_layout_fill_text" 
+        android:title="Fill Text" 
+        android:icon="@android:drawable/ic_menu_zoom"/>
+    
 </menu>
 

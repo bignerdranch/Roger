@@ -132,6 +132,7 @@ public class LayoutEditDialogFragment extends DialogFragment {
 			if (listener != null) {
 				listener.onValueChanged(layoutValue);
 			}
+			
 		}
 	};
 	

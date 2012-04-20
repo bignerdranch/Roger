@@ -521,7 +521,7 @@ public abstract class ViewUtils {
         T child = null;
         for (int i=0; i < childCount; i++) {
             View v = vg.getChildAt(i);
-            if (v.getClass().equals(klass)) 
+            if (v.getClass().isInstance(klass)) 
                 return klass.cast(v);
             else if (v instanceof ViewGroup) {
                 child = findViewByClass((ViewGroup)v, klass);

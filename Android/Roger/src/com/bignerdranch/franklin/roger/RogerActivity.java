@@ -36,6 +36,8 @@ public class RogerActivity extends FragmentActivity {
     private DownloadManager manager;
     private TheManagement management;
     private RogerParams rogerParams;
+    private boolean textFillSet;
+    private boolean textFillEnabled;
     
     private TextView serverNameTextView;
     private TextView connectionStatusTextView;
@@ -289,7 +291,27 @@ public class RogerActivity extends FragmentActivity {
         View v = inflater.inflate(id, container, false);
 
         container.addView(v);
+
+        addTextFill();
         containerBorder.setVisibility(View.VISIBLE);
+    }
+    
+    private void addTextFill() {
+    	
+    	if (!textFillSet) {
+    		return;
+    	}
+    	
+    	String dummyText = getString(R.string.dummy_text);
+    	ArrayList<TextView> views = ViewUtils.findViewsByClass(container, TextView.class);
+    	for (TextView textView : views) {
+    		
+    		if (textFillEnabled) {
+    			textView.setText(dummyText);
+    		} else {
+    			textView.setText("");
+    		}
+    	}
     }
 
     protected void showLayoutParamsDialog() {
@@ -302,6 +324,12 @@ public class RogerActivity extends FragmentActivity {
             .startDiscovery();
     }
 
+    private void updateTextFill() {
+    	textFillSet = true;
+    	textFillEnabled = !textFillEnabled;
+    	addTextFill();
+    }
+    
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
@@ -320,6 +348,10 @@ public class RogerActivity extends FragmentActivity {
 	    	
 	    	case R.id.menu_layout_options:
 	    		showLayoutParamsDialog();
+	    		break;
+	    		
+	    	case R.id.menu_layout_fill_text:
+	    		updateTextFill();
 	    		break;
     	}
     	
