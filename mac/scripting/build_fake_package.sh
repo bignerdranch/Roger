@@ -23,11 +23,11 @@ PLATFORM_JAR="$ANDROID_SDK/platforms/$TARGET/android.jar"
 
 rm -f "$APK_NAME"
 
-# fake manifest
-echo Building $APK_NAME using $FAKE_MANIFEST
-$AAPT package -F "$APK_NAME" -S "$PROJECT_RESOURCES" -M "$FAKE_MANIFEST" -I "$PLATFORM_JAR" 
+## fake manifest
+#echo Building $APK_NAME using $FAKE_MANIFEST
+#$AAPT package -F "$APK_NAME" -S "$PROJECT_RESOURCES" -M "$FAKE_MANIFEST" -I "$PLATFORM_JAR" 
 
 
-## real manifest
-#echo Building $APK_NAME using $ANDROID_MANIFEST
-#$AAPT package -F "$APK_NAME" -S "$PROJECT_RESOURCES" -M "$ANDROID_MANIFEST" -I "$PLATFORM_JAR" 
+# real manifest
+echo Building $APK_NAME using $ANDROID_MANIFEST
+$AAPT package -F "$APK_NAME" -S "$PROJECT_RESOURCES" -M "$ANDROID_MANIFEST" -I "$PLATFORM_JAR" 
