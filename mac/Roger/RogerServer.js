@@ -61,33 +61,12 @@ http.createServer(function(request, response){
             'Content-Encoding' : 'application/octet-stream'
         });
 
-        filesys.createReadStream(fileName, { 
-            'flags' : 'r', 
-            'encoding' : 'binary', 
-            'mode' : 0666, 
-            'bufferSize' : chunkSize })
-            .addListener("data", function (chunk) {
-                var bufNextPos = pos + chunk.length;
-
-                sys.puts("pos: " + pos + " next pos:" + bufNextPos + " chunk length: " + chunk.length + " bufSize: " + bufSize);
-                if (bufNextPos > bufSize) {
-                    sys.puts("resetting, sending " + pos + " bytes");
-                    response.write(buffer.slice(0, pos));
-                    pos = 0;
-                    bufNextPos = pos + chunk.length
-                } else {
-                    sys.puts("continuing");
-                }
-
-                buffer.write(chunk, 'binary', pos);
-                pos = bufNextPos;
-            })
-            .addListener("close", function () {
-                if (pos != 0) {
-                    response.write(buffer.slice(0, pos));
-                }
-                response.end();
-            });
+        var readStream = filesys.createReadStream(fileName);
+        sys.pump(readStream, response, function (err) {
+            if (err) {
+                sys.write("error writing " + fileName + " to client: " + err);
+            }
+        });
 
 	  	//filesys.readFile(fileName, "binary", function(err, file) {  
         //  	if(!err) {        
