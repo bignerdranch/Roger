@@ -83,7 +83,8 @@ public class DownloadService extends IntentService {
             // should start up again soon
 		} catch (IOException e) {
 			Log.e(TAG, "Unable to download file", e);
-            ConnectionHelper.getInstance(this).setConnectionError(data.desc, e);
+            ConnectionHelper.getInstance(this)
+                .setConnectionError(data.desc, e);
 		}
 	}
 
@@ -97,6 +98,8 @@ public class DownloadService extends IntentService {
             validateData();
 			data.conn = (HttpURLConnection) remoteUrl.openConnection();
 			data.conn.connect();
+            ConnectionHelper.getInstance(this)
+                .setConnectionSuccess(data.desc);
 
 			input = data.conn.getInputStream();
 		}
