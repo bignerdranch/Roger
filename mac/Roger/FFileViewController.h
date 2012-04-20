@@ -8,7 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface FFileViewController : NSViewController {
+@interface FFileViewController : NSViewController <NSTableViewDelegate, NSTableViewDataSource> {
     NSFileManager* fm;
     NSMutableDictionary* pathModificationDates;
     NSDate* appStartedTimestamp;
@@ -16,11 +16,16 @@
     FSEventStreamRef stream;
     NSString *ipAddress;
     
-    NSTask *nodeTask;
+    NSMutableArray *recentFiles;
+    NSMutableArray *recentEditTimes;
+    NSDateFormatter *dateFormatter;
     
-    IBOutlet NSTextField *statusText;
+    NSTask *nodeTask;
 }
 
+@property (nonatomic, strong) IBOutlet NSTableView *tableView;
+@property (nonatomic, strong) IBOutlet NSTextField *statusText;
+@property (nonatomic, strong) IBOutlet NSProgressIndicator *statusProgress;
 @property (nonatomic, copy) NSString *sdkPath;
 @property (nonatomic, copy) NSString *apkPath;
 
@@ -36,6 +41,10 @@
 - (NSString *)packageForManifest:(NSString *)manifest;
 - (void)sendChangesWithPath:(NSString *)apkPath layout:(NSString *)layout package:(NSString *)package;
 - (NSString *)currentIPAddress;
+
+- (void)updateStatusWithText:(NSString *)text;
+- (void)hideStatus;
+- (void)showStatus;
 
 - (void)startServer;
 - (void)stopServer;
