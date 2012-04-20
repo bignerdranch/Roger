@@ -5,15 +5,16 @@ import java.io.File;
 import android.content.Context;
 
 public class FileApk extends LocalApk {
-    protected File file;
+    protected String filePath;
 
-    public FileApk(Context c, String packageName, File file) {
+    public FileApk(Context c, String packageName, String filePath) {
         super(c, packageName);
-        this.file = file;
+        this.filePath = filePath;
     }
 
     @Override
-    public File getFile() {
-        return file;
+    protected File getFile() {
+
+        return new File(filePath);
     }
 }

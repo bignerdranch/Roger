@@ -19,4 +19,24 @@
             android:layout_height="wrap_content" />
     </FrameLayout>
 
+    <LinearLayout
+        android:id="@+id/serverStatusOverlay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|right"
+        android:background="@android:color/transparent"
+        android:orientation="vertical"
+        android:padding="20dp">
+        <TextView 
+            android:id="@+id/serverNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp" />
+        <TextView 
+            android:id="@+id/connectionStatusTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp" />
+    </LinearLayout>
+
 </FrameLayout>

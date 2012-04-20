@@ -9,7 +9,7 @@ public class DownloadManager {
 	
 	private DownloadListener listener;
 	public interface DownloadListener {
-		public void onApkDownloaded(final String path, final String layoutName, final String packageName);
+		public void onApkDownloaded(LayoutDescription description);
 	}
 	
 	private static DownloadManager manager;
@@ -44,7 +44,12 @@ public class DownloadManager {
 	
 	public void onDownloadComplete(String apkPath, String layoutName, String packageName) {
 		if (listener != null) {
-			listener.onApkDownloaded(apkPath, layoutName, packageName);
+            LayoutDescription desc = new LayoutDescription();
+
+            desc.setApkPath(apkPath);
+            desc.setLayoutName(layoutName);
+            desc.setPackageName(packageName);
+			listener.onApkDownloaded(desc);
 		}
 	}
 }

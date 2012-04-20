@@ -1,5 +1,7 @@
 package com.bignerdranch.franklin.roger;
 
+import java.util.ArrayList;
+
 import android.content.Context;
 import android.content.Intent;
 
@@ -9,6 +11,12 @@ public class ConnectionHelper {
     public static final String TAG = "ConnectionHelper";
 
     protected Context context;
+
+    public interface Listener {
+        public void onStateChanged(int connectionState, ServerDescription server);
+    }
+
+    private ArrayList<Listener> listeners = new ArrayList<Listener>();
 
     private ConnectionHelper(Context context) {
         this.context = context.getApplicationContext();
@@ -33,6 +41,15 @@ public class ConnectionHelper {
     int connectionState = STATE_DISCONNECTED;
     Exception connectionError;
 
+    public void addListener(Listener listener) {
+        if (!listeners.contains(listener))
+            listeners.add(listener);
+    }
+
+    public void removeListener(Listener listener) {
+        listeners.remove(listener);
+    }
+
     public int getState() {
         return connectionState;
     }
@@ -55,6 +72,10 @@ public class ConnectionHelper {
 
     protected void notifyConnectionStateChange(int newState) {
         this.connectionState = newState;
+
+        for (Listener listener : listeners) {
+            listener.onStateChanged(newState, connectedServer);
+        }
     }
 
     protected void notifyDisconnect() {
