@@ -8,11 +8,14 @@
     android:paddingLeft="30dp"
     android:paddingRight="30dp"
     android:orientation="vertical"
-    android:gravity="center" >
+    android:background="@drawable/error_border"
+    android:gravity="center_horizontal|top" >
     
 	<TextView
 	    android:id="@+id/error_layout_text"
 	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content" />
+	    android:layout_height="wrap_content"
+	    android:textSize="18sp"
+	    android:textColor="#FFD8000C" />
     
 </LinearLayout>
