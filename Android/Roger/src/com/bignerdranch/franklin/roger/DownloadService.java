@@ -150,6 +150,8 @@ public class DownloadService extends IntentService {
         long startTime = System.currentTimeMillis();
 
 		String filePath = getPath();
+
+        new File(filePath).delete();
 		FileOutputStream output = getOutputStream(filePath);
         InputStream input;
         synchronized (data) {
