@@ -16,7 +16,7 @@ public class ConnectionHelper {
 
     protected static ConnectionHelper instance;
     
-    public ConnectionHelper getInstance(Context context) {
+    public static ConnectionHelper getInstance(Context context) {
         if (instance == null) {
             instance = new ConnectionHelper(context);
         }
@@ -35,6 +35,10 @@ public class ConnectionHelper {
 
     public int getConnectionState() {
         return connectionState;
+    }
+
+    public ServerDescription getConnectedServer() {
+        return connectedServer;
     }
 
     public void setConnectionSuccess(ServerDescription server) {
@@ -64,17 +68,19 @@ public class ConnectionHelper {
 
         notifyConnectionStateChange(STATE_CONNECTING);
     }
-        
 
     protected void serviceDisconnect() {
-        Intent i = new Intent(DownloadService.ACTION_DISCONNECT);
+        Intent i = new Intent(context, DownloadService.class);
+        i.setAction(DownloadService.ACTION_DISCONNECT);
         context.startService(i);
         notifyDisconnect();
     }
 
     protected void connect(ServerDescription server) {
         connectedServer = server;
-        Intent i = new Intent(DownloadService.ACTION_CONNECT);
+        Intent i = new Intent(context, DownloadService.class);
+        i.setAction(DownloadService.ACTION_CONNECT);
+        i.putExtra(DownloadService.EXTRA_SERVER_DESCRIPTION, server);
         context.startService(i);
         notifyStartConnect(server);
     }

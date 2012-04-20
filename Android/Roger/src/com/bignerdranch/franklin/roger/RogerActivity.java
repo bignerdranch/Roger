@@ -39,8 +39,6 @@ public class RogerActivity extends FragmentActivity {
         
         setContentView(R.layout.main);
         container = (FrameLayout)findViewById(R.id.container);
-        
-        startService();
     }
 
     private BroadcastReceiver foundServersReceiver = new BroadcastReceiver() {
@@ -129,11 +127,6 @@ public class RogerActivity extends FragmentActivity {
     protected void onStop() {
     	super.onStop();
     	manager.setDownloadListener(null);
-    }
-    
-    private void startService() {
-    	Intent service = new Intent(RogerActivity.this, DownloadService.class);
-    	startService(service);
     }
     
     private DownloadManager.DownloadListener downloadListener = new DownloadManager.DownloadListener() {

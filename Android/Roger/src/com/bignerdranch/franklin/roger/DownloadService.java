@@ -25,8 +25,15 @@ public class DownloadService extends IntentService {
 
 	private static final String SERVER_ADDRESS = HOSTNAME + ":8082/";
 	private static final String SERVER_APK_ADDRESS = HOSTNAME + ":8081/get?hash=%1$s";
+
 	private DownloadManager manager;
-	private HttpURLConnection connection;
+
+    private static class ConnectionData {
+        ServerDescription desc;
+        HttpURLConnection conn;
+    }
+
+    protected ConnectionData data = new ConnectionData(); 
 
 	public DownloadService() {
 		super("DownloadService");
@@ -34,11 +41,11 @@ public class DownloadService extends IntentService {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		if (ACTION_CONNECT.equals(intent.getAction())) {
-			synchronized (this) {
-				if (connection != null) {
-					connection.disconnect();
-					connection = null;
+		if (ACTION_CONNECT.equals(intent.getAction()) || ACTION_DISCONNECT.equals(intent.getAction())) {
+			synchronized (data) {
+				if (data.conn != null) {
+					data.conn.disconnect();
+					data.conn = null;
 				}
 			}
 		}
@@ -46,32 +53,52 @@ public class DownloadService extends IntentService {
 		return super.onStartCommand(intent, flags, startId);
 	}
 
+    private static class ServerChangedException extends RuntimeException {
+        public ServerChangedException() {
+            super();
+        }
+    }
+
+    private void validateData() {
+        synchronized (data) {
+            ConnectionHelper helper = ConnectionHelper.getInstance(this);
+            if (!data.desc.equals(helper.getConnectedServer())) {
+                throw new ServerChangedException();
+            }
+        }
+    }
+
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		manager = DownloadManager.getInstance();
 
 		try {
+            synchronized (data) {
+                data.desc = (ServerDescription)intent.getSerializableExtra(EXTRA_SERVER_DESCRIPTION);
+            }
 			FileDescriptor descriptor = getDescriptor();
 			String filePath = getApk(descriptor.identifier);
 			broadcastChange(filePath, descriptor.layout, descriptor.pack);
+        } catch (ServerChangedException ex) {
+            // should start up again soon
 		} catch (IOException e) {
 			Log.e(TAG, "Unable to download file", e);
+            ConnectionHelper.getInstance(this).setConnectionError(data.desc, e);
 		}
-
-		startService(new Intent(this, DownloadService.class));
 	}
 
 	private FileDescriptor getDescriptor() throws IOException {
-
-		URL remoteUrl = new URL(SERVER_ADDRESS);
-		Log.d(TAG, "Connecting to " + SERVER_ADDRESS);
+        String serverAddress = data.desc.getServerAddress();
+		URL remoteUrl = new URL(serverAddress);
+		Log.d(TAG, "Connecting to " + serverAddress);
 
 		InputStream input;
-		synchronized (this) {
-			connection = (HttpURLConnection) remoteUrl.openConnection();
-			connection.connect();
+		synchronized (data) {
+            validateData();
+			data.conn = (HttpURLConnection) remoteUrl.openConnection();
+			data.conn.connect();
 
-			input = connection.getInputStream();
+			input = data.conn.getInputStream();
 		}
 
 		byte[] buffer = new byte[BUFFER_SIZE];
@@ -94,11 +121,16 @@ public class DownloadService extends IntentService {
 			Log.d(TAG, "Layout file: " + layoutFile + " identifier " + identifier + " package: " + pack);
 		}
 
+        synchronized (data) {
+            data.conn.disconnect();
+            data.conn = null;
+        }
+
 		return new FileDescriptor(identifier, pack, layoutFile);
 	}
 
 	private String getApk(String identifier) throws IOException {
-		String address = String.format(SERVER_APK_ADDRESS, identifier);
+		String address = String.format(data.desc.getApkAddress(), identifier);
 		URL remoteUrl = new URL(address);
 		Log.d(TAG, "Connecting to " + address);
 
@@ -107,13 +139,15 @@ public class DownloadService extends IntentService {
 		String filePath = getPath();
 		FileOutputStream output = getOutputStream(filePath);
         InputStream input;
-        synchronized (this) {
-            connection = (HttpURLConnection) remoteUrl.openConnection();
-            connection.setChunkedStreamingMode(CHUNK_SIZE);
-            connection.connect();
-            input = connection.getInputStream();
-            Log.d(TAG, "Content length " + connection.getContentLength());
-            input = connection.getInputStream();
+        synchronized (data) {
+            validateData();
+
+            data.conn = (HttpURLConnection) remoteUrl.openConnection();
+            data.conn.setChunkedStreamingMode(CHUNK_SIZE);
+            data.conn.connect();
+            input = data.conn.getInputStream();
+            Log.d(TAG, "Content length " + data.conn.getContentLength());
+            input = data.conn.getInputStream();
         }
 
 		byte[] buffer = new byte[BUFFER_SIZE];
@@ -125,6 +159,11 @@ public class DownloadService extends IntentService {
 			bytesWritten += bytesRead;
             Log.i(TAG, "read " + bytesRead + " bytes " + bytesWritten + " total");
 		}
+
+        synchronized (data) {
+            data.conn.disconnect();
+            data.conn = null;
+        }
 		
 		Log.d(TAG, "Wrote " + bytesWritten + " bytes in " + (System.currentTimeMillis() - startTime) + " ms");
 		return filePath;
