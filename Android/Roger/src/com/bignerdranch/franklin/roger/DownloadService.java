@@ -17,42 +17,39 @@ public class DownloadService extends IntentService {
     private static final int CHUNK_SIZE = 32768;
     private static final int BUFFER_SIZE = CHUNK_SIZE;
 
-    public static final String ACTION_DISCONNECT = 
-        DownloadService.class.getPackage() + ".ACTION_CONNECT";
-    public static final String ACTION_CONNECT = 
-        DownloadService.class.getPackage() + ".ACTION_CONNECT";
-    public static final String EXTRA_SERVER_DESCRIPTION = 
-        DownloadService.class.getPackage() + ".EXTRA_SERVER_DESCRIPTION";
+    public static final String ACTION_DISCONNECT = DownloadService.class.getPackage() + ".ACTION_CONNECT";
+	public static final String ACTION_CONNECT = DownloadService.class.getPackage() + ".ACTION_CONNECT";
+	public static final String EXTRA_SERVER_DESCRIPTION = DownloadService.class.getPackage() + ".EXTRA_SERVER_DESCRIPTION";
 
-    private static final String HOSTNAME = "http://10.1.10.108";
-	
+	private static final String HOSTNAME = "http://10.1.10.108";
+
 	private static final String SERVER_ADDRESS = HOSTNAME + ":8082/";
 	private static final String SERVER_APK_ADDRESS = HOSTNAME + ":8081/get?hash=%1$s";
 	private DownloadManager manager;
-    private HttpURLConnection connection;
-	
+	private HttpURLConnection connection;
+
 	public DownloadService() {
 		super("DownloadService");
 	}
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        if (ACTION_CONNECT.equals(intent.getAction())) {
-            synchronized (this) {
-                if (connection != null) {
-                    connection.disconnect();
-                    connection = null;
-                }
-            }
-        }
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		if (ACTION_CONNECT.equals(intent.getAction())) {
+			synchronized (this) {
+				if (connection != null) {
+					connection.disconnect();
+					connection = null;
+				}
+			}
+		}
 
-        return super.onStartCommand(intent, flags, startId);
-    }
+		return super.onStartCommand(intent, flags, startId);
+	}
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		manager = DownloadManager.getInstance();
-		
+
 		try {
 			FileDescriptor descriptor = getDescriptor();
 			String filePath = getApk(descriptor.identifier);
@@ -60,7 +57,7 @@ public class DownloadService extends IntentService {
 		} catch (IOException e) {
 			Log.e(TAG, "Unable to download file", e);
 		}
-		
+
 		startService(new Intent(this, DownloadService.class));
 	}
 
@@ -69,13 +66,13 @@ public class DownloadService extends IntentService {
 		URL remoteUrl = new URL(SERVER_ADDRESS);
 		Log.d(TAG, "Connecting to " + SERVER_ADDRESS);
 
-        InputStream input;
-        synchronized (this) {
-            connection = (HttpURLConnection) remoteUrl.openConnection();
-            connection.connect();
+		InputStream input;
+		synchronized (this) {
+			connection = (HttpURLConnection) remoteUrl.openConnection();
+			connection.connect();
 
-            input = connection.getInputStream();
-        }
+			input = connection.getInputStream();
+		}
 
 		byte[] buffer = new byte[BUFFER_SIZE];
 		String layoutFile = "main";
@@ -84,22 +81,22 @@ public class DownloadService extends IntentService {
 		
 		while ((input.read(buffer)) > 0) {
 			String data = new String(buffer);
-			
+
 			String response = data.substring(0, data.indexOf("--"));
 			Log.d(TAG, "Got response: " + response);
-			
+
 			String[] values = response.split("\n");
 			layoutFile = values[0];
-            layoutFile = layoutFile.split("\\.")[0];
+			layoutFile = layoutFile.split("\\.")[0];
 			identifier = values[1];
 			pack = values[2];
-			
+
 			Log.d(TAG, "Layout file: " + layoutFile + " identifier " + identifier + " package: " + pack);
 		}
-		
+
 		return new FileDescriptor(identifier, pack, layoutFile);
 	}
-	
+
 	private String getApk(String identifier) throws IOException {
 		String address = String.format(SERVER_APK_ADDRESS, identifier);
 		URL remoteUrl = new URL(address);
@@ -122,7 +119,7 @@ public class DownloadService extends IntentService {
 		byte[] buffer = new byte[BUFFER_SIZE];
 		int bytesRead = 0;
 		int bytesWritten = 0;
-		
+
 		while ((bytesRead = input.read(buffer)) > 0) {
 			output.write(buffer, 0, bytesRead);
 			bytesWritten += bytesRead;
@@ -132,13 +129,13 @@ public class DownloadService extends IntentService {
 		Log.d(TAG, "Wrote " + bytesWritten + " bytes in " + (System.currentTimeMillis() - startTime) + " ms");
 		return filePath;
 	}
-	
+
 	private String getPath() {
 		String path = manager.getNextPath(this);
 		Log.d(TAG, "Downloading file with path: " + path);
 		return path;
 	}
-	
+
 	private FileOutputStream getOutputStream(String path) throws IOException {
 		File filePath = new File(path);
 		filePath.createNewFile();
@@ -148,12 +145,12 @@ public class DownloadService extends IntentService {
 	private void broadcastChange(String apkPath, String layoutName, String pack) {
 		manager.onDownloadComplete(apkPath, layoutName, pack);
 	}
-	
+
 	private class FileDescriptor {
 		public String identifier;
 		public String pack;
 		public String layout;
-		
+
 		public FileDescriptor(String identifier, String pack, String layout) {
 			this.identifier = identifier;
 			this.pack = pack;

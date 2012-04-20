@@ -8,7 +8,7 @@
 
 #import "FFileViewController.h"
 
-//#define DEBUG_NODE 1
+#define DEBUG_NODE 1
 
 @interface FFileViewController ()
 

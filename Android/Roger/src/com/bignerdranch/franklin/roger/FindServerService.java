@@ -59,10 +59,10 @@ public class FindServerService extends IntentService {
         socket.setTimeToLive(5);
         socket.setSoTimeout(TIMEOUT);
 
-        HashSet<InetAddress> addresses = new HashSet<InetAddress>();
+        HashSet<ServerDescription> addresses = new HashSet<ServerDescription>();
         for (int i = 0; i < BROADCAST_TRIES; i++) {
             broadcastSelf(socket);
-            for (InetAddress address : waitForResponses(socket)) {
+            for (ServerDescription address : waitForResponses(socket)) {
                 addresses.add(address);
             }
         }
@@ -70,21 +70,15 @@ public class FindServerService extends IntentService {
         socket.close();
 
         Log.i(TAG, "got the following addresses:");
-        for (InetAddress address : addresses) {
-            Log.i(TAG, "    " + address.getHostName() + "");
+        for (ServerDescription address : addresses) {
+            Log.i(TAG, "    " + address.getName() + " : " + address.getHostAddress() + "");
         }
 
-        broadcastAddresses(new ArrayList<InetAddress>(addresses));
+        broadcastAddresses(new ArrayList<ServerDescription>(addresses));
     }
 
-    private void broadcastAddresses(ArrayList<InetAddress> addresses) {
-        ArrayList<ServerDescription> hostAddresses = new ArrayList<ServerDescription>();
-        for (InetAddress address : addresses) {
-            ServerDescription desc = new ServerDescription();
-            desc.setName(address.getHostName());
-            desc.setHostAddress(address.getHostAddress());
-            hostAddresses.add(desc);
-        }
+    private void broadcastAddresses(ArrayList<ServerDescription> addresses) {
+        ArrayList<ServerDescription> hostAddresses = new ArrayList<ServerDescription>(addresses);
 
         Intent i = new Intent(ACTION_FOUND_SERVERS);
         i.putExtra(EXTRA_IP_ADDRESSES, hostAddresses);
@@ -112,12 +106,12 @@ public class FindServerService extends IntentService {
         }
     }
 
-    private ArrayList<InetAddress> waitForResponses(MulticastSocket socket) throws IOException {
+    private ArrayList<ServerDescription> waitForResponses(MulticastSocket socket) throws IOException {
         long startTime = System.currentTimeMillis();
 
         byte[] responseMessage = new byte[128];
 
-        ArrayList<InetAddress> addresses = new ArrayList<InetAddress>();
+        ArrayList<ServerDescription> addresses = new ArrayList<ServerDescription>();
         String localAddress = getWifiAddress().getHostAddress();
 
         while (System.currentTimeMillis() < startTime + TIMEOUT) {
@@ -126,8 +120,14 @@ public class FindServerService extends IntentService {
             try {
                 socket.receive(response);
                 if (!localAddress.equals(response.getAddress().getHostAddress())) {
-                    Log.i(TAG, "received an address");
-                    addresses.add(response.getAddress());
+                	String hostname = new String(response.getData());
+                	hostname = hostname.substring(0, response.getLength());
+                    Log.i(TAG, "received an address with hostname " + hostname);
+                    
+                    ServerDescription description = new ServerDescription();
+                    description.setName(hostname);
+                    description.setHostAddress(response.getAddress().getHostAddress());
+                    addresses.add(description);
                 }
             } catch (SocketTimeoutException ste) {
                 // done
