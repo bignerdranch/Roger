@@ -49,14 +49,58 @@ http.createServer(function(request, response){
         var hash = parts.query['hash'];
         var fileName = files[hash];
 
-        response.writeHead(200, { 'Content-Type' : 'application/octet-stream' });
-        var readStream = filesys.createReadStream(fileName);
+        var bufSize = 64 * 1024;
+        var chunkSize = 64 * 1024;
+        var pos = 0;
+        var buffer = new Buffer(bufSize);
+        sys.puts("pos: " + pos + " bufSize: " + bufSize);
 
-        sys.pump(readStream, response, function (err) {
-            if (err) {
-                sys.write("error writing " + fileName + ": " + err);
-            }
+        sys.puts("sending " + fileName + " to a client");
+        response.writeHead(200, {
+            'Transfer-Encoding' : 'chunked',
+            'Content-Encoding' : 'application/octet-stream'
         });
+
+        filesys.createReadStream(fileName, { 
+            'flags' : 'r', 
+            'encoding' : 'binary', 
+            'mode' : 0666, 
+            'bufferSize' : chunkSize })
+            .addListener("data", function (chunk) {
+                var bufNextPos = pos + chunk.length;
+
+                sys.puts("pos: " + pos + " next pos:" + bufNextPos + " chunk length: " + chunk.length + " bufSize: " + bufSize);
+                if (bufNextPos > bufSize) {
+                    sys.puts("resetting, sending " + pos + " bytes");
+                    response.write(buffer.slice(0, pos));
+                    pos = 0;
+                    bufNextPos = pos + chunk.length
+                } else {
+                    sys.puts("continuing");
+                }
+
+                buffer.write(chunk, 'binary', pos);
+                pos = bufNextPos;
+            })
+            .addListener("close", function () {
+                if (pos != 0) {
+                    response.write(buffer.slice(0, pos));
+                }
+                response.end();
+            });
+
+	  	//filesys.readFile(fileName, "binary", function(err, file) {  
+        //  	if(!err) {        
+	    //        sys.puts("sending " + fileName + " to a client with length " + file.length);
+        //        response.writeHead(200, {'Transfer-Encoding' : 'chunked'})
+	    //        response.write(file, "binary");
+	  	//	  response.end();
+	    //    } else {
+	  	//	  response.writeHeader(200);
+	    //        sys.puts("unable to find file " + apk + " : " + err);
+	  	//	  response.end();
+	    //    }
+	    //  });
     }
 }).listen(port);  
 sys.puts("Server Running on " + port);
