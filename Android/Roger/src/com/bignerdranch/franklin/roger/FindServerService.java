@@ -9,7 +9,7 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 
 import android.app.IntentService;
 
@@ -26,6 +26,7 @@ public class FindServerService extends IntentService {
     public static final String TAG = "FindServerService";
     public static final int OUTGOING_PORT = 8099;
     public static final int TIMEOUT = 1000; //ms
+    public static final int BROADCAST_TRIES = 3; 
 
     public static String ACTION_FOUND_SERVERS = 
         FindServerService.class.getPackage() + ".ACTION_FOUND_SERVERS";
@@ -55,11 +56,17 @@ public class FindServerService extends IntentService {
 
         socket.joinGroup(InetAddress.getByName("234.5.6.7"));
 
-        socket.setTimeToLive(1);
+        socket.setTimeToLive(5);
         socket.setSoTimeout(TIMEOUT);
 
-        broadcastSelf(socket);
-        ArrayList<InetAddress> addresses = waitForResponses(socket);
+        HashSet<InetAddress> addresses = new HashSet<InetAddress>();
+        for (int i = 0; i < BROADCAST_TRIES; i++) {
+            broadcastSelf(socket);
+            for (InetAddress address : waitForResponses(socket)) {
+                addresses.add(address);
+            }
+        }
+
         socket.close();
 
         Log.i(TAG, "got the following addresses:");
@@ -67,13 +74,16 @@ public class FindServerService extends IntentService {
             Log.i(TAG, "    " + address.getHostName() + "");
         }
 
-        broadcastAddresses(addresses);
+        broadcastAddresses(new ArrayList<InetAddress>(addresses));
     }
 
     private void broadcastAddresses(ArrayList<InetAddress> addresses) {
-        ArrayList<String> hostAddresses = new ArrayList<String>();
+        ArrayList<ServerDescription> hostAddresses = new ArrayList<ServerDescription>();
         for (InetAddress address : addresses) {
-            hostAddresses.add(address.getHostAddress());
+            ServerDescription desc = new ServerDescription();
+            desc.setName(address.getHostName());
+            desc.setHostAddress(address.getHostAddress());
+            hostAddresses.add(desc);
         }
 
         Intent i = new Intent(ACTION_FOUND_SERVERS);
@@ -95,7 +105,6 @@ public class FindServerService extends IntentService {
 
         try {
             InetAddress address = InetAddress.getByAddress(bytes);
-            Log.i(TAG, "ip address from " + ipAddress + " is " + address.getHostAddress() + "");
             return address;
         } catch (UnknownHostException uhe) {
             Log.e(TAG, "do not want", uhe);
@@ -110,9 +119,6 @@ public class FindServerService extends IntentService {
 
         ArrayList<InetAddress> addresses = new ArrayList<InetAddress>();
         String localAddress = getWifiAddress().getHostAddress();
-        for (InetAddress a : Collections.list(socket.getNetworkInterface().getInetAddresses())) {
-            Log.i(TAG, "    " + a.getHostAddress() + "");
-        }
 
         while (System.currentTimeMillis() < startTime + TIMEOUT) {
             DatagramPacket response = new DatagramPacket(responseMessage, responseMessage.length);

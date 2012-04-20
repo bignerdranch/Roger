@@ -18,13 +18,33 @@ public class DownloadService extends IntentService {
 	//private static final String PACKAGE = "com.bignerdranch.franklin.roger";
 	//private static final String PACKAGE = "com.att.labs.uversetv.android.tablet";
 	private static final char INFO_PREFIX = '-';
+
+    public static final String ACTION_CONNECT = 
+        DownloadService.class.getPackage() + ".ACTION_CONNECT";
+    public static final String EXTRA_SERVER_DESCRIPTION = 
+        DownloadService.class.getPackage() + ".EXTRA_SERVER_DESCRIPTION";
 	
 	private static final String SERVER_ADDRESS = "http://10.1.10.57:8082/";
 	private DownloadManager manager;
+    private HttpURLConnection connection;
 	
 	public DownloadService() {
 		super("DownloadService");
 	}
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (ACTION_CONNECT.equals(intent.getAction())) {
+            synchronized (this) {
+                if (connection != null) {
+                    connection.disconnect();
+                    connection = null;
+                }
+            }
+        }
+
+        return super.onStartCommand(intent, flags, startId);
+    }
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
@@ -47,46 +67,19 @@ public class DownloadService extends IntentService {
 
 		String filePath = getPath();
 		FileOutputStream output = getOutputStream(filePath);
-		HttpURLConnection conn = (HttpURLConnection) remoteUrl.openConnection();
-		conn.connect();
+        InputStream input;
+        synchronized (this) {
+            connection = (HttpURLConnection) remoteUrl.openConnection();
+            connection.connect();
+            input = connection.getInputStream();
+        }
 
-		InputStream input = conn.getInputStream();
 		byte[] buffer = new byte[1024];
 		int bytesRead = 0;
 		String layoutFile = "";
 		boolean firstPass = true;
         int totalBytesRead = 0;
 
-        //while ((bytesRead = input.read(buffer)) > 0) {
-        //    int i = 0;
-
-        //    if (firstPass) {
-        //        i++;
-        //        int firstIndex = i;
-
-        //        while (buffer[i] != INFO_PREFIX) i++;
-
-        //        byte[] layoutNameBuffer = new byte[i - firstIndex];
-        //        int j = 0;
-        //        int k = firstIndex;
-        //        while (k < i - 1) {
-        //            layoutNameBuffer[j++] = buffer[k++];
-        //        }
-
-        //        layoutFile = new String(layoutNameBuffer);
-
-        //        Log.i(TAG, "got layout file: " + layoutFile + "");
-
-        //        i++;
-        //        output.write(buffer, i, bytesRead - i);
-        //        firstPass = false;
-        //        totalBytesRead += bytesRead - i;
-        //    } else {
-        //        output.write(buffer, 0, bytesRead);
-        //        totalBytesRead += bytesRead;
-        //    }
-        //}
-		
 		while ((bytesRead = input.read(buffer)) > 0) {
 			int byteOffset = 0;
 			if (firstPass) {
