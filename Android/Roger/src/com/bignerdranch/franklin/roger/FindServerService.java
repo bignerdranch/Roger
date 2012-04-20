@@ -47,6 +47,7 @@ public class FindServerService extends IntentService {
         } catch (IOException ioe) {
             Log.e(TAG, "failed to find servers", ioe);
         }
+        DiscoveryHelper.getInstance(this).finishDiscovery();
 	}
 
     private InetAddress getWifiAddress() {

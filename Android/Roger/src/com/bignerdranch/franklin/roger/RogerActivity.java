@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bignerdranch.franklin.roger.model.RogerParams;
@@ -41,6 +42,7 @@ public class RogerActivity extends FragmentActivity {
     private FrameLayout container;
     private ViewGroup rootContainer;
     private ViewGroup containerBorder;
+    private ProgressBar discoveryProgressBar;
 
     private static class TheManagement extends Fragment {
         public LayoutDescription layoutDescription;
@@ -54,13 +56,25 @@ public class RogerActivity extends FragmentActivity {
         @Override
         public void onDestroy() {
             super.onDestroy();
+            ConnectionHelper.getInstance(getActivity())
+                .connectToServer(null);
         }
     }
 
+    private DiscoveryHelper.Listener discoveryListener = new DiscoveryHelper.Listener() {
+        public void onStateChanged(DiscoveryHelper discover) {
+            if (discoveryProgressBar != null) {
+                discoveryProgressBar.post(new Runnable() { public void run() {
+                    updateDiscovery();
+                }});
+            }
+        }
+    };
+    
     private ConnectionHelper.Listener connectionStateListener = new ConnectionHelper.Listener() {
-        public void onStateChanged(int state, ServerDescription desc) {
-            if (container != null) {
-                container.post(new Runnable() { public void run() {
+        public void onStateChanged(ConnectionHelper connector) {
+            if (connectionStatusTextView != null) {
+                connectionStatusTextView.post(new Runnable() { public void run() {
                     updateServerStatus();
                 }});
             }
@@ -85,6 +99,10 @@ public class RogerActivity extends FragmentActivity {
         container = (FrameLayout)findViewById(R.id.container);
         containerBorder = (ViewGroup)findViewById(R.id.main_container_border);
         containerBorder.setVisibility(View.GONE);
+        discoveryProgressBar = (ProgressBar)findViewById(R.id.discoveryProgressBar);
+
+        DiscoveryHelper.getInstance(this)
+            .addListener(discoveryListener);
 
         if (rogerParams == null) {
         	float density = getResources().getDisplayMetrics().density;
@@ -93,12 +111,12 @@ public class RogerActivity extends FragmentActivity {
     				ViewGroup.LayoutParams.WRAP_CONTENT));
     	}
         
-        ConnectionHelper helper = ConnectionHelper.getInstance(this);
-        if (helper.getState() == ConnectionHelper.STATE_DISCONNECTED || helper.getState() == ConnectionHelper.STATE_FAILED) {
+        ConnectionHelper connector = ConnectionHelper.getInstance(this);
+        if (connector.getState() == ConnectionHelper.STATE_DISCONNECTED || connector.getState() == ConnectionHelper.STATE_FAILED) {
             refreshServers();
         }
 
-        helper.addListener(connectionStateListener);
+        connector.addListener(connectionStateListener);
 
         management = (TheManagement)getSupportFragmentManager()
             .findFragmentByTag(THE_MANAGEMENT);
@@ -115,6 +133,7 @@ public class RogerActivity extends FragmentActivity {
         }
 
         updateServerStatus();
+        updateDiscovery();
     }
 
     @Override
@@ -122,6 +141,18 @@ public class RogerActivity extends FragmentActivity {
         super.onDestroy();
         ConnectionHelper.getInstance(this)
             .removeListener(connectionStateListener);
+        DiscoveryHelper.getInstance(this)
+            .removeListener(discoveryListener);
+    }
+
+    private void updateDiscovery() {
+        DiscoveryHelper discover = DiscoveryHelper.getInstance(this);
+
+        if (discover.getState() == DiscoveryHelper.STATE_DISCOVERING) {
+            discoveryProgressBar.setVisibility(View.VISIBLE);
+        } else {
+            discoveryProgressBar.setVisibility(View.GONE);
+        }
     }
     
     public void setRogerParams(RogerParams params) {
@@ -157,9 +188,9 @@ public class RogerActivity extends FragmentActivity {
     }
 
     private void updateServerStatus() {
-        ConnectionHelper helper = ConnectionHelper.getInstance(this);
+        ConnectionHelper connector = ConnectionHelper.getInstance(this);
 
-        ServerDescription desc = helper.getConnectedServer();
+        ServerDescription desc = connector.getConnectedServer();
 
         if (desc != null) {
             serverNameTextView.setText(desc.getName());
@@ -173,7 +204,7 @@ public class RogerActivity extends FragmentActivity {
 
         String state = null;
 
-        switch (helper.getState()) {
+        switch (connector.getState()) {
             case ConnectionHelper.STATE_CONNECTING:
                 state = "Connecting...";
                 break;
@@ -185,6 +216,9 @@ public class RogerActivity extends FragmentActivity {
                 break;
             case ConnectionHelper.STATE_DISCONNECTED:
                 state = "Disconnected";
+                break;
+            case ConnectionHelper.STATE_DOWNLOADING:
+                state = "Downloading...";
                 break;
             default:
                 break;
@@ -198,12 +232,12 @@ public class RogerActivity extends FragmentActivity {
             ArrayList<?> addresses = (ArrayList<?>)i.getSerializableExtra(FindServerService.EXTRA_IP_ADDRESSES);
             if (addresses == null || addresses.size() == 0) return;
 
-            ConnectionHelper helper = ConnectionHelper.getInstance(c);
-            int state = helper.getState();
+            ConnectionHelper connector = ConnectionHelper.getInstance(c);
+            int state = connector.getState();
             if (addresses.size() == 1 && 
                     (state == ConnectionHelper.STATE_DISCONNECTED || state == ConnectionHelper.STATE_FAILED)) {
                 // auto connect
-                helper.connectToServer((ServerDescription)addresses.get(0));
+                connector.connectToServer((ServerDescription)addresses.get(0));
                 return;
             }
 
@@ -264,8 +298,8 @@ public class RogerActivity extends FragmentActivity {
     }
     
     protected void refreshServers() {
-        Intent i = new Intent(this, FindServerService.class);
-        startService(i);
+        DiscoveryHelper.getInstance(this)
+            .startDiscovery();
     }
 
     @Override

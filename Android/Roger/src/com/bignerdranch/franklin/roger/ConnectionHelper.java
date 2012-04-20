@@ -13,7 +13,7 @@ public class ConnectionHelper {
     protected Context context;
 
     public interface Listener {
-        public void onStateChanged(int connectionState, ServerDescription server);
+        public void onStateChanged(ConnectionHelper helper);
     }
 
     private ArrayList<Listener> listeners = new ArrayList<Listener>();
@@ -36,6 +36,7 @@ public class ConnectionHelper {
     public static final int STATE_CONNECTED = 1;
     public static final int STATE_FAILED = 2;
     public static final int STATE_DISCONNECTED = 3;
+    public static final int STATE_DOWNLOADING = 4;
 
     ServerDescription connectedServer;
     int connectionState = STATE_DISCONNECTED;
@@ -58,13 +59,27 @@ public class ConnectionHelper {
         return connectedServer;
     }
 
+    public void setDownloading(ServerDescription server) {
+        if (!server.equals(connectedServer)) return;
+
+        notifyConnectionStateChange(STATE_DOWNLOADING);
+    }
+
+    public void setFinishDownload(ServerDescription server) {
+        if (!server.equals(connectedServer)) return;
+
+        notifyConnectionStateChange(STATE_CONNECTED);
+    }
+
     public void setConnectionSuccess(ServerDescription server) {
-        if (!server.getHostAddress().equals(connectedServer.getHostAddress())) return;
+        if (!server.equals(connectedServer)) return;
 
         notifyConnectionStateChange(STATE_CONNECTED);
     }
 
     public void setConnectionError(ServerDescription server, Exception error) {
+        if (connectedServer == null) return;
+
         if (!server.getHostAddress().equals(connectedServer.getHostAddress())) return;
 
         notifyConnectionStateChange(STATE_FAILED);
@@ -74,7 +89,7 @@ public class ConnectionHelper {
         this.connectionState = newState;
 
         for (Listener listener : listeners) {
-            listener.onStateChanged(newState, connectedServer);
+            listener.onStateChanged(this);
         }
     }
 
@@ -94,6 +109,7 @@ public class ConnectionHelper {
         Intent i = new Intent(context, DownloadService.class);
         i.setAction(DownloadService.ACTION_DISCONNECT);
         context.startService(i);
+        connectedServer = null;
         notifyDisconnect();
     }
 
@@ -109,9 +125,6 @@ public class ConnectionHelper {
     public void connectToServer(ServerDescription server) {
         if (server == null) {
             serviceDisconnect();
-        } else if (connectedServer != null && server.getHostAddress().equals(connectedServer.getHostAddress())) {
-            Log.i(TAG, "connecting to " + connectedServer.getHostAddress() + ", but we're already connected to it");
-            // do nothing
         } else {
             connect(server);
         }

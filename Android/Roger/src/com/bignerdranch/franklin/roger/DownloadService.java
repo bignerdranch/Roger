@@ -14,17 +14,12 @@ import android.util.Log;
 public class DownloadService extends IntentService {
 	private static final String TAG = "DownloadService";
 
-    private static final int CHUNK_SIZE = 32768;
+    private static final int CHUNK_SIZE = 64 * 1024;
     private static final int BUFFER_SIZE = CHUNK_SIZE;
 
-    public static final String ACTION_DISCONNECT = DownloadService.class.getPackage() + ".ACTION_CONNECT";
+    public static final String ACTION_DISCONNECT = DownloadService.class.getPackage() + ".ACTION_DISCONNECT";
 	public static final String ACTION_CONNECT = DownloadService.class.getPackage() + ".ACTION_CONNECT";
 	public static final String EXTRA_SERVER_DESCRIPTION = DownloadService.class.getPackage() + ".EXTRA_SERVER_DESCRIPTION";
-
-	private static final String HOSTNAME = "http://10.1.10.108";
-
-	private static final String SERVER_ADDRESS = HOSTNAME + ":8082/";
-	private static final String SERVER_APK_ADDRESS = HOSTNAME + ":8081/get?hash=%1$s";
 
 	private DownloadManager manager;
 
@@ -54,6 +49,7 @@ public class DownloadService extends IntentService {
 	}
 
     private static class ServerChangedException extends RuntimeException {
+        public static final long serialVersionUID = 0l;
         public ServerChangedException() {
             super();
         }
@@ -71,21 +67,35 @@ public class DownloadService extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		manager = DownloadManager.getInstance();
+        ConnectionHelper connector = ConnectionHelper.getInstance(this);
+
+        if (ACTION_DISCONNECT.equals(intent.getAction())) {
+            // do nothing
+            return;
+        }
 
 		try {
             synchronized (data) {
                 data.desc = (ServerDescription)intent.getSerializableExtra(EXTRA_SERVER_DESCRIPTION);
             }
 			FileDescriptor descriptor = getDescriptor();
+            connector.setDownloading(data.desc);
 			String filePath = getApk(descriptor.identifier);
+            connector.setFinishDownload(data.desc);
 			broadcastChange(filePath, descriptor.layout, descriptor.pack);
+
+            // still connected, presumably
+            Intent i = new Intent(this, this.getClass());
+            i.setAction(ACTION_CONNECT);
+            i.putExtra(EXTRA_SERVER_DESCRIPTION, data.desc);
+            startService(i);
         } catch (ServerChangedException ex) {
             // should start up again soon
 		} catch (IOException e) {
 			Log.e(TAG, "Unable to download file", e);
-            ConnectionHelper.getInstance(this)
-                .setConnectionError(data.desc, e);
+            connector.setConnectionError(data.desc, e);
 		}
+
 	}
 
 	private FileDescriptor getDescriptor() throws IOException {
@@ -160,7 +170,7 @@ public class DownloadService extends IntentService {
 		while ((bytesRead = input.read(buffer)) > 0) {
 			output.write(buffer, 0, bytesRead);
 			bytesWritten += bytesRead;
-            Log.i(TAG, "read " + bytesRead + " bytes " + bytesWritten + " total");
+            Log.i(TAG, "read " + bytesRead + " " + bytesWritten + " total");
 		}
 
         synchronized (data) {

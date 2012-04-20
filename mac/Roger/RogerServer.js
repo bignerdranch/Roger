@@ -48,19 +48,38 @@ http.createServer(function(request, response){
     } else if (parts.pathname == "/get") {
         var hash = parts.query['hash'];
         var fileName = files[hash];
-                
-	  	filesys.readFile(fileName, "binary", function(err, file) {  
-          	if(!err) {        
-	            sys.puts("sending " + fileName + " to a client with length " + file.length);
-                response.writeHead(200, {'Transfer-Encoding' : 'chunked'})
-	            response.write(file, "binary");
-	  		  response.end();
-	        } else {
-	  		  response.writeHeader(200);
-	            sys.puts("unable to find file " + apk + " : " + err);
-	  		  response.end();
-	        }
-	      });
+
+        var bufSize = 64 * 1024;
+        var chunkSize = 64 * 1024;
+        var pos = 0;
+        var buffer = new Buffer(bufSize);
+        sys.puts("pos: " + pos + " bufSize: " + bufSize);
+
+        sys.puts("sending " + fileName + " to a client");
+        response.writeHead(200, {
+            'Transfer-Encoding' : 'chunked',
+            'Content-Encoding' : 'application/octet-stream'
+        });
+
+        var readStream = filesys.createReadStream(fileName);
+        sys.pump(readStream, response, function (err) {
+            if (err) {
+                sys.write("error writing " + fileName + " to client: " + err);
+            }
+        });
+
+	  	//filesys.readFile(fileName, "binary", function(err, file) {  
+        //  	if(!err) {        
+	    //        sys.puts("sending " + fileName + " to a client with length " + file.length);
+        //        response.writeHead(200, {'Transfer-Encoding' : 'chunked'})
+	    //        response.write(file, "binary");
+	  	//	  response.end();
+	    //    } else {
+	  	//	  response.writeHeader(200);
+	    //        sys.puts("unable to find file " + apk + " : " + err);
+	  	//	  response.end();
+	    //    }
+	    //  });
     }
 }).listen(port);  
 sys.puts("Server Running on " + port);

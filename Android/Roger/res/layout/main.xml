@@ -24,19 +24,34 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|right"
-        android:background="@android:color/transparent"
+        android:background="@color/transparent_gray"
         android:orientation="vertical"
         android:padding="20dp">
         <TextView 
             android:id="@+id/serverNameTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:gravity="right"
+            android:textColor="@android:color/black"
             android:textSize="18sp" />
         <TextView 
             android:id="@+id/connectionStatusTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:gravity="right"
+            android:textColor="@android:color/black"
             android:textSize="18sp" />
     </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/discoveryProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        style="@android:style/Widget.ProgressBar.Large"
+        android:padding="20dp"
+        />
 
 </FrameLayout>
