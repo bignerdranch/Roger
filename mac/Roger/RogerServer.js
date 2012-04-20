@@ -4,7 +4,8 @@ http = require("http"),
 path = require("path"),  
 dgram = require("dgram"),  
 url = require("url"),  
-filesys = require("fs");
+filesys = require("fs"),
+os = require("os");;
 
 port = 8081;
 mobilePort = 8082;
@@ -92,8 +93,9 @@ var udpSocket = dgram.createSocket("udp4");
 udpSocket.on("message", function(msg, rinfo) {
     // send back a response
     sys.puts("received something from address: " + rinfo.address);
+	sys.puts("Host name " + os.hostname());
 
-    var message = new Buffer("not significant");
+    var message = new Buffer(os.hostname());
     udpSocket.send(message, 0, message.length, multicastPort, rinfo.address, function (err, bytes) {
         sys.puts("error sending udp message: " + err);
     });

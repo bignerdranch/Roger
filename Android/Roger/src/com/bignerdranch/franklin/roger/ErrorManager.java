@@ -1,11 +1,7 @@
 package com.bignerdranch.franklin.roger;
 
 import android.content.Context;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 public class ErrorManager {
@@ -22,5 +18,6 @@ public class ErrorManager {
 //		toast.setDuration(Toast.LENGTH_SHORT);
 //		toast.setView(layout);
 //		toast.show();
+		Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
 	}
 }

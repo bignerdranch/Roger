@@ -28,4 +28,23 @@ public class ServerDescription implements Serializable {
     public String toString() {
         return getName();
     }
+    
+    @Override
+    public int hashCode() {
+    	return hostAddress.hashCode() + name.hashCode();
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+    	
+    	if (o instanceof ServerDescription) {
+    		ServerDescription other = (ServerDescription) o;
+    		if (other.getHostAddress().compareTo(hostAddress) == 0
+    				&& other.getName().compareTo(name) == 0) {
+    			return true;
+    		}
+    	}
+    	
+    	return false;
+    }
 }
