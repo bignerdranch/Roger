@@ -210,6 +210,10 @@ public class RogerActivity extends FragmentActivity {
         containerBorder.setVisibility(View.VISIBLE);
     }
 
+    protected void showLayoutParamsDialog() {
+    	
+    }
+    
     protected void refreshServers() {
         Intent i = new Intent(this, FindServerService.class);
         startService(i);
@@ -224,10 +228,18 @@ public class RogerActivity extends FragmentActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.menu_refresh) {
-            refreshServers();
-        }
-
+    	
+    	switch (item.getItemId()) {
+    	
+	    	case R.id.menu_refresh:    		
+	    		refreshServers();
+	    		break;
+	    	
+	    	case R.id.menu_layout_options:
+	    		showLayoutParamsDialog();
+	    		break;
+    	}
+    	
         return true;
     }
     

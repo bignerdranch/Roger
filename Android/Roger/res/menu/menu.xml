@@ -4,5 +4,11 @@
         android:id="@+id/menu_refresh" 
         android:title="Refresh Servers" 
         android:icon="@android:drawable/ic_menu_search"/>
+    
+    <item 
+        android:id="@+id/menu_layout_options" 
+        android:title="Layout Params" 
+        android:icon="@android:drawable/ic_menu_edit"/>
+    
 </menu>
 
