@@ -70,7 +70,6 @@ public abstract class LocalApk {
 
         @Override
         public ApplicationInfo getApplicationInfo() {
-            Log.i(TAG, "getting app info");
             ApplicationInfo containingInfo = context.getApplicationInfo();
 
             ApplicationInfo info = new ApplicationInfo();
@@ -271,8 +270,6 @@ public abstract class LocalApk {
             ClassLoader cl = ClassLoader.getSystemClassLoader();
             Class<?> contextImplClass = (Class<?>)cl.loadClass(contextImplName);
             Class<?> activityThreadClass = (Class<?>)cl.loadClass(activityThreadName);
-
-            scan(context.getClass());
 
             Log.i(TAG, "getting constructor and method");
             Constructor<?> contextImplConstructor = getConstructor(contextImplClass);

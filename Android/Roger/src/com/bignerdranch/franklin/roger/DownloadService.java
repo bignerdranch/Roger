@@ -22,6 +22,11 @@ public class DownloadService extends IntentService {
 
 	private static final char INFO_PREFIX = '-';
 
+    private static final int CHUNK_SIZE = 32768;
+    private static final int BUFFER_SIZE = CHUNK_SIZE;
+
+    public static final String ACTION_DISCONNECT = 
+        DownloadService.class.getPackage() + ".ACTION_CONNECT";
     public static final String ACTION_CONNECT = 
         DownloadService.class.getPackage() + ".ACTION_CONNECT";
     public static final String EXTRA_SERVER_DESCRIPTION = 
@@ -80,7 +85,7 @@ public class DownloadService extends IntentService {
             input = connection.getInputStream();
         }
 
-		byte[] buffer = new byte[1024];
+		byte[] buffer = new byte[BUFFER_SIZE];
 		int bytesRead = 0;
 		String layoutFile = "main";
 		String identifier = "";
@@ -148,27 +153,31 @@ public class DownloadService extends IntentService {
 		URL remoteUrl = new URL(address);
 		Log.d(TAG, "Connecting to " + address);
 
+        long startTime = System.currentTimeMillis();
+
 		String filePath = getPath();
 		FileOutputStream output = getOutputStream(filePath);
         InputStream input;
         synchronized (this) {
             connection = (HttpURLConnection) remoteUrl.openConnection();
+            connection.setChunkedStreamingMode(CHUNK_SIZE);
             connection.connect();
             input = connection.getInputStream();
             Log.d(TAG, "Content length " + connection.getContentLength());
             input = connection.getInputStream();
         }
 
-		byte[] buffer = new byte[1024];
+		byte[] buffer = new byte[BUFFER_SIZE];
 		int bytesRead = 0;
 		int bytesWritten = 0;
 		
 		while ((bytesRead = input.read(buffer)) > 0) {
 			output.write(buffer, 0, bytesRead);
 			bytesWritten += bytesRead;
+            Log.i(TAG, "read " + bytesRead + " bytes " + bytesWritten + " total");
 		}
 		
-		Log.d(TAG, "Wrote " + bytesWritten + " bytes");
+		Log.d(TAG, "Wrote " + bytesWritten + " bytes in " + (System.currentTimeMillis() - startTime) + " ms");
 		return filePath;
 	}
 	

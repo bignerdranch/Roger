@@ -2,7 +2,14 @@ package com.bignerdranch.franklin.roger;
 
 import java.io.Serializable;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+import android.util.Log;
+
 public class ServerDescription implements Serializable {
+    public static final String TAG = "ServerDescription";
+
     public static final long serialVersionUID = 0l;
     
     protected String hostAddress;
@@ -22,6 +29,15 @@ public class ServerDescription implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public InetAddress getInetAddress() {
+        try {
+            return InetAddress.getByName(getHostAddress());
+        } catch (UnknownHostException uhe) {
+            Log.e(TAG, "do not want", uhe);
+            return null;
+        }
     }
 
     @Override
