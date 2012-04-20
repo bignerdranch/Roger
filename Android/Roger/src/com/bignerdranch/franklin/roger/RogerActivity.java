@@ -1,9 +1,19 @@
 package com.bignerdranch.franklin.roger;
 
-import android.app.Activity;
+import java.util.ArrayList;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.os.Bundle;
+
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -11,8 +21,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 
-public class RogerActivity extends Activity {
+public class RogerActivity extends FragmentActivity {
     public static final String TAG = "RogerActivity";
+
+    private static String SERVER_SELECT = "SelectServer";
 
     private DownloadManager manager;
     
@@ -29,6 +41,38 @@ public class RogerActivity extends Activity {
         container = (FrameLayout)findViewById(R.id.container);
         
         startService();
+    }
+
+    private BroadcastReceiver foundServersReceiver = new BroadcastReceiver() {
+        public void onReceive(Context c, Intent i) {
+            ArrayList<?> addresses = (ArrayList<?>)i.getSerializableExtra(FindServerService.EXTRA_IP_ADDRESSES);
+            if (addresses == null || addresses.size() == 0) return;
+
+            Bundle args = new Bundle();
+            args.putSerializable(FindServerService.EXTRA_IP_ADDRESSES, addresses);
+
+            FragmentManager fm = getSupportFragmentManager();
+            if (fm.findFragmentByTag(SERVER_SELECT) == null) {
+                DialogFragment f = new SelectServerDialog();
+                f.setArguments(args);
+                f.show(fm, SERVER_SELECT);
+            }
+        }
+    };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        IntentFilter filter = new IntentFilter(FindServerService.ACTION_FOUND_SERVERS);
+        LocalBroadcastManager.getInstance(this)
+            .registerReceiver(foundServersReceiver, filter);
+    }
+    
+    @Override
+    public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this)
+            .unregisterReceiver(foundServersReceiver);
     }
     
     private void loadApk(String apkPath, String layoutName, String packageName) {

@@ -63,10 +63,30 @@ http.createServer(function(request, response){
 	            }
 	        });
       }
-
 }).listen(port);  
 sys.puts("Server Running on " + port);
 
+var server = net.createServer(function (stream) {
+    clients.push(stream);
+
+    stream.setTimeout(0);
+    stream.setEncoding("utf8");
+
+    stream.addListener("connect", function () {
+        sys.puts("Added mobile client. Total: " + clients.length);
+        stream.pipe(stream);
+    });
+
+    stream.addListener("end", function() {
+        clients.remove(stream);
+        sys.puts("Removed mobile client. Total: " + clients.length);
+        stream.end();
+    });
+});
+server.listen(mobilePort, hostname);
+sys.puts("Mobile server Running on " + hostname + ":" + mobilePort);
+
+// setup server discovery listener
 var udpSocket = dgram.createSocket("udp4");
 udpSocket.on("message", function(msg, rinfo) {
     // send back a response
@@ -83,22 +103,3 @@ udpSocket.setBroadcast(true);
 udpSocket.addMembership(multicast);
 
 
-var server = net.createServer(function (stream) {
-                              clients.push(stream);
-                              
-                              stream.setTimeout(0);
-                              stream.setEncoding("utf8");
-                              
-                              stream.addListener("connect", function () {
-                                                 sys.puts("Added mobile client. Total: " + clients.length);
-                                                 stream.pipe(stream);
-                                                 });
-                              
-                              stream.addListener("end", function() {
-                                                 clients.remove(stream);
-                                                 sys.puts("Removed mobile client. Total: " + clients.length);
-                                                 stream.end();
-                                                 });
-                              });
-server.listen(mobilePort, hostname);
-sys.puts("Mobile server Running on " + hostname + ":" + mobilePort);

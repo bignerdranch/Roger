@@ -14,17 +14,43 @@ import android.util.Pair;
 
 public class DownloadService extends IntentService {
 	private static final String TAG = "DownloadService";
-	
-	private static final String PACKAGE = "com.bignerdranch.Franklin.RogerTest";
+
+    private static final String PACKAGE = "com.bignerdranch.franklin.roger.dummypackage";
+	//private static final String PACKAGE = "com.bignerdranch.franklin.roger";
+	//private static final String PACKAGE = "com.att.labs.uversetv.android.tablet";
+	//private static final String PACKAGE = "com.bignerdranch.Franklin.RogerTest";
+
 	private static final char INFO_PREFIX = '-';
+
+    public static final String ACTION_CONNECT = 
+        DownloadService.class.getPackage() + ".ACTION_CONNECT";
+    public static final String EXTRA_SERVER_DESCRIPTION = 
+        DownloadService.class.getPackage() + ".EXTRA_SERVER_DESCRIPTION";
+
+    private static final String HOSTNAME = "http://10.1.10.57";
 	
-	private static final String SERVER_ADDRESS = "http://10.1.10.108:8082/";
-	private static final String SERVER_APK_ADDRESS = "http://10.1.10.108:8081/get?hash=%1$s";
+	private static final String SERVER_ADDRESS = HOSTNAME + ":8082/";
+	private static final String SERVER_APK_ADDRESS = HOSTNAME + ":8081/get?hash=%1$s";
 	private DownloadManager manager;
+    private HttpURLConnection connection;
 	
 	public DownloadService() {
 		super("DownloadService");
 	}
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (ACTION_CONNECT.equals(intent.getAction())) {
+            synchronized (this) {
+                if (connection != null) {
+                    connection.disconnect();
+                    connection = null;
+                }
+            }
+        }
+
+        return super.onStartCommand(intent, flags, startId);
+    }
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
@@ -46,10 +72,14 @@ public class DownloadService extends IntentService {
 		URL remoteUrl = new URL(SERVER_ADDRESS);
 		Log.d(TAG, "Connecting to " + SERVER_ADDRESS);
 
-		HttpURLConnection conn = (HttpURLConnection) remoteUrl.openConnection();
-		conn.connect();
+        InputStream input;
+        synchronized (this) {
+            connection = (HttpURLConnection) remoteUrl.openConnection();
+            connection.connect();
 
-		InputStream input = conn.getInputStream();
+            input = connection.getInputStream();
+        }
+
 		byte[] buffer = new byte[1024];
 		int bytesRead = 0;
 		String layoutFile = "main";
@@ -63,6 +93,7 @@ public class DownloadService extends IntentService {
 			
 			String[] values = response.split("\n");
 			layoutFile = values[0];
+            layoutFile = layoutFile.split("\\.")[0];
 			identifier = values[1];
 			
 			Log.d(TAG, "Layout file: " + layoutFile + " identifier " + identifier);
@@ -119,11 +150,15 @@ public class DownloadService extends IntentService {
 
 		String filePath = getPath();
 		FileOutputStream output = getOutputStream(filePath);
-		HttpURLConnection conn = (HttpURLConnection) remoteUrl.openConnection();
-		conn.connect();
+        InputStream input;
+        synchronized (this) {
+            connection = (HttpURLConnection) remoteUrl.openConnection();
+            connection.connect();
+            input = connection.getInputStream();
+            Log.d(TAG, "Content length " + connection.getContentLength());
+            input = connection.getInputStream();
+        }
 
-		Log.d(TAG, "Content length " + conn.getContentLength());
-		InputStream input = conn.getInputStream();
 		byte[] buffer = new byte[1024];
 		int bytesRead = 0;
 		int bytesWritten = 0;

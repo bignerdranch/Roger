@@ -8,7 +8,7 @@
 
 #import "FFileViewController.h"
 
-#define DEBUG_NODE 1
+//#define DEBUG_NODE 1
 
 @interface FFileViewController ()
 
@@ -227,6 +227,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 {
     NSString *reqUrl = [NSString stringWithFormat:serverUrl, [self currentIPAddress], apk, layout];
     NSLog(@"Sending request: %@", reqUrl);
+    NSLog(@"Our file is this many bytes: %ld", [[NSData dataWithContentsOfFile:apk] length]);
     
     NSURLRequest *req = [NSURLRequest requestWithURL:[NSURL URLWithString:reqUrl]]; 
     [NSURLConnection sendAsynchronousRequest:req queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
@@ -325,8 +326,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     NSLog(@"sdkPath: %@", [self sdkPath]);
     NSLog(@"apkPath: %@", [self apkPath]);
 
-    [args addObject:buildScriptPath];
-    [args addObject:[self sdkPath]];
+    [args addObject:buildScriptPath]; [args addObject:[self sdkPath]];
     [args addObject:manifest];
     [args addObject:[self apkPath]];
     [args addObject:[self fakeManifestPath]];

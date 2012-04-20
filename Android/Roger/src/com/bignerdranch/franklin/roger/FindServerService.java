@@ -3,14 +3,13 @@ package com.bignerdranch.franklin.roger;
 import java.io.IOException;
 
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 
 import android.app.IntentService;
 
@@ -19,12 +18,20 @@ import android.content.Intent;
 
 import android.net.wifi.WifiManager;
 
+import android.support.v4.content.LocalBroadcastManager;
+
 import android.util.Log;
 
 public class FindServerService extends IntentService {
     public static final String TAG = "FindServerService";
     public static final int OUTGOING_PORT = 8099;
     public static final int TIMEOUT = 1000; //ms
+    public static final int BROADCAST_TRIES = 3; 
+
+    public static String ACTION_FOUND_SERVERS = 
+        FindServerService.class.getPackage() + ".ACTION_FOUND_SERVERS";
+    public static String EXTRA_IP_ADDRESSES = 
+        FindServerService.class.getPackage() + ".EXTRA_IP_ADDRESSES";
 
     public FindServerService() {
         super("FindServerService");
@@ -49,17 +56,41 @@ public class FindServerService extends IntentService {
 
         socket.joinGroup(InetAddress.getByName("234.5.6.7"));
 
-        socket.setTimeToLive(1);
+        socket.setTimeToLive(5);
         socket.setSoTimeout(TIMEOUT);
 
-        broadcastSelf(socket);
-        ArrayList<InetAddress> addresses = waitForResponses(socket);
+        HashSet<InetAddress> addresses = new HashSet<InetAddress>();
+        for (int i = 0; i < BROADCAST_TRIES; i++) {
+            broadcastSelf(socket);
+            for (InetAddress address : waitForResponses(socket)) {
+                addresses.add(address);
+            }
+        }
+
         socket.close();
 
         Log.i(TAG, "got the following addresses:");
         for (InetAddress address : addresses) {
             Log.i(TAG, "    " + address.getHostName() + "");
         }
+
+        broadcastAddresses(new ArrayList<InetAddress>(addresses));
+    }
+
+    private void broadcastAddresses(ArrayList<InetAddress> addresses) {
+        ArrayList<ServerDescription> hostAddresses = new ArrayList<ServerDescription>();
+        for (InetAddress address : addresses) {
+            ServerDescription desc = new ServerDescription();
+            desc.setName(address.getHostName());
+            desc.setHostAddress(address.getHostAddress());
+            hostAddresses.add(desc);
+        }
+
+        Intent i = new Intent(ACTION_FOUND_SERVERS);
+        i.putExtra(EXTRA_IP_ADDRESSES, hostAddresses);
+        
+        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
+        manager.sendBroadcast(i);
     }
 
     private void broadcastSelf(MulticastSocket socket) throws IOException {
@@ -74,7 +105,6 @@ public class FindServerService extends IntentService {
 
         try {
             InetAddress address = InetAddress.getByAddress(bytes);
-            Log.i(TAG, "ip address from " + ipAddress + " is " + address.getHostAddress() + "");
             return address;
         } catch (UnknownHostException uhe) {
             Log.e(TAG, "do not want", uhe);
@@ -89,9 +119,6 @@ public class FindServerService extends IntentService {
 
         ArrayList<InetAddress> addresses = new ArrayList<InetAddress>();
         String localAddress = getWifiAddress().getHostAddress();
-        for (InetAddress a : Collections.list(socket.getNetworkInterface().getInetAddresses())) {
-            Log.i(TAG, "    " + a.getHostAddress() + "");
-        }
 
         while (System.currentTimeMillis() < startTime + TIMEOUT) {
             DatagramPacket response = new DatagramPacket(responseMessage, responseMessage.length);
