@@ -13,7 +13,7 @@
     <item 
         android:id="@+id/menu_layout_fill_text" 
         android:title="Fill Text" 
-        android:icon="@android:drawable/ic_menu_zoom"/>
+        android:icon="@android:drawable/ic_menu_set_as"/>
     
 </menu>
 
