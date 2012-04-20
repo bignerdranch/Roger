@@ -9,6 +9,7 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 
 import android.app.IntentService;
@@ -19,6 +20,8 @@ import android.content.Intent;
 import android.net.wifi.WifiManager;
 
 import android.support.v4.content.LocalBroadcastManager;
+
+import android.text.TextUtils;
 
 import android.util.Log;
 
@@ -96,7 +99,12 @@ public class FindServerService extends IntentService {
     }
 
     private InetAddress getInetAddress(int ipAddress) {
-        byte[] bytes = new byte[] { (byte)(ipAddress >> 0), (byte)(ipAddress >> 8), (byte)(ipAddress >> 16), (byte) (ipAddress >> 24)};
+        byte[] bytes = new byte[] { 
+            (byte)(ipAddress >> 0), 
+            (byte)(ipAddress >> 8), 
+            (byte)(ipAddress >> 16), 
+            (byte) (ipAddress >> 24)
+        };
 
         try {
             InetAddress address = InetAddress.getByAddress(bytes);
@@ -123,6 +131,14 @@ public class FindServerService extends IntentService {
                 if (!localAddress.equals(response.getAddress().getHostAddress())) {
                 	String hostname = new String(response.getData());
                 	hostname = hostname.substring(0, response.getLength());
+                    ArrayList<String> parts = new ArrayList<String>(Arrays.asList(hostname.split("\\.")));
+
+                    if (parts.get(parts.size() - 1).equals("local")) {
+                        parts.remove(parts.size() - 1);
+                    }
+
+                    hostname = TextUtils.join(".", parts);
+
                     Log.i(TAG, "received an address with hostname " + hostname);
                     
                     ServerDescription description = new ServerDescription();

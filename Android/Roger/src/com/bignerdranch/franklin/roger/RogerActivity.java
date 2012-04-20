@@ -47,12 +47,26 @@ public class RogerActivity extends FragmentActivity {
         container = (FrameLayout)findViewById(R.id.container);
         containerBorder = (ViewGroup)findViewById(R.id.main_container_border);
         containerBorder.setVisibility(View.GONE);
+
+        ConnectionHelper helper = ConnectionHelper.getInstance(this);
+        if (helper.getState() == ConnectionHelper.STATE_DISCONNECTED || helper.getState() == ConnectionHelper.STATE_FAILED) {
+            refreshServers();
+        }
     }
 
     private BroadcastReceiver foundServersReceiver = new BroadcastReceiver() {
         public void onReceive(Context c, Intent i) {
             ArrayList<?> addresses = (ArrayList<?>)i.getSerializableExtra(FindServerService.EXTRA_IP_ADDRESSES);
             if (addresses == null || addresses.size() == 0) return;
+
+            ConnectionHelper helper = ConnectionHelper.getInstance(c);
+            int state = helper.getState();
+            if (addresses.size() == 1 && 
+                    (state == ConnectionHelper.STATE_DISCONNECTED || state == ConnectionHelper.STATE_FAILED)) {
+                // auto connect
+                helper.connectToServer((ServerDescription)addresses.get(0));
+                return;
+            }
 
             Bundle args = new Bundle();
             args.putSerializable(FindServerService.EXTRA_IP_ADDRESSES, addresses);
@@ -110,6 +124,11 @@ public class RogerActivity extends FragmentActivity {
         containerBorder.setVisibility(View.VISIBLE);
     }
 
+    protected void refreshServers() {
+        Intent i = new Intent(this, FindServerService.class);
+        startService(i);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
@@ -120,8 +139,7 @@ public class RogerActivity extends FragmentActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_refresh) {
-            Intent i = new Intent(this, FindServerService.class);
-            startService(i);
+            refreshServers();
         }
 
         return true;
