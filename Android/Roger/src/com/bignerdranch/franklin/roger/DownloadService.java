@@ -14,17 +14,12 @@ import android.util.Log;
 public class DownloadService extends IntentService {
 	private static final String TAG = "DownloadService";
 
-    private static final int CHUNK_SIZE = 32768;
+    private static final int CHUNK_SIZE = 64 * 1024;
     private static final int BUFFER_SIZE = CHUNK_SIZE;
 
     public static final String ACTION_DISCONNECT = DownloadService.class.getPackage() + ".ACTION_DISCONNECT";
 	public static final String ACTION_CONNECT = DownloadService.class.getPackage() + ".ACTION_CONNECT";
 	public static final String EXTRA_SERVER_DESCRIPTION = DownloadService.class.getPackage() + ".EXTRA_SERVER_DESCRIPTION";
-
-	private static final String HOSTNAME = "http://10.1.10.108";
-
-	private static final String SERVER_ADDRESS = HOSTNAME + ":8082/";
-	private static final String SERVER_APK_ADDRESS = HOSTNAME + ":8081/get?hash=%1$s";
 
 	private DownloadManager manager;
 
@@ -54,6 +49,7 @@ public class DownloadService extends IntentService {
 	}
 
     private static class ServerChangedException extends RuntimeException {
+        public static final long serialVersionUID = 0l;
         public ServerChangedException() {
             super();
         }
@@ -165,7 +161,7 @@ public class DownloadService extends IntentService {
 		while ((bytesRead = input.read(buffer)) > 0) {
 			output.write(buffer, 0, bytesRead);
 			bytesWritten += bytesRead;
-            Log.i(TAG, "read " + bytesRead + " bytes " + bytesWritten + " total");
+            Log.i(TAG, "read " + bytesRead + " " + bytesWritten + " total");
 		}
 
         synchronized (data) {

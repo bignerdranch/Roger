@@ -48,19 +48,15 @@ http.createServer(function(request, response){
     } else if (parts.pathname == "/get") {
         var hash = parts.query['hash'];
         var fileName = files[hash];
-                
-	  	filesys.readFile(fileName, "binary", function(err, file) {  
-          	if(!err) {        
-	            sys.puts("sending " + fileName + " to a client with length " + file.length);
-                response.writeHead(200, {'Transfer-Encoding' : 'chunked'})
-	            response.write(file, "binary");
-	  		  response.end();
-	        } else {
-	  		  response.writeHeader(200);
-	            sys.puts("unable to find file " + apk + " : " + err);
-	  		  response.end();
-	        }
-	      });
+
+        response.writeHead(200, { 'Content-Type' : 'application/octet-stream' });
+        var readStream = filesys.createReadStream(fileName);
+
+        sys.pump(readStream, response, function (err) {
+            if (err) {
+                sys.write("error writing " + fileName + ": " + err);
+            }
+        });
     }
 }).listen(port);  
 sys.puts("Server Running on " + port);

@@ -13,7 +13,7 @@ public class ConnectionHelper {
     protected Context context;
 
     public interface Listener {
-        public void onStateChanged(int connectionState, ServerDescription server);
+        public void onStateChanged(ConnectionHelper helper);
     }
 
     private ArrayList<Listener> listeners = new ArrayList<Listener>();
@@ -76,7 +76,7 @@ public class ConnectionHelper {
         this.connectionState = newState;
 
         for (Listener listener : listeners) {
-            listener.onStateChanged(newState, connectedServer);
+            listener.onStateChanged(this);
         }
     }
 
