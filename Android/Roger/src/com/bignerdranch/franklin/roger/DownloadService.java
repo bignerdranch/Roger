@@ -80,6 +80,12 @@ public class DownloadService extends IntentService {
 			FileDescriptor descriptor = getDescriptor();
 			String filePath = getApk(descriptor.identifier);
 			broadcastChange(filePath, descriptor.layout, descriptor.pack);
+
+            // still connected, presumably
+            Intent i = new Intent(this, this.getClass());
+            i.setAction(ACTION_CONNECT);
+            i.putExtra(EXTRA_SERVER_DESCRIPTION, data.desc);
+            startService(i);
         } catch (ServerChangedException ex) {
             // should start up again soon
 		} catch (IOException e) {
@@ -87,6 +93,7 @@ public class DownloadService extends IntentService {
             ConnectionHelper.getInstance(this)
                 .setConnectionError(data.desc, e);
 		}
+
 	}
 
 	private FileDescriptor getDescriptor() throws IOException {
