@@ -36,6 +36,9 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
 @synthesize sdkPath;
 @synthesize apkPath;
+@synthesize tableView;
+@synthesize statusText;
+@synthesize statusProgress;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -45,6 +48,12 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
         [self setApkPath:[NSString stringWithFormat:@"%@/stripped.apk", NSHomeDirectory()]];
         [self setSdkPath:[[NSUserDefaults standardUserDefaults] stringForKey:@"SdkDirKey"]];
         if (![self sdkPath]) [self setSdkPath:@""];
+        
+        recentFiles = [[NSMutableArray alloc] init];
+        recentEditTimes = [[NSMutableArray alloc] init];
+        dateFormatter = [[NSDateFormatter alloc] init];
+        [dateFormatter setDateStyle:NSDateFormatterShortStyle];
+        [dateFormatter setTimeStyle:NSDateFormatterShortStyle];
     }
     
     return self;
@@ -56,6 +65,8 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 	appStartedTimestamp = [NSDate date];
     pathModificationDates = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"pathModificationDates"] mutableCopy];
 	lastEventId = [[NSUserDefaults standardUserDefaults] objectForKey:@"lastEventId"];
+    
+    [self hideStatus];
 	[self initializeEventStream];
     
     NSString *ip = [self currentIPAddress];
@@ -92,6 +103,25 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     FSEventStreamStop(stream);
     FSEventStreamInvalidate(stream);
     return NSTerminateNow;
+}
+
+- (void)updateStatusWithText:(NSString *)text
+{
+    [statusText setTitleWithMnemonic:text];
+}
+
+- (void)hideStatus
+{
+    [statusText setHidden:YES];
+    [statusProgress setHidden:YES];
+    [statusProgress stopAnimation:self];
+}
+
+- (void)showStatus
+{
+    [statusText setHidden:NO];
+    [statusProgress setHidden:NO];
+    [statusProgress startAnimation:self];
 }
 
 - (void) registerDefaults
@@ -144,7 +174,13 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 			NSDate *fileModDate = [fileAttributes objectForKey:NSFileModificationDate];
 			if([fileModDate compare:[self lastModificationDateForPath:path]] == NSOrderedDescending) {
                 NSLog(@"File change at: %@", fullPath);
-                [statusText setTitleWithMnemonic:[NSString stringWithFormat:@"%@ changed at %@", [fullPath lastPathComponent], [NSDate date]]];
+                
+                [recentFiles addObject:[fullPath lastPathComponent]];
+                [recentEditTimes addObject:[NSDate date]];
+                [[self tableView] reloadData];
+                
+                [self showStatus];
+                [self updateStatusWithText:[NSString stringWithFormat:@"Processing %@", [fullPath lastPathComponent]]];
                 [self androidProjectChangedWithPath:[self androidProjectDirectoryFromPath:fullPath] layout:[fullPath lastPathComponent]];
                 break;
 			}
@@ -195,6 +231,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     NSString *apkFile = [self apkPath];
     NSLog(@"Got apk file %@", apkFile);
     
+    [self updateStatusWithText:@"Uploading"];
     // Send it over to the server
     [self sendChangesWithPath:apkFile layout:layout package:package];
 }
@@ -212,6 +249,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
             NSLog(@"Unable to send to server: %@", error);
         }
         
+        [self hideStatus];
     }];
 }
  
@@ -424,5 +462,24 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     
     return ipAddress;
 }
+
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView
+{
+    return [recentFiles count];
+}
+
+- (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
+{
+    int index = (([recentFiles count] - 1) - row);
+    
+    if ([[tableColumn identifier] isEqualToString:@"file"]) {
+        return [recentFiles objectAtIndex:index];
+    } else {
+        NSDate *date = [recentEditTimes objectAtIndex:index];
+        return [dateFormatter stringFromDate:date];
+    }
+
+}
+
 
 @end
