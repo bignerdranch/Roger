@@ -24,7 +24,6 @@ import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.bignerdranch.franklin.roger.model.RogerParams;
@@ -315,9 +314,12 @@ public class RogerActivity extends FragmentActivity {
                     @Override
                     public View getView(int position, View convertView, ViewGroup parent) {
                         if (convertView != null) {
+                            addTextFill(convertView);
                             return convertView;
                         } else {
-                            return inflater.inflate(id, parent, false);
+                            View v = inflater.inflate(id, parent, false);
+                            addTextFill(v);
+                            return v;
                         }
                     }
                 });
@@ -339,20 +341,29 @@ public class RogerActivity extends FragmentActivity {
             ErrorManager.show(getApplicationContext(), rootContainer, cause.getMessage());
         }
     }
-    
+
     private void addTextFill() {
+        addTextFill(container);
+    }
+    
+    private void addTextFill(View view) {
     	if (!management.textFillSet) {
     		return;
     	}
     	
     	String dummyText = getString(R.string.dummy_text);
-    	ArrayList<TextView> views = ViewUtils.findViewsByClass(container, TextView.class);
+    	ArrayList<TextView> views = ViewUtils.findViewsByClass(view, TextView.class);
     	for (TextView textView : views) {
+            String oldText = (String)ViewUtils.getTag(textView, R.id.original_text);
+            if (oldText == null) {
+                oldText = textView.getText() == null ? "" : textView.getText().toString();
+                ViewUtils.setTag(textView, R.id.original_text);
+            }
     		
     		if (management.textFillEnabled) {
     			textView.setText(dummyText);
     		} else {
-    			textView.setText("");
+    			textView.setText(oldText);
     		}
     	}
     }

@@ -490,10 +490,14 @@ public abstract class ViewUtils {
      * @param vg A view group.
      * @param klass A class to find instances of.
      */
-    public static <T> ArrayList<T> findViewsByClass(ViewGroup vg, Class<T> klass) {
+    public static <T> ArrayList<T> findViewsByClass(View v, Class<T> klass) {
         ArrayList<T> instances = new ArrayList<T>();
 
-        fillViewsWithClass(vg, klass, instances);
+        if (v instanceof ViewGroup) {
+            fillViewsWithClass((ViewGroup)v, klass, instances);
+        } else if (klass.isInstance(v)) {
+            instances.add(klass.cast(v));
+        }
 
         return instances;
     }

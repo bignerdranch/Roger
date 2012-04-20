@@ -4,4 +4,6 @@
     <string name="hello">Hello World, RogerActivity!</string>
     <string name="app_name">Roger</string>
 	<string name="dummy_text">Yeah this is not a one week project. :) - Dianne Hackborn. Yeah this is not a one week project. :) - Dianne Hackborn. Yeah this is not a one week project. :) - Dianne Hackborn</string>
+
+    <item type="id" name="original_text" />
 </resources>
