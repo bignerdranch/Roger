@@ -37,7 +37,7 @@
 - (void)androidProjectChangedWithPath:(NSString *)path layout:(NSString *)layout;
 - (NSString *)apkFileInPath:(NSString *)path;
 - (NSString *)packageForManifest:(NSString *)manifest;
-- (void)sendChangesWithPath:(NSString *)apkPath layout:(NSString *)layout;
+- (void)sendChangesWithPath:(NSString *)apkPath layout:(NSString *)layout package:(NSString *)package;
 - (NSString *)currentIPAddress;
 
 - (void)startServer;

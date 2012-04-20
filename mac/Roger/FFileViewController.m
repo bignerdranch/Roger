@@ -14,7 +14,7 @@
 
 @end
 
-static NSString* const serverUrl = @"http://%@:8081/post?apk=%@&layout=%@";
+static NSString* const serverUrl = @"http://%@:8081/post?apk=%@&layout=%@&pack=%@";
 
 void fsevents_callback(ConstFSEventStreamRef streamRef,
                        void *userData,
@@ -216,16 +216,19 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
     [self buildAppWithManifest:manifest];
 
+    NSString *package = [self packageForManifest:manifest];
+    NSLog(@"Got package %@", package);
+    
     NSString *apkFile = [self apkPath];
     NSLog(@"Got apk file %@", apkFile);
     
     // Send it over to the server
-    [self sendChangesWithPath:apkFile layout:layout];
+    [self sendChangesWithPath:apkFile layout:layout package:package];
 }
 
-- (void)sendChangesWithPath:(NSString *)apk layout:(NSString *)layout
+- (void)sendChangesWithPath:(NSString *)apk layout:(NSString *)layout package:(NSString *)package
 {
-    NSString *reqUrl = [NSString stringWithFormat:serverUrl, [self currentIPAddress], apk, layout];
+    NSString *reqUrl = [NSString stringWithFormat:serverUrl, [self currentIPAddress], apk, layout, package];
     NSLog(@"Sending request: %@", reqUrl);
     NSLog(@"Our file is this many bytes: %ld", [[NSData dataWithContentsOfFile:apk] length]);
     
