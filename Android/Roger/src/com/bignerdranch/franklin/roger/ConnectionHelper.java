@@ -30,10 +30,10 @@ public class ConnectionHelper {
     public static final int STATE_DISCONNECTED = 3;
 
     ServerDescription connectedServer;
-    int connectionState;
+    int connectionState = STATE_DISCONNECTED;
     Exception connectionError;
 
-    public int getConnectionState() {
+    public int getState() {
         return connectionState;
     }
 

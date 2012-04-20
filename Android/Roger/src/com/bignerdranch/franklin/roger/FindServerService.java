@@ -11,7 +11,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 
 import android.app.IntentService;
 
@@ -132,7 +131,7 @@ public class FindServerService extends IntentService {
                 if (!localAddress.equals(response.getAddress().getHostAddress())) {
                 	String hostname = new String(response.getData());
                 	hostname = hostname.substring(0, response.getLength());
-                    List<String> parts = Arrays.asList(hostname.split("\\."));
+                    ArrayList<String> parts = new ArrayList<String>(Arrays.asList(hostname.split("\\.")));
 
                     if (parts.get(parts.size() - 1).equals("local")) {
                         parts.remove(parts.size() - 1);

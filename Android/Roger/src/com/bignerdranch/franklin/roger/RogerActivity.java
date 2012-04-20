@@ -47,6 +47,11 @@ public class RogerActivity extends FragmentActivity {
         container = (FrameLayout)findViewById(R.id.container);
         containerBorder = (ViewGroup)findViewById(R.id.main_container_border);
         containerBorder.setVisibility(View.GONE);
+
+        ConnectionHelper helper = ConnectionHelper.getInstance(this);
+        if (helper.getState() == ConnectionHelper.STATE_DISCONNECTED || helper.getState() == ConnectionHelper.STATE_FAILED) {
+            refreshServers();
+        }
     }
 
     private BroadcastReceiver foundServersReceiver = new BroadcastReceiver() {
@@ -55,7 +60,7 @@ public class RogerActivity extends FragmentActivity {
             if (addresses == null || addresses.size() == 0) return;
 
             ConnectionHelper helper = ConnectionHelper.getInstance(c);
-            int state = helper.getConnectionState();
+            int state = helper.getState();
             if (addresses.size() == 1 && 
                     (state == ConnectionHelper.STATE_DISCONNECTED || state == ConnectionHelper.STATE_FAILED)) {
                 // auto connect
