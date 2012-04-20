@@ -30,11 +30,11 @@ public class SelectServerDialog extends DialogFragment {
         return new AlertDialog.Builder(getActivity())
             .setAdapter(adapter, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
+                    if (which < 0) return;
+
                     Log.i(TAG, "selected server: " + addresses.get(which) + "");
-                    Intent i = new Intent(getActivity(), DownloadService.class);
-                    i.setAction(DownloadService.ACTION_CONNECT);
-                    i.putExtra(DownloadService.EXTRA_SERVER_DESCRIPTION, addresses.get(which));
-                    getActivity().startService(i);
+                    ConnectionHelper.getInstance(getActivity())
+                        .connectToServer(addresses.get(which));
                 }
             })
             .create();

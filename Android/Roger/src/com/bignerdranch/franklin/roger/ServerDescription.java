@@ -40,6 +40,14 @@ public class ServerDescription implements Serializable {
         }
     }
 
+    public String getServerAddress() {
+        return "http://" + getHostAddress() + ":8082/";
+    }
+
+    public String getApkAddress() {
+        return "http://" + getHostAddress() + ":8081/get?hash=%1$s";
+    }
+
     @Override
     public String toString() {
         return getName();

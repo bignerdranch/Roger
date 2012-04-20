@@ -75,6 +75,7 @@ public class FindServerService extends IntentService {
         }
 
         broadcastAddresses(new ArrayList<ServerDescription>(addresses));
+        Log.i(TAG, "done finding");
     }
 
     private void broadcastAddresses(ArrayList<ServerDescription> addresses) {
