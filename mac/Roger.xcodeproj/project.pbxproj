@@ -20,6 +20,8 @@
 		8342C534153F73E6007B2447 /* FFileViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8342C532153F73E6007B2447 /* FFileViewController.xib */; };
 		83FEA52815407D8900B40A11 /* RogerServer.js in Sources */ = {isa = PBXBuildFile; fileRef = 83FEA52715407D8900B40A11 /* RogerServer.js */; };
 		83FEA52B1540826600B40A11 /* RogerServer.js in Resources */ = {isa = PBXBuildFile; fileRef = 83FEA52715407D8900B40A11 /* RogerServer.js */; };
+		83FEA53515410BA700B40A11 /* FPreferenceWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83FEA53315410BA600B40A11 /* FPreferenceWindowController.m */; };
+		83FEA53615410BA700B40A11 /* FPreferenceWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 83FEA53415410BA700B40A11 /* FPreferenceWindowController.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,6 +47,9 @@
 		8342C532153F73E6007B2447 /* FFileViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FFileViewController.xib; sourceTree = "<group>"; };
 		83FEA52715407D8900B40A11 /* RogerServer.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = RogerServer.js; sourceTree = "<group>"; };
 		83FEA52C1540B31400B40A11 /* AndroidManifest.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = AndroidManifest.xml; path = scripting/AndroidManifest.xml; sourceTree = "<group>"; };
+		83FEA53215410BA600B40A11 /* FPreferenceWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPreferenceWindowController.h; sourceTree = "<group>"; };
+		83FEA53315410BA600B40A11 /* FPreferenceWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPreferenceWindowController.m; sourceTree = "<group>"; };
+		83FEA53415410BA700B40A11 /* FPreferenceWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FPreferenceWindowController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,6 +115,9 @@
 				8342C530153F73E6007B2447 /* FFileViewController.h */,
 				8342C531153F73E6007B2447 /* FFileViewController.m */,
 				8342C532153F73E6007B2447 /* FFileViewController.xib */,
+				83FEA53215410BA600B40A11 /* FPreferenceWindowController.h */,
+				83FEA53315410BA600B40A11 /* FPreferenceWindowController.m */,
+				83FEA53415410BA700B40A11 /* FPreferenceWindowController.xib */,
 			);
 			path = Roger;
 			sourceTree = "<group>";
@@ -187,6 +195,7 @@
 				362A7AA01540643700CA25C6 /* build_fake_package.sh in Resources */,
 				362A7AA215406FFE00CA25C6 /* en1_addr.sh in Resources */,
 				361B445B1540A56200C4F80B /* AndroidManifest.xml in Resources */,
+				83FEA53615410BA700B40A11 /* FPreferenceWindowController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -201,6 +210,7 @@
 				8342C51E153F7274007B2447 /* FAppDelegate.m in Sources */,
 				8342C533153F73E6007B2447 /* FFileViewController.m in Sources */,
 				83FEA52815407D8900B40A11 /* RogerServer.js in Sources */,
+				83FEA53515410BA700B40A11 /* FPreferenceWindowController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -36,7 +36,6 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
 @synthesize sdkPath;
 @synthesize apkPath;
-@synthesize sdkPathField;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -59,7 +58,6 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 	lastEventId = [[NSUserDefaults standardUserDefaults] objectForKey:@"lastEventId"];
 	[self initializeEventStream];
     
-    [self update];
     NSString *ip = [self currentIPAddress];
     NSLog(@"Current ip: %@", ip);
 }
@@ -83,31 +81,6 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     
 	FSEventStreamScheduleWithRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
 	FSEventStreamStart(stream);
-}
-
-- (void)update
-{
-    [[self sdkPathField] setStringValue:[self sdkPath]];
-}
-
-- (IBAction)selectSdkClicked:(id)sender
-{
-    NSLog(@"selectSdkClicked");
-    NSOpenPanel *openPanel = [NSOpenPanel openPanel];
-
-    [openPanel setCanChooseDirectories:YES];
-    [openPanel setCanChooseFiles:NO];
-
-    [openPanel beginWithCompletionHandler:^(NSInteger result) {
-        if (result != NSOKButton ) return;
-
-        for (NSURL *url in [openPanel URLs]) {
-            NSString *fileName = [url path];
-            [[NSUserDefaults standardUserDefaults] setObject:fileName forKey:@"SdkDirKey"];
-            [self setSdkPath:fileName];
-            [self update];
-        }
-    }];
 }
 
 - (NSApplicationTerminateReply)applicationShouldTerminate: (NSApplication *)app

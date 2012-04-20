@@ -33,4 +33,13 @@
     controller = nil;
 }
 
+- (IBAction)showPreferencePanel:(id)sender
+{
+    if (!pref) {
+        pref = [[FPreferenceWindowController alloc] initWithWindowNibName:@"FPreferenceWindowController"];
+    }
+
+    [pref showWindow:self];
+}
+
 @end
