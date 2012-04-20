@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/container"
-    android:background="@android:color/white"
+    android:background="@drawable/checker"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
+    
+    <FrameLayout
+	    android:id="@+id/container"
+        android:layout_width="wrap_content"
+    	android:layout_height="wrap_content" />
+    
 </FrameLayout>

@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 public class RogerActivity extends Activity {
     public static final String TAG = "RogerActivity";
@@ -46,6 +47,7 @@ public class RogerActivity extends Activity {
 
         if (id == 0) {
         	Log.e(TAG, "ID is 0. Not inflating.");
+        	showError();
         	return;
         }
         
@@ -84,6 +86,10 @@ public class RogerActivity extends Activity {
     protected void onStop() {
     	super.onStop();
     	manager.setDownloadListener(null);
+    }
+    
+    private void showError() {
+    	Toast.makeText(this, "Unable to load view", Toast.LENGTH_SHORT).show();
     }
     
     private void startService() {
