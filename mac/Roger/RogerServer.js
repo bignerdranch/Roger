@@ -64,7 +64,7 @@ http.createServer(function(request, response){
         var readStream = filesys.createReadStream(fileName);
         sys.pump(readStream, response, function (err) {
             if (err) {
-                sys.write("error writing " + fileName + " to client: " + err);
+                sys.puts("error writing " + fileName + " to client: " + err);
             }
         });
 

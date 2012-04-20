@@ -18,20 +18,26 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.bignerdranch.franklin.roger.model.RogerParams;
 
 public class RogerActivity extends FragmentActivity {
     public static final String TAG = "RogerActivity";
 
     private static String SERVER_SELECT = "SelectServer";
     private static String THE_MANAGEMENT = "Management";
+    private static final String LAYOUT_PARAM_DIALOG_TAG = "RogerActivity.layoutParamsDialog";
 
     private DownloadManager manager;
-
     private TheManagement management;
+    private RogerParams rogerParams;
+    private boolean textFillSet;
+    private boolean textFillEnabled;
     
     private TextView serverNameTextView;
     private TextView connectionStatusTextView;
@@ -100,6 +106,13 @@ public class RogerActivity extends FragmentActivity {
         DiscoveryHelper.getInstance(this)
             .addListener(discoveryListener);
 
+        if (rogerParams == null) {
+        	float density = getResources().getDisplayMetrics().density;
+    		rogerParams = new RogerParams(density, new ViewGroup.LayoutParams(
+    				ViewGroup.LayoutParams.WRAP_CONTENT, 
+    				ViewGroup.LayoutParams.WRAP_CONTENT));
+    	}
+        
         ConnectionHelper connector = ConnectionHelper.getInstance(this);
         if (connector.getState() == ConnectionHelper.STATE_DISCONNECTED || connector.getState() == ConnectionHelper.STATE_FAILED) {
             refreshServers();
@@ -142,6 +155,38 @@ public class RogerActivity extends FragmentActivity {
         } else {
             discoveryProgressBar.setVisibility(View.GONE);
         }
+    }
+    
+    public void setRogerParams(RogerParams params) {
+    	rogerParams = params;
+    	updateLayoutParams(params);
+    }
+    
+    private void updateLayoutParams(RogerParams params) {
+    	if (container == null) {
+    		return;
+    	}
+    	
+    	int width = params.getWidthParam();
+    	int height = params.getHeightParam();
+    	
+    	FrameLayout.LayoutParams actualParams = new FrameLayout.LayoutParams(width, height);
+    	container.setLayoutParams(actualParams);
+    	
+    	int containerWidth = ViewGroup.LayoutParams.WRAP_CONTENT;
+    	int containerHeight = ViewGroup.LayoutParams.WRAP_CONTENT;
+    	if (width == ViewGroup.LayoutParams.FILL_PARENT) {
+    		containerWidth = width;
+    	}
+    	
+    	if (height == ViewGroup.LayoutParams.FILL_PARENT) {
+    		containerHeight = height;
+    	}
+    	
+    	FrameLayout.LayoutParams containerParams = (FrameLayout.LayoutParams) containerBorder.getLayoutParams();
+    	containerParams.width = containerWidth;
+    	containerParams.height = containerHeight;
+    	containerBorder.setLayoutParams(containerParams);
     }
 
     private void updateServerStatus() {
@@ -229,6 +274,7 @@ public class RogerActivity extends FragmentActivity {
         management.layoutDescription = description;
 
     	container.removeAllViews();
+    	updateLayoutParams(rogerParams);
 
         int id = description.getResId(this);
     	
@@ -245,14 +291,45 @@ public class RogerActivity extends FragmentActivity {
         View v = inflater.inflate(id, container, false);
 
         container.addView(v);
+
+        addTextFill();
         containerBorder.setVisibility(View.VISIBLE);
     }
+    
+    private void addTextFill() {
+    	
+    	if (!textFillSet) {
+    		return;
+    	}
+    	
+    	String dummyText = getString(R.string.dummy_text);
+    	ArrayList<TextView> views = ViewUtils.findViewsByClass(container, TextView.class);
+    	for (TextView textView : views) {
+    		
+    		if (textFillEnabled) {
+    			textView.setText(dummyText);
+    		} else {
+    			textView.setText("");
+    		}
+    	}
+    }
 
+    protected void showLayoutParamsDialog() {
+    	LayoutDialogFragment dialog = LayoutDialogFragment.newInstance(rogerParams);
+    	dialog.show(getSupportFragmentManager(), LAYOUT_PARAM_DIALOG_TAG);
+    }
+    
     protected void refreshServers() {
         DiscoveryHelper.getInstance(this)
             .startDiscovery();
     }
 
+    private void updateTextFill() {
+    	textFillSet = true;
+    	textFillEnabled = !textFillEnabled;
+    	addTextFill();
+    }
+    
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
@@ -262,10 +339,22 @@ public class RogerActivity extends FragmentActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.menu_refresh) {
-            refreshServers();
-        }
-
+    	
+    	switch (item.getItemId()) {
+    	
+	    	case R.id.menu_refresh:    		
+	    		refreshServers();
+	    		break;
+	    	
+	    	case R.id.menu_layout_options:
+	    		showLayoutParamsDialog();
+	    		break;
+	    		
+	    	case R.id.menu_layout_fill_text:
+	    		updateTextFill();
+	    		break;
+    	}
+    	
         return true;
     }
     
