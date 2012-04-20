@@ -135,7 +135,7 @@ public class FindServerService extends IntentService {
                 	String hostname = new String(response.getData());
                 	hostname = hostname.substring(0, response.getLength());
                     if (hostname.startsWith(SECRET_STRING)) {
-                        hostname = hostname.substring(SECRET_STRING.length(), hostname.length() - SECRET_STRING.length());
+                        hostname = hostname.substring(SECRET_STRING.length(), hostname.length());
 
                         ArrayList<String> parts = new ArrayList<String>(Arrays.asList(hostname.split("\\.")));
 

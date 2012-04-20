@@ -13,6 +13,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,9 +38,6 @@ public class RogerActivity extends FragmentActivity {
 
     private DownloadManager manager;
     private TheManagement management;
-    private RogerParams rogerParams;
-    private boolean textFillSet;
-    private boolean textFillEnabled;
     
     private TextView serverNameTextView;
     private TextView connectionStatusTextView;
@@ -50,6 +48,9 @@ public class RogerActivity extends FragmentActivity {
 
     private static class TheManagement extends Fragment {
         public LayoutDescription layoutDescription;
+        public RogerParams rogerParams;
+        public boolean textFillSet;
+        public boolean textFillEnabled;
 
         @Override
         public void onCreate(Bundle sharedInstanceState) {
@@ -108,20 +109,6 @@ public class RogerActivity extends FragmentActivity {
         DiscoveryHelper.getInstance(this)
             .addListener(discoveryListener);
 
-        if (rogerParams == null) {
-        	float density = getResources().getDisplayMetrics().density;
-    		rogerParams = new RogerParams(density, new ViewGroup.LayoutParams(
-    				ViewGroup.LayoutParams.WRAP_CONTENT, 
-    				ViewGroup.LayoutParams.WRAP_CONTENT));
-    	}
-        
-        ConnectionHelper connector = ConnectionHelper.getInstance(this);
-        if (connector.getState() == ConnectionHelper.STATE_DISCONNECTED || connector.getState() == ConnectionHelper.STATE_FAILED) {
-            refreshServers();
-        }
-
-        connector.addListener(connectionStateListener);
-
         management = (TheManagement)getSupportFragmentManager()
             .findFragmentByTag(THE_MANAGEMENT);
 
@@ -135,6 +122,20 @@ public class RogerActivity extends FragmentActivity {
         if (management.layoutDescription != null) {
             loadLayout(management.layoutDescription);
         }
+
+        if (management.rogerParams == null) {
+        	float density = getResources().getDisplayMetrics().density;
+    		management.rogerParams = new RogerParams(density, new ViewGroup.LayoutParams(
+    				ViewGroup.LayoutParams.WRAP_CONTENT, 
+    				ViewGroup.LayoutParams.WRAP_CONTENT));
+    	}
+        
+        ConnectionHelper connector = ConnectionHelper.getInstance(this);
+        if (connector.getState() == ConnectionHelper.STATE_DISCONNECTED || connector.getState() == ConnectionHelper.STATE_FAILED) {
+            refreshServers();
+        }
+
+        connector.addListener(connectionStateListener);
 
         updateServerStatus();
         updateDiscovery();
@@ -160,7 +161,7 @@ public class RogerActivity extends FragmentActivity {
     }
     
     public void setRogerParams(RogerParams params) {
-    	rogerParams = params;
+    	management.rogerParams = params;
     	updateLayoutParams(params);
     }
     
@@ -276,7 +277,7 @@ public class RogerActivity extends FragmentActivity {
         management.layoutDescription = description;
 
     	container.removeAllViews();
-    	updateLayoutParams(rogerParams);
+    	updateLayoutParams(management.rogerParams);
 
         int id = description.getResId(this);
     	
@@ -290,18 +291,26 @@ public class RogerActivity extends FragmentActivity {
         Log.i(TAG, "getting a layout inflater...");
         LayoutInflater inflater = description.getApk(this).getLayoutInflater(getLayoutInflater());
         Log.i(TAG, "inflating???");
-        View v = inflater.inflate(id, container, false);
+        try {
+            View v = inflater.inflate(id, container, false);
 
-        
-        container.addView(v);
+            container.addView(v);
 
-        addTextFill();
-        containerBorder.setVisibility(View.VISIBLE);
+            addTextFill();
+            containerBorder.setVisibility(View.VISIBLE);
+        } catch (InflateException ex) {
+            Throwable cause = ex;
+            while (cause.getCause() != null) {
+                cause = cause.getCause();
+            }
+
+            ErrorManager.show(getApplicationContext(), rootContainer, cause.getMessage());
+        }
     }
     
     private void addTextFill() {
     	
-    	if (!textFillSet) {
+    	if (!management.textFillSet) {
     		return;
     	}
     	
@@ -309,7 +318,7 @@ public class RogerActivity extends FragmentActivity {
     	ArrayList<TextView> views = ViewUtils.findViewsByClass(container, TextView.class);
     	for (TextView textView : views) {
     		
-    		if (textFillEnabled) {
+    		if (management.textFillEnabled) {
     			textView.setText(dummyText);
     		} else {
     			textView.setText("");
@@ -318,7 +327,7 @@ public class RogerActivity extends FragmentActivity {
     }
 
     protected void showLayoutParamsDialog() {
-    	LayoutDialogFragment dialog = LayoutDialogFragment.newInstance(rogerParams);
+    	LayoutDialogFragment dialog = LayoutDialogFragment.newInstance(management.rogerParams);
     	dialog.show(getSupportFragmentManager(), LAYOUT_PARAM_DIALOG_TAG);
     }
     
@@ -328,8 +337,8 @@ public class RogerActivity extends FragmentActivity {
     }
 
     private void updateTextFill() {
-    	textFillSet = true;
-    	textFillEnabled = !textFillEnabled;
+    	management.textFillSet = true;
+    	management.textFillEnabled = !management.textFillEnabled;
     	addTextFill();
     }
     
