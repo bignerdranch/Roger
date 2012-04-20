@@ -109,9 +109,6 @@ public class ConnectionHelper {
     public void connectToServer(ServerDescription server) {
         if (server == null) {
             serviceDisconnect();
-        } else if (connectedServer != null && server.getHostAddress().equals(connectedServer.getHostAddress())) {
-            Log.i(TAG, "connecting to " + connectedServer.getHostAddress() + ", but we're already connected to it");
-            // do nothing
         } else {
             connect(server);
         }

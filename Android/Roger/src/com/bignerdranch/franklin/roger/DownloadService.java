@@ -17,7 +17,7 @@ public class DownloadService extends IntentService {
     private static final int CHUNK_SIZE = 32768;
     private static final int BUFFER_SIZE = CHUNK_SIZE;
 
-    public static final String ACTION_DISCONNECT = DownloadService.class.getPackage() + ".ACTION_CONNECT";
+    public static final String ACTION_DISCONNECT = DownloadService.class.getPackage() + ".ACTION_DISCONNECT";
 	public static final String ACTION_CONNECT = DownloadService.class.getPackage() + ".ACTION_CONNECT";
 	public static final String EXTRA_SERVER_DESCRIPTION = DownloadService.class.getPackage() + ".EXTRA_SERVER_DESCRIPTION";
 
@@ -71,6 +71,11 @@ public class DownloadService extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		manager = DownloadManager.getInstance();
+
+        if (ACTION_DISCONNECT.equals(intent.getAction())) {
+            // do nothing
+            return;
+        }
 
 		try {
             synchronized (data) {

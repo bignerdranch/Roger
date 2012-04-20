@@ -50,13 +50,15 @@ public class RogerActivity extends FragmentActivity {
         @Override
         public void onDestroy() {
             super.onDestroy();
+            ConnectionHelper.getInstance(getActivity())
+                .connectToServer(null);
         }
     }
 
     private ConnectionHelper.Listener connectionStateListener = new ConnectionHelper.Listener() {
         public void onStateChanged(int state, ServerDescription desc) {
-            if (container != null) {
-                container.post(new Runnable() { public void run() {
+            if (connectionStatusTextView != null) {
+                connectionStatusTextView.post(new Runnable() { public void run() {
                     updateServerStatus();
                 }});
             }
