@@ -1,0 +1,11 @@
+To do:
+
+- Fix theme support for SDK_INT < 11 in LocalApk
+- Improve client feedback 
+    - notify when build starts
+    - download progress barf
+    - notify build errors
+
+Ideas for new features:
+
+- Dependent resource analysis - e.g. why is this deployment taking so long? show resource sizes
