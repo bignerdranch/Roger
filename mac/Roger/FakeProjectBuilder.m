@@ -85,7 +85,14 @@
 
     NSLog(@"included files:");
     for (NSString *path in includedFilePaths) {
-        NSLog(@"    %@", path);
+        // include file size
+        NSError *err = nil;
+        NSDictionary *attributes = [manager attributesOfItemAtPath:path error:&err];
+        int size = -1;
+        if (attributes) {
+            size = [[attributes objectForKey:NSFileSize] intValue];
+        }
+        NSLog(@"    %@ %d", path, size);
     }
 
     [self symlinkAllFiles:includedFilePaths pathDepth:3 inDirectory:targetPath];
