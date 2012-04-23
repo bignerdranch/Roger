@@ -126,7 +126,7 @@
 {
     NSError *err = nil;
     NSRegularExpression *regex = [NSRegularExpression
-        regularExpressionWithPattern:@"^@\\+?([a-z_:]+)/([a-z._]+)$"
+        regularExpressionWithPattern:@"^@\\+?([a-z_:]+)/([a-z._0-9]+)$"
                              options:NSRegularExpressionCaseInsensitive
                                error:&err];
     NSArray *matches = [regex matchesInString:self 
