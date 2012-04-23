@@ -132,12 +132,12 @@
             continue;
         } 
 
-        NSLog(@"creating folder for %@ to live in at %@", targetSymlinkPath, targetSubPath);
         if (![manager createDirectoryAtPath:targetSubPath withIntermediateDirectories:YES attributes:nil error:&err]) {
             NSLog(@"wat, creating dir %@ failed: %@", targetPath, err);
             return NO;
         }
 
+        NSLog(@"creating symlink from %@ to %@", targetSymlinkPath, fullPath);
         if (![manager createSymbolicLinkAtPath:targetSymlinkPath 
                            withDestinationPath:fullPath
                                          error:&err]) {
