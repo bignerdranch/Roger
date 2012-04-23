@@ -7,6 +7,8 @@
 //
 
 #import "FFileViewController.h"
+#import "FakeProjectBuilder.h"
+#import "FResourceName.h"
 
 //#define DEBUG_NODE 1
 
@@ -157,6 +159,9 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
 - (void) addModifiedFilesAtPath: (NSString *)path
 {
+    if ([path rangeOfString:@"FakeProjectByRogerByFranklin"].location != NSNotFound)
+        return;
+
     NSError *err = nil;
 	NSArray *contents = [fm contentsOfDirectoryAtPath:path error:&err];
     if (err) {
@@ -237,7 +242,8 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
     if (![self sdkPath]) return;
 
-    [self buildAppWithManifest:manifest];
+    FResourceName *resName = [FResourceName resourceNameWithType:@"layout" name:[layout stringByDeletingPathExtension]];
+    [self buildAppWithManifest:manifest resourceName:resName];
 
     NSString *package = [self packageForManifest:manifest];
     int minSdkVersion = [self minSdkForManifest:manifest];
@@ -309,7 +315,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     
     if (err) {
         NSLog(@"Got regex error: %@", err);
-        return nil;
+        return 0;
     }
     
     for (NSTextCheckingResult *match in matches) {
@@ -374,9 +380,35 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     return [bundle pathForResource:@"RogerServer" ofType:@"js"];
 }
 
-- (void)buildAppWithManifest:(NSString *)manifest
+- (NSString *)buildFakeProjectForProjectPath:(NSString *)projectPath resourceName:(FResourceName *)resName
 {
-    NSLog(@"Building apk with manifest: %@", [manifest stringByDeletingLastPathComponent]);
+    NSLog(@"building fake project for project path:%@ resourceName:%@", projectPath, resName);
+
+    NSString *targetPath = [projectPath stringByAppendingPathComponent:@"FakeProjectByRogerByFranklin"];
+
+    [[[FakeProjectBuilder alloc] init] buildFakeResourcesAtPath:targetPath
+                                                 forProjectPath:projectPath
+                                             targetResourceName:resName];
+    return targetPath;
+}
+
+- (void)cleanupFakeProjectAtPath:(NSString *)targetPath
+{
+    NSError *err = nil;
+    // delete the targetpath
+    if (![[NSFileManager defaultManager] removeItemAtPath:targetPath error:&err]) {
+        NSLog(@"failed to delete %@: %@", targetPath, err);
+    }
+}
+
+- (void)buildAppWithManifest:(NSString *)manifest resourceName:(FResourceName *)resName
+{
+    NSString *projectPath = [manifest stringByDeletingLastPathComponent];
+    NSLog(@"Building apk with manifest: %@", projectPath);
+
+    NSString *fakeProjectPath = [self buildFakeProjectForProjectPath:projectPath resourceName:resName];
+    NSLog(@"Fake project path is: %@", fakeProjectPath);
+
     NSTask *aTask = [[NSTask alloc] init];
     NSMutableArray *args = [NSMutableArray array];
     
@@ -392,7 +424,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     [args addObject:buildScriptPath]; [args addObject:[self sdkPath]];
     [args addObject:manifest];
     [args addObject:[self apkPath]];
-    [args addObject:[self fakeManifestPath]];
+    [args addObject:fakeProjectPath];
     [aTask setCurrentDirectoryPath:NSHomeDirectory()];
     [aTask setEnvironment:env];
     [aTask setLaunchPath:@"/bin/sh"];
@@ -406,6 +438,8 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     
     [aTask launch];
     [aTask waitUntilExit];
+
+    [self cleanupFakeProjectAtPath:fakeProjectPath];
 }
 
 - (void)buildAppWithBuildFile:(NSString *)buildFile 
