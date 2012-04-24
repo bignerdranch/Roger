@@ -9,3 +9,8 @@ To do:
 Ideas for new features:
 
 - Dependent resource analysis - e.g. why is this deployment taking so long? show resource sizes
+- Other resource types:
+    - Drawables
+    - Styles? No idea how to do this.
+- Draw view boundaries
+- Running on an emulator (wanted it today)
