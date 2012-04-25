@@ -5,6 +5,7 @@ To do:
     - notify when build starts
     - download progress barf
     - notify build errors
+- Handle layouts with custom classes somehow
 
 Ideas for new features:
 
