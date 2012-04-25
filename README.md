@@ -1,3 +1,5 @@
+![Roger icon](https://github.com/bignerdranch/Roger/raw/master/Android/Roger/res/drawable/roger_icon.png)
+
 Roger
 =====
 
