@@ -4,7 +4,7 @@ Roger
 =====
 
 Roger is an Android layout file viewer. Run the server on your MacBook; run the client
-on one or more devices. Every time you save your layout, Roger will show it to you on 
+on one or more devices. Every time you save a layout, Roger will show it to you on 
 your devices. You can then futz around with the view - rotate, change the layout params
 on its container layout, fill its text views with enormous strings, or see what it looks
 like used as a row in a ListView.
