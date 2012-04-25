@@ -30,9 +30,9 @@ folder, and lives in a tree with an AndroidManifest.xml, Roger then builds a str
 version of your project apk and sends it to all of your devices. Android Roger then opens up 
 the apk, fishes your layout out, inflates it and displays it inside a container view.
 
-As a result, the views you see in Roger should be identical to what you see when you load them at runtime
-in your own application. For large projects, Roger is also substantially faster than building
-and running your app.
+As a result, the views you see in Roger are identical to what you see when you inflate them at runtime
+in your own application. And because not every resources is included, Roger is also substantially faster than building
+and running your app for a large project.
 
 Limitations
 -----------
@@ -49,3 +49,24 @@ Not at the moment. Sorry.
 ### Themes on pre-Honeycomb devices?
 
 You might run into some problems there.
+
+### Libraries?
+
+Haven't tried it, but almost certainly no.
+
+### Custom view subclasses?
+
+No.
+
+### Merge layouts?
+
+Not right now.
+
+### Any container layout besides FrameLayout?
+
+Not right now.
+
+### Does it do anything at all?
+
+Yes, you might still be excited about it if you hadn't read this far
+into the README. I hope you're happy with your curious self.
