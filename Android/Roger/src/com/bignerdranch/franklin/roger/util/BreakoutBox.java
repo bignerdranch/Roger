@@ -1,4 +1,4 @@
-package com.bignerdranch.franklin.roger;
+package com.bignerdranch.franklin.roger.util;
 
 import android.util.SparseArray;
 import android.view.View;

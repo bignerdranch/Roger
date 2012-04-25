@@ -28,6 +28,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bignerdranch.franklin.roger.model.RogerParams;
+import com.bignerdranch.franklin.roger.network.DownloadManager;
+import com.bignerdranch.franklin.roger.pair.ConnectionHelper;
+import com.bignerdranch.franklin.roger.pair.DiscoveryHelper;
+import com.bignerdranch.franklin.roger.pair.FindServerService;
+import com.bignerdranch.franklin.roger.pair.SelectServerDialog;
+import com.bignerdranch.franklin.roger.pair.ServerDescription;
+import com.bignerdranch.franklin.roger.util.ViewUtils;
 
 public class RogerActivity extends FragmentActivity {
     public static final String TAG = "RogerActivity";
@@ -42,7 +49,6 @@ public class RogerActivity extends FragmentActivity {
     private TextView serverNameTextView;
     private TextView connectionStatusTextView;
     private FrameLayout container;
-    private ViewGroup rootContainer;
     private ViewGroup containerBorder;
     private ProgressBar discoveryProgressBar;
 
@@ -101,7 +107,6 @@ public class RogerActivity extends FragmentActivity {
         serverNameTextView = (TextView)findViewById(R.id.serverNameTextView);
         connectionStatusTextView = (TextView)findViewById(R.id.connectionStatusTextView);
         
-        rootContainer = (ViewGroup)findViewById(R.id.main_root);
         container = (FrameLayout)findViewById(R.id.container);
         containerBorder = (ViewGroup)findViewById(R.id.main_container_border);
         containerBorder.setVisibility(View.GONE);
@@ -209,29 +214,28 @@ public class RogerActivity extends FragmentActivity {
             connectionStatusTextView.setVisibility(View.GONE);
         }
 
-        String state = null;
-
+        int stateResId = 0;
         switch (connector.getState()) {
             case ConnectionHelper.STATE_CONNECTING:
-                state = "Connecting...";
+                stateResId = R.string.connection_state_connecting;
                 break;
             case ConnectionHelper.STATE_CONNECTED:
-                state = "";
+                stateResId = R.string.connection_state_connected;
                 break;
             case ConnectionHelper.STATE_FAILED:
-                state = "Connection failed";
+                stateResId = R.string.connection_state_failed;
                 break;
             case ConnectionHelper.STATE_DISCONNECTED:
-                state = "Disconnected";
+                stateResId = R.string.connection_state_disconnected;
                 break;
             case ConnectionHelper.STATE_DOWNLOADING:
-                state = "Downloading...";
+                stateResId = R.string.connection_state_downloading;
                 break;
             default:
                 break;
         }
 
-        connectionStatusTextView.setText(state);
+        connectionStatusTextView.setText(stateResId);
     }
 
     private BroadcastReceiver foundServersReceiver = new BroadcastReceiver() {
@@ -286,8 +290,9 @@ public class RogerActivity extends FragmentActivity {
 
         if (description.getMinVersion() != 0 && description.getMinVersion() > Build.VERSION.SDK_INT) {
         	Log.e(TAG, "invalid version of Android");
-        	ErrorManager.show(getApplicationContext(), 
-                    rootContainer, "This view requires Android version " + description.getMinVersion());
+        	
+        	String versionFormat = getString(R.string.error_old_android_version_format);
+        	ErrorManager.show(getApplicationContext(), String.format(versionFormat, description.getMinVersion()));
         	containerBorder.setVisibility(View.GONE);
         	return;
         }
@@ -299,7 +304,8 @@ public class RogerActivity extends FragmentActivity {
     	
         if (id == 0) {
         	Log.e(TAG, "ID is 0. Not inflating.");
-        	ErrorManager.show(getApplicationContext(), rootContainer, "Unable to load view");
+        	String layoutError = getString(R.string.error_zero_layout_id);
+        	ErrorManager.show(getApplicationContext(), layoutError);
         	containerBorder.setVisibility(View.GONE);
         	return;
         }
@@ -347,7 +353,7 @@ public class RogerActivity extends FragmentActivity {
                 cause = cause.getCause();
             }
 
-            ErrorManager.show(getApplicationContext(), rootContainer, cause.getMessage());
+            ErrorManager.show(getApplicationContext(), cause.getMessage());
         }
     }
 

@@ -1,4 +1,6 @@
-package com.bignerdranch.franklin.roger;
+package com.bignerdranch.franklin.roger.network;
+
+import com.bignerdranch.franklin.roger.LayoutDescription;
 
 import android.content.Context;
 

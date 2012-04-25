@@ -1,4 +1,4 @@
-package com.bignerdranch.franklin.roger;
+package com.bignerdranch.franklin.roger.pair;
 
 import java.io.Serializable;
 

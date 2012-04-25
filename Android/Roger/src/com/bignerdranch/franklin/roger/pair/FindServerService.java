@@ -1,4 +1,4 @@
-package com.bignerdranch.franklin.roger;
+package com.bignerdranch.franklin.roger.pair;
 
 import java.io.IOException;
 
@@ -11,6 +11,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+
 
 import android.app.IntentService;
 

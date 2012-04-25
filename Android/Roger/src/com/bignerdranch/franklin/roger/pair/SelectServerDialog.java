@@ -1,28 +1,25 @@
-package com.bignerdranch.franklin.roger;
+package com.bignerdranch.franklin.roger.pair;
 
 import java.util.ArrayList;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-
 import android.content.DialogInterface;
-import android.content.Intent;
-
 import android.os.Bundle;
-
 import android.support.v4.app.DialogFragment;
-
 import android.util.Log;
-
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
+
+import com.bignerdranch.franklin.roger.R;
 
 public class SelectServerDialog extends DialogFragment {
     public static final String TAG = "SelectServerDialog";
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState)  {
-        final ArrayList<ServerDescription> addresses = (ArrayList<ServerDescription>)getArguments()
+        @SuppressWarnings("unchecked")
+		final ArrayList<ServerDescription> addresses = (ArrayList<ServerDescription>)getArguments()
             .getSerializable(FindServerService.EXTRA_IP_ADDRESSES);
 
         ListAdapter adapter = new ArrayAdapter<ServerDescription>(getActivity(), R.layout.server_item, addresses);

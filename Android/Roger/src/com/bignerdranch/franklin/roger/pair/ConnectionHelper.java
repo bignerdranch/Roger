@@ -1,11 +1,11 @@
-package com.bignerdranch.franklin.roger;
+package com.bignerdranch.franklin.roger.pair;
 
 import java.util.ArrayList;
 
+import com.bignerdranch.franklin.roger.network.DownloadService;
+
 import android.content.Context;
 import android.content.Intent;
-
-import android.util.Log;
 
 public class ConnectionHelper {
     public static final String TAG = "ConnectionHelper";

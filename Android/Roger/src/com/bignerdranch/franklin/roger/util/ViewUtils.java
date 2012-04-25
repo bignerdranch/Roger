@@ -1,7 +1,8 @@
-package com.bignerdranch.franklin.roger;
+package com.bignerdranch.franklin.roger.util;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+
 
 import android.app.Activity;
 

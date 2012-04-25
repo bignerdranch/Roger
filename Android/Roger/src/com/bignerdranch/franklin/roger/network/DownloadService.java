@@ -1,4 +1,4 @@
-package com.bignerdranch.franklin.roger;
+package com.bignerdranch.franklin.roger.network;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import com.bignerdranch.franklin.roger.pair.ConnectionHelper;
+import com.bignerdranch.franklin.roger.pair.ServerDescription;
 
 import android.app.IntentService;
 import android.content.Intent;
