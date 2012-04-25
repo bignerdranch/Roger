@@ -69,5 +69,26 @@ See above. This and merge layouts are pointless without each other anyway.
 
 ### Does it do anything at all?
 
-Yes, you might still be excited about it if you hadn't read this far. I hope you're 
+Yes. You might still be excited about it if you hadn't read this far. I hope you're 
 happy with your curious self. Go back and read the first paragraph again. But stop after that.
+
+### What will happen if git creates a bunch of new layout files?
+
+For a brief period of time, things will be hectic on your machine.
+
+### Are you going to fix any of this?
+
+I've actually been enjoying working on this README a lot, so I may just stop working on the code
+if that's all right.
+
+### I thought this was a list of limitations?
+
+It is actually a list of arbitrarily chosen questions.
+
+### Who chose them?
+
+I did.
+
+### Why?
+
+To defend myself against an imaginary interlocutor.
