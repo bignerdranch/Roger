@@ -13,4 +13,7 @@ Ideas for new features:
     - Drawables
     - Styles? No idea how to do this.
 - Draw view boundaries
+- HierarchyViewer-type stuff
 - Running on an emulator (wanted it today)
+- Wake up Roger client from background
+    - For adb connected devices, this actually would be pretty easy - just send an intent
