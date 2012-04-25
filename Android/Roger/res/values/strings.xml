@@ -6,4 +6,16 @@
 	<string name="dummy_text">Yeah this is not a one week project. :) - Dianne Hackborn. Yeah this is not a one week project. :) - Dianne Hackborn. Yeah this is not a one week project. :) - Dianne Hackborn</string>
 
     <item type="id" name="original_text" />
+    
+    <!-- Connection Status -->
+    <string name="connection_state_connecting">Connecting…</string>
+    <string name="connection_state_connected">Connected</string>
+    <string name="connection_state_failed">Connection Failed</string>
+    <string name="connection_state_disconnected">Disconnected</string>
+    <string name="connection_state_downloading">Downloading…</string>
+    
+    <!-- Error Messages -->
+    <string name="error_old_android_version_format">This view requires Android version %1$s</string>
+    <string name="error_zero_layout_id">Unable to load view</string>
+    
 </resources>

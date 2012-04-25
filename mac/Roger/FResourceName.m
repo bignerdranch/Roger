@@ -18,11 +18,11 @@
     return [[FResourceName alloc] initWithType:type name:name];
 }
 
-- (FResourceName *)initWithType:(NSString *)type name:(NSString *)name
+- (FResourceName *)initWithType:(NSString *)tp name:(NSString *)nm
 {
     if ((self = [super init])) {
-        [self setType:type];
-        [self setName:name];
+        [self setType:tp];
+        [self setName:nm];
     }
 
     return self;

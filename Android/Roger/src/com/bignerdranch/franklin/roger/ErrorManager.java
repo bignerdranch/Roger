@@ -1,19 +1,17 @@
 package com.bignerdranch.franklin.roger;
 
 import android.content.Context;
-
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class ErrorManager {
     public static final String TAG = "ErrorManager";
 
-	public static void show(Context context, ViewGroup root, String message) {
+	public static void show(Context context, String message) {
 		LayoutInflater inflater = LayoutInflater.from(context);
 		View layout = inflater.inflate(R.layout.error_layout, null);
 
