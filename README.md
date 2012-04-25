@@ -31,7 +31,7 @@ version of your project apk and sends it to all of your devices. Android Roger t
 the apk, fishes your layout out, inflates it and displays it inside a container view.
 
 As a result, the views you see in Roger are identical to what you see when you inflate them at runtime
-in your own application. And because not every resources is included, Roger is also substantially faster than building
+in your own application. And because not every resource is included, Roger is also substantially faster than building
 and running your app for a large project.
 
 Limitations
@@ -40,7 +40,8 @@ Limitations
 ### Android versions?
 
 We don't know. The goal is "As many as possible." This will probably be hard, because Roger
-relies on intimate knowledge of internal Android classes.
+relies on intimate knowledge of internal Android classes. We've tested it so far on Gingerbread, 
+Honeycomb, and Ice Cream Sandwich.
 
 ### Emulators?
 
@@ -64,7 +65,7 @@ Not right now.
 
 ### Any container layout besides FrameLayout?
 
-Not right now.
+See above. This and merge layouts are pointless without each other anyway.
 
 ### Does it do anything at all?
 
