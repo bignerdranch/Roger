@@ -68,5 +68,5 @@ Not right now.
 
 ### Does it do anything at all?
 
-Yes, you might still be excited about it if you hadn't read this far
-into the README. I hope you're happy with your curious self.
+Yes, you might still be excited about it if you hadn't read this far. I hope you're 
+happy with your curious self. Go back and read the first paragraph again. But stop after that.
