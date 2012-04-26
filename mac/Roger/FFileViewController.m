@@ -483,8 +483,13 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     //return multicastAddress;
 }
 
-- (void)startServer
+- (BOOL)startServer
 {
+    if (!ipAddress) {
+        NSLog(@"unable to start server - no wifi ip address");
+        return NO;
+    }
+
     NSOperationQueue *queue = [[NSOperationQueue alloc] init];
     [queue addOperationWithBlock:^(void) {
         nodeTask = [[NSTask alloc] init];
@@ -513,6 +518,8 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 #endif
 
     }];
+
+    return YES;
 }
 
 - (void)stopServer
@@ -537,10 +544,14 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     [task launch];
     [task waitUntilExit];
     
-    NSData *data = [[[task standardOutput] fileHandleForReading] availableData];
-    if ((data != nil) && [data length]) {
-        ipAddress = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-        ipAddress = [ipAddress stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+    if ([task terminationStatus]) {
+        return nil;
+    } else {
+        NSData *data = [[[task standardOutput] fileHandleForReading] availableData];
+        if ((data != nil) && [data length]) {
+            ipAddress = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+            ipAddress = [ipAddress stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+        }
     }
     
     return ipAddress;
