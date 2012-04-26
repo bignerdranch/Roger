@@ -9,5 +9,10 @@ ifconfig | awk '
 } 
 
 /^[ \t]*inet / { 
-    if (wifi) print $2; 
+    if (wifi) wifiAddres = $2; 
+}
+
+END {
+    if (wifi) print wifi;
+    else exit(1);
 }'
