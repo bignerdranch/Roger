@@ -28,7 +28,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bignerdranch.franklin.roger.model.RogerParams;
-import com.bignerdranch.franklin.roger.network.DownloadManager;
 import com.bignerdranch.franklin.roger.pair.ConnectionHelper;
 import com.bignerdranch.franklin.roger.pair.DiscoveryHelper;
 import com.bignerdranch.franklin.roger.Constants;
@@ -43,7 +42,6 @@ public class RogerActivity extends FragmentActivity {
     private static String THE_MANAGEMENT = "Management";
     private static final String LAYOUT_PARAM_DIALOG_TAG = "RogerActivity.layoutParamsDialog";
 
-    private DownloadManager manager;
     private TheManagement management;
     
     private TextView serverNameTextView;
@@ -73,32 +71,10 @@ public class RogerActivity extends FragmentActivity {
         }
     }
 
-    private DiscoveryHelper.Listener discoveryListener = new DiscoveryHelper.Listener() {
-        public void onStateChanged(DiscoveryHelper discover) {
-            if (discoveryProgressBar != null) {
-                discoveryProgressBar.post(new Runnable() { public void run() {
-                    updateDiscovery();
-                }});
-            }
-        }
-    };
-    
-    private ConnectionHelper.Listener connectionStateListener = new ConnectionHelper.Listener() {
-        public void onStateChanged(ConnectionHelper connector) {
-            if (connectionStatusTextView != null) {
-                connectionStatusTextView.post(new Runnable() { public void run() {
-                    updateServerStatus();
-                }});
-            }
-        }
-    };
-    
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
-        manager = DownloadManager.getInstance();
         
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         
@@ -439,26 +415,44 @@ public class RogerActivity extends FragmentActivity {
     @Override
     protected void onStart() {
     	super.onStart();
-    	manager.setDownloadListener(downloadListener);
+        IntentFilter filter = new IntentFilter(Constants.ACTION_NEW_LAYOUT);
+        registerReceiver(downloadReceiver, filter);
     }
     
     @Override
     protected void onStop() {
     	super.onStop();
-    	manager.setDownloadListener(null);
+        unregisterReceiver(downloadReceiver);
     }
-    
-    private DownloadManager.DownloadListener downloadListener = new DownloadManager.DownloadListener() {
 
-		@Override
-		public void onApkDownloaded(final LayoutDescription description) {
-			Log.d(TAG, "New apk with path: " + description.getApkPath());
-			container.post(new Runnable() {
-				public void run() {
-					loadLayout(description);
-				}
-			});
-		}
-    	
+    private BroadcastReceiver downloadReceiver = new BroadcastReceiver() {
+        public void onReceive(Context c, Intent i) {
+            if (!Constants.ACTION_NEW_LAYOUT.equals(i.getAction())) return;
+
+            LayoutDescription description = (LayoutDescription)i
+                .getSerializableExtra(Constants.EXTRA_LAYOUT_DESCRIPTION);
+
+            loadLayout(description);
+        }
+    };
+    
+    private DiscoveryHelper.Listener discoveryListener = new DiscoveryHelper.Listener() {
+        public void onStateChanged(DiscoveryHelper discover) {
+            if (discoveryProgressBar != null) {
+                discoveryProgressBar.post(new Runnable() { public void run() {
+                    updateDiscovery();
+                }});
+            }
+        }
+    };
+    
+    private ConnectionHelper.Listener connectionStateListener = new ConnectionHelper.Listener() {
+        public void onStateChanged(ConnectionHelper connector) {
+            if (connectionStatusTextView != null) {
+                connectionStatusTextView.post(new Runnable() { public void run() {
+                    updateServerStatus();
+                }});
+            }
+        }
     };
 }

@@ -67,7 +67,7 @@ public class DownloadService extends IntentService {
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
-		manager = DownloadManager.getInstance();
+		manager = DownloadManager.getInstance(this);
         ConnectionHelper connector = ConnectionHelper.getInstance(this);
 
         if (Constants.ACTION_DISCONNECT.equals(intent.getAction())) {

@@ -1,28 +1,27 @@
 package com.bignerdranch.franklin.roger.network;
 
+import com.bignerdranch.franklin.roger.Constants;
 import com.bignerdranch.franklin.roger.LayoutDescription;
 
 import android.content.Context;
+import android.content.Intent;
 
 public class DownloadManager {
 	private static final int APK_COUNT = 2;
 
 	private int apkIndex;
-	
-	private DownloadListener listener;
-	public interface DownloadListener {
-		public void onApkDownloaded(LayoutDescription description);
-	}
+    private Context context;
 	
 	private static DownloadManager manager;
-	public static DownloadManager getInstance() {
+	public static DownloadManager getInstance(Context c) {
 		if (manager == null) {
-			manager = new DownloadManager();
+			manager = new DownloadManager(c);
 		}
 		return manager;
 	}
 	
-	private DownloadManager() { 
+	private DownloadManager(Context context) { 
+        this.context = context.getApplicationContext();
 		apkIndex = 0;
 	}
 
@@ -40,19 +39,16 @@ public class DownloadManager {
 		}
 	}
 	
-	public void setDownloadListener(DownloadListener listener) {
-		this.listener = listener;
-	}
-	
 	public void onDownloadComplete(String apkPath, String layoutName, String packageName, int minimumVersion) {
-		if (listener != null) {
-            LayoutDescription desc = new LayoutDescription();
+        LayoutDescription desc = new LayoutDescription();
 
-            desc.setApkPath(apkPath);
-            desc.setLayoutName(layoutName);
-            desc.setPackageName(packageName);
-            desc.setMinVersion(minimumVersion);
-			listener.onApkDownloaded(desc);
-		}
+        desc.setApkPath(apkPath);
+        desc.setLayoutName(layoutName);
+        desc.setPackageName(packageName);
+        desc.setMinVersion(minimumVersion);
+
+        Intent i = new Intent(Constants.ACTION_NEW_LAYOUT);
+        i.putExtra(Constants.EXTRA_LAYOUT_DESCRIPTION, desc);
+        context.sendBroadcast(i);
 	}
 }
