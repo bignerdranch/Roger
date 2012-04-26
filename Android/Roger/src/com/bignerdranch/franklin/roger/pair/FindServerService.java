@@ -18,6 +18,9 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
 import android.net.wifi.WifiManager;
 
 import android.support.v4.content.LocalBroadcastManager;
@@ -46,12 +49,22 @@ public class FindServerService extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
         try {
+            getEmulatorLocalhost();
             findServers();
         } catch (IOException ioe) {
             Log.e(TAG, "failed to find servers", ioe);
         }
         DiscoveryHelper.getInstance(this).finishDiscovery();
 	}
+
+    private InetAddress getEmulatorLocalhost() {
+        ConnectivityManager manager = (ConnectivityManager)getSystemService(CONNECTIVITY_SERVICE);
+        Log.i(TAG, "all network info:");
+        for (NetworkInfo info : manager.getAllNetworkInfo()) {
+            Log.i(TAG, "    info:" + info + " ");
+        }
+        return null;
+    }
 
     private InetAddress getWifiAddress() {
         WifiManager wifi = (WifiManager)getSystemService(Context.WIFI_SERVICE);
