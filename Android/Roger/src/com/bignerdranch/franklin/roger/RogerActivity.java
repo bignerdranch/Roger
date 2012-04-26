@@ -31,7 +31,7 @@ import com.bignerdranch.franklin.roger.model.RogerParams;
 import com.bignerdranch.franklin.roger.network.DownloadManager;
 import com.bignerdranch.franklin.roger.pair.ConnectionHelper;
 import com.bignerdranch.franklin.roger.pair.DiscoveryHelper;
-import com.bignerdranch.franklin.roger.pair.FindServerService;
+import com.bignerdranch.franklin.roger.Constants;
 import com.bignerdranch.franklin.roger.pair.SelectServerDialog;
 import com.bignerdranch.franklin.roger.pair.ServerDescription;
 import com.bignerdranch.franklin.roger.util.ViewUtils;
@@ -240,7 +240,7 @@ public class RogerActivity extends FragmentActivity {
 
     private BroadcastReceiver foundServersReceiver = new BroadcastReceiver() {
         public void onReceive(Context c, Intent i) {
-            ArrayList<?> addresses = (ArrayList<?>)i.getSerializableExtra(FindServerService.EXTRA_IP_ADDRESSES);
+            ArrayList<?> addresses = (ArrayList<?>)i.getSerializableExtra(Constants.EXTRA_IP_ADDRESSES);
             if (addresses == null || addresses.size() == 0) return;
 
             ConnectionHelper connector = ConnectionHelper.getInstance(c);
@@ -253,7 +253,7 @@ public class RogerActivity extends FragmentActivity {
             }
 
             Bundle args = new Bundle();
-            args.putSerializable(FindServerService.EXTRA_IP_ADDRESSES, addresses);
+            args.putSerializable(Constants.EXTRA_IP_ADDRESSES, addresses);
 
             FragmentManager fm = getSupportFragmentManager();
             if (fm.findFragmentByTag(SERVER_SELECT) == null) {
@@ -267,7 +267,7 @@ public class RogerActivity extends FragmentActivity {
     @Override
     public void onResume() {
         super.onResume();
-        IntentFilter filter = new IntentFilter(FindServerService.ACTION_FOUND_SERVERS);
+        IntentFilter filter = new IntentFilter(Constants.ACTION_FOUND_SERVERS);
         LocalBroadcastManager.getInstance(this)
             .registerReceiver(foundServersReceiver, filter);
     }

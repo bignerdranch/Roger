@@ -2,6 +2,8 @@ package com.bignerdranch.franklin.roger.pair;
 
 import java.util.ArrayList;
 
+import com.bignerdranch.franklin.roger.Constants;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -20,7 +22,7 @@ public class SelectServerDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState)  {
         @SuppressWarnings("unchecked")
 		final ArrayList<ServerDescription> addresses = (ArrayList<ServerDescription>)getArguments()
-            .getSerializable(FindServerService.EXTRA_IP_ADDRESSES);
+            .getSerializable(Constants.EXTRA_IP_ADDRESSES);
 
         ListAdapter adapter = new ArrayAdapter<ServerDescription>(getActivity(), R.layout.server_item, addresses);
 

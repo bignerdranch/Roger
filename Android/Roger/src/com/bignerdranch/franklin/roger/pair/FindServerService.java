@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import com.bignerdranch.franklin.roger.Constants;
+
 
 import android.app.IntentService;
 
@@ -36,11 +38,6 @@ public class FindServerService extends IntentService {
     public static final int BROADCAST_TRIES = 3; 
 
     public static final String SECRET_STRING = "SECRETS!";
-
-    public static String ACTION_FOUND_SERVERS = 
-        FindServerService.class.getPackage() + ".ACTION_FOUND_SERVERS";
-    public static String EXTRA_IP_ADDRESSES = 
-        FindServerService.class.getPackage() + ".EXTRA_IP_ADDRESSES";
 
     public FindServerService() {
         super("FindServerService");
@@ -101,8 +98,8 @@ public class FindServerService extends IntentService {
     private void broadcastAddresses(ArrayList<ServerDescription> addresses) {
         ArrayList<ServerDescription> hostAddresses = new ArrayList<ServerDescription>(addresses);
 
-        Intent i = new Intent(ACTION_FOUND_SERVERS);
-        i.putExtra(EXTRA_IP_ADDRESSES, hostAddresses);
+        Intent i = new Intent(Constants.ACTION_FOUND_SERVERS);
+        i.putExtra(Constants.EXTRA_IP_ADDRESSES, hostAddresses);
         
         LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
         manager.sendBroadcast(i);

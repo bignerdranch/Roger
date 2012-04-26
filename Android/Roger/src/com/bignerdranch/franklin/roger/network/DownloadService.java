@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import com.bignerdranch.franklin.roger.Constants;
+
 import com.bignerdranch.franklin.roger.pair.ConnectionHelper;
 import com.bignerdranch.franklin.roger.pair.ServerDescription;
 
@@ -19,10 +21,6 @@ public class DownloadService extends IntentService {
 
     private static final int CHUNK_SIZE = 64 * 1024;
     private static final int BUFFER_SIZE = CHUNK_SIZE;
-
-    public static final String ACTION_DISCONNECT = DownloadService.class.getPackage() + ".ACTION_DISCONNECT";
-	public static final String ACTION_CONNECT = DownloadService.class.getPackage() + ".ACTION_CONNECT";
-	public static final String EXTRA_SERVER_DESCRIPTION = DownloadService.class.getPackage() + ".EXTRA_SERVER_DESCRIPTION";
 
 	private DownloadManager manager;
 
@@ -39,7 +37,7 @@ public class DownloadService extends IntentService {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		if (ACTION_CONNECT.equals(intent.getAction()) || ACTION_DISCONNECT.equals(intent.getAction())) {
+		if (Constants.ACTION_CONNECT.equals(intent.getAction()) || Constants.ACTION_DISCONNECT.equals(intent.getAction())) {
 			synchronized (data) {
 				if (data.conn != null) {
 					data.conn.disconnect();
@@ -72,14 +70,14 @@ public class DownloadService extends IntentService {
 		manager = DownloadManager.getInstance();
         ConnectionHelper connector = ConnectionHelper.getInstance(this);
 
-        if (ACTION_DISCONNECT.equals(intent.getAction())) {
+        if (Constants.ACTION_DISCONNECT.equals(intent.getAction())) {
             // do nothing
             return;
         }
 
 		try {
             synchronized (data) {
-                data.desc = (ServerDescription)intent.getSerializableExtra(EXTRA_SERVER_DESCRIPTION);
+                data.desc = (ServerDescription)intent.getSerializableExtra(Constants.EXTRA_SERVER_DESCRIPTION);
             }
 			FileDescriptor descriptor = getDescriptor();
             connector.setDownloading(data.desc);
@@ -89,8 +87,8 @@ public class DownloadService extends IntentService {
 
             // still connected, presumably
             Intent i = new Intent(this, this.getClass());
-            i.setAction(ACTION_CONNECT);
-            i.putExtra(EXTRA_SERVER_DESCRIPTION, data.desc);
+            i.setAction(Constants.ACTION_CONNECT);
+            i.putExtra(Constants.EXTRA_SERVER_DESCRIPTION, data.desc);
             startService(i);
         } catch (ServerChangedException ex) {
             // should start up again soon

@@ -2,6 +2,8 @@ package com.bignerdranch.franklin.roger.pair;
 
 import java.util.ArrayList;
 
+import com.bignerdranch.franklin.roger.Constants;
+
 import com.bignerdranch.franklin.roger.network.DownloadService;
 
 import android.content.Context;
@@ -107,7 +109,7 @@ public class ConnectionHelper {
 
     protected void serviceDisconnect() {
         Intent i = new Intent(context, DownloadService.class);
-        i.setAction(DownloadService.ACTION_DISCONNECT);
+        i.setAction(Constants.ACTION_DISCONNECT);
         context.startService(i);
         connectedServer = null;
         notifyDisconnect();
@@ -116,8 +118,8 @@ public class ConnectionHelper {
     protected void connect(ServerDescription server) {
         connectedServer = server;
         Intent i = new Intent(context, DownloadService.class);
-        i.setAction(DownloadService.ACTION_CONNECT);
-        i.putExtra(DownloadService.EXTRA_SERVER_DESCRIPTION, server);
+        i.setAction(Constants.ACTION_CONNECT);
+        i.putExtra(Constants.EXTRA_SERVER_DESCRIPTION, server);
         context.startService(i);
         notifyStartConnect(server);
     }
