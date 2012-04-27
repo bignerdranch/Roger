@@ -327,6 +327,7 @@ public class RogerActivity extends FragmentActivity {
             addTextFill();
             containerBorder.setVisibility(View.VISIBLE);
         } catch (InflateException ex) {
+            Log.i(TAG, "InflateException", ex);
             Throwable cause = ex;
             while (cause.getCause() != null) {
                 cause = cause.getCause();
