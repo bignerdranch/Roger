@@ -14,6 +14,9 @@ cd "$WD"
 
 PROJECT_DIR=$(echo "$ANDROID_MANIFEST" | sed 's /[^/]*$  ')
 PROJECT_PROPERTIES="$PROJECT_DIR"/project.properties
+if [ ! -e "$PROJECT_PROPERTIES" ]; then
+    PROJECT_PROPERTIES="$PROJECT_DIR"/default.properties
+fi
 PROJECT_RESOURCES="$PROJECT_DIR"/res
 TARGET=$(cat "$PROJECT_PROPERTIES" | grep 'target=' | sed 's/^.*=//')
 
