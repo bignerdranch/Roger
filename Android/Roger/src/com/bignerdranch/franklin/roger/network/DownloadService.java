@@ -1,13 +1,12 @@
 package com.bignerdranch.franklin.roger.network;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 import com.bignerdranch.franklin.roger.Constants;
+import com.bignerdranch.franklin.roger.LayoutDescription;
 
 import com.bignerdranch.franklin.roger.pair.ConnectionHelper;
 import com.bignerdranch.franklin.roger.pair.ServerDescription;
@@ -79,11 +78,10 @@ public class DownloadService extends IntentService {
             synchronized (data) {
                 data.desc = (ServerDescription)intent.getSerializableExtra(Constants.EXTRA_SERVER_DESCRIPTION);
             }
-			FileDescriptor descriptor = getDescriptor();
+			LayoutDescription description = getLayoutDescription();
             connector.setDownloading(data.desc);
-			String filePath = getApk(descriptor.identifier);
             connector.setFinishDownload(data.desc);
-			broadcastChange(filePath, descriptor.layout, descriptor.pack, descriptor.minVersion);
+			broadcastChange(description);
 
             // still connected, presumably
             Intent i = new Intent(this, this.getClass());
@@ -99,7 +97,7 @@ public class DownloadService extends IntentService {
 
 	}
 
-	private FileDescriptor getDescriptor() throws IOException {
+	private LayoutDescription getLayoutDescription() throws IOException {
         String serverAddress = data.desc.getServerAddress();
 		URL remoteUrl = new URL(serverAddress);
 		Log.d(TAG, "Connecting to " + serverAddress);
@@ -120,6 +118,7 @@ public class DownloadService extends IntentService {
 		String identifier = "";
 		String pack = "";
 		String minVersionText = "";
+		String txnIdText = "";
 		
 		while ((input.read(buffer)) > 0) {
 			String data = new String(buffer);
@@ -133,6 +132,7 @@ public class DownloadService extends IntentService {
 			identifier = values[1];
 			pack = values[2];
 			minVersionText = values[3];
+			txnIdText = values[4];
 
 			Log.d(TAG, "Layout file: " + layoutFile + " identifier " + identifier + " package: " + pack);
 		}
@@ -150,78 +150,18 @@ public class DownloadService extends IntentService {
         }
         
 
-		return new FileDescriptor(identifier, pack, layoutFile, minVersion);
-	}
-
-	private String getApk(String identifier) throws IOException {
-		String address = String.format(data.desc.getApkAddress(), identifier);
-		URL remoteUrl = new URL(address);
-		Log.d(TAG, "Connecting to " + address);
-
-        long startTime = System.currentTimeMillis();
-
-		String filePath = getPath();
-
-        new File(filePath).delete();
-		FileOutputStream output = getOutputStream(filePath);
-        InputStream input;
-        synchronized (data) {
-            validateData();
-
-            data.conn = (HttpURLConnection) remoteUrl.openConnection();
-            data.conn.setChunkedStreamingMode(CHUNK_SIZE);
-            data.conn.connect();
-            input = data.conn.getInputStream();
-            Log.d(TAG, "Content length " + data.conn.getContentLength());
-            input = data.conn.getInputStream();
+        int txnId = 0;
+        try {
+        	txnId = Integer.parseInt(txnIdText);
+        } catch (NumberFormatException e) {
+        	Log.e(TAG, "Unable to parse min version from " + minVersionText, e);
         }
+        
 
-		byte[] buffer = new byte[BUFFER_SIZE];
-		int bytesRead = 0;
-		int bytesWritten = 0;
-
-		while ((bytesRead = input.read(buffer)) > 0) {
-			output.write(buffer, 0, bytesRead);
-			bytesWritten += bytesRead;
-            Log.i(TAG, "read " + bytesRead + " " + bytesWritten + " total");
-		}
-
-        synchronized (data) {
-            data.conn.disconnect();
-            data.conn = null;
-        }
-		
-		Log.d(TAG, "Wrote " + bytesWritten + " bytes in " + (System.currentTimeMillis() - startTime) + " ms");
-		return filePath;
+		return new LayoutDescription(identifier, pack, layoutFile, minVersion, txnId);
 	}
 
-	private String getPath() {
-		String path = manager.getNextPath(this);
-		Log.d(TAG, "Downloading file with path: " + path);
-		return path;
-	}
-
-	private FileOutputStream getOutputStream(String path) throws IOException {
-		File filePath = new File(path);
-		filePath.createNewFile();
-		return new FileOutputStream(filePath);
-	}
-
-	private void broadcastChange(String apkPath, String layoutName, String pack, int minimumVersion) {
-		manager.onDownloadComplete(apkPath, layoutName, pack, minimumVersion);
-	}
-
-	private class FileDescriptor {
-		public String identifier;
-		public String pack;
-		public String layout;
-		public int minVersion;
-
-		public FileDescriptor(String identifier, String pack, String layout, int minVersion) {
-			this.identifier = identifier;
-			this.pack = pack;
-			this.layout = layout;
-			this.minVersion = minVersion;
-		}
+	private void broadcastChange(LayoutDescription description) {
+		manager.onDownloadComplete(description);
 	}
 }

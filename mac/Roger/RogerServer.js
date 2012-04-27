@@ -35,6 +35,7 @@ http.createServer(function(request, response){
         var layout = parts.query['layout'];
 		var pack = parts.query['pack'];
 		var minSdk = parts.query['minSdk'];
+		var txnId = parts.query['txnId'];
         sys.puts("posting apk: " + apk + " layout: " + layout);
         response.writeHeader(200);
 		response.end();
@@ -43,18 +44,12 @@ http.createServer(function(request, response){
 		files[fileIndex] = apk;
         clients.forEach(function(s) {
 			sys.puts("sending data to a client");
-			s.write(layout + "\n" + fileIndex + "\n" + pack + "\n" + minSdk + "--", "utf8");
+			s.write(layout + "\n" + fileIndex + "\n" + pack + "\n" + minSdk + "\n" + txnId + "--", "utf8");
 			s.end();
         });  
     } else if (parts.pathname == "/get") {
         var hash = parts.query['hash'];
         var fileName = files[hash];
-
-        var bufSize = 64 * 1024;
-        var chunkSize = 64 * 1024;
-        var pos = 0;
-        var buffer = new Buffer(bufSize);
-        sys.puts("pos: " + pos + " bufSize: " + bufSize);
 
         sys.puts("sending " + fileName + " to a client");
         response.writeHead(200, {

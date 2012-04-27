@@ -14,9 +14,15 @@
 
 @interface FFileViewController ()
 
+- (void)sendChangesToNodeWithPath:(NSString *)apk layout:(NSString *)layout package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId;
+- (void)sendChangesToAdbWithPath:(NSString *)apk layout:(NSString *)layout package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId;
+
+- (void)initTxnId;
+- (NSString *)adbPath;
+
 @end
 
-static NSString* const serverUrl = @"http://%@:8081/post?apk=%@&layout=%@&pack=%@&minSdk=%d";
+static NSString* const serverUrl = @"http://%@:8081/post?apk=%@&layout=%@&pack=%@&minSdk=%d&txnId=%d";
 
 void fsevents_callback(ConstFSEventStreamRef streamRef,
                        void *userData,
@@ -73,6 +79,8 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     
     NSString *ip = [self currentIPAddress];
     NSLog(@"Current ip: %@", ip);
+
+    [self initTxnId];
 }
 
 - (void) initializeEventStream
@@ -155,6 +163,11 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 - (void)updateLastEventId: (uint64_t) eventId
 {
 	lastEventId = [NSNumber numberWithUnsignedLongLong:eventId];
+}
+
+- (void)initTxnId
+{
+    currentTxnId = random();
 }
 
 - (void) addModifiedFilesAtPath: (NSString *)path
@@ -253,13 +266,59 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     NSLog(@"Got apk file %@", apkFile);
     
     [self updateStatusWithText:@"Uploading"];
+
+    int txnId = [self nextTxnId];
     // Send it over to the server
-    [self sendChangesWithPath:apkFile layout:layout package:package minSdk:minSdkVersion];
+    [self sendChangesWithPath:apkFile layout:layout package:package minSdk:minSdkVersion txnId:txnId];
 }
 
-- (void)sendChangesWithPath:(NSString *)apk layout:(NSString *)layout package:(NSString *)package minSdk:(int)minSdk
+- (int)nextTxnId
 {
-    NSString *reqUrl = [NSString stringWithFormat:serverUrl, [self currentIPAddress], apk, layout, package, minSdk];
+    return ++currentTxnId;
+}
+
+- (void)sendChangesWithPath:(NSString *)apk layout:(NSString *)layout package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId
+{
+    [self sendChangesToNodeWithPath:apk layout:layout package:package minSdk:minSdk txnId:txnId];
+    [self sendChangesToAdbWithPath:apk layout:layout package:package minSdk:minSdk txnId:txnId];
+}
+
+- (void)sendChangesToAdbWithPath:(NSString *)apk layout:(NSString *)layout package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId
+{
+    NSTask *aTask = [[NSTask alloc] init];
+
+    NSString *publishApkToAdbDevices = [self publishApkToAdbDevicesPath];
+    NSLog(@"Calling %@ to send to adb...", publishApkToAdbDevices);
+    NSMutableArray *args = [[NSMutableArray alloc] init];
+    NSMutableDictionary *env = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+        [self adbPath], @"ADB",
+        nil];
+
+    [args addObject:publishApkToAdbDevices]; 
+    [args addObject:apk];
+    [args addObject:layout];
+    [args addObject:package];
+    [args addObject:[NSString stringWithFormat:@"%d", minSdk]];
+    [args addObject:[NSString stringWithFormat:@"%d", txnId]];
+    [aTask setCurrentDirectoryPath:NSHomeDirectory()];
+    [aTask setLaunchPath:@"/bin/sh"];
+    [aTask setEnvironment:env];
+    [aTask setArguments:args];
+    
+    // If the output from this task is not piped somewhere else, regular NSLog messages will not show up
+    // after the task logs any messages
+    NSPipe *outputPipe = [NSPipe pipe];
+    [aTask setStandardInput:[NSPipe pipe]];
+    [aTask setStandardOutput:outputPipe];
+    
+    [aTask launch];
+
+    // don't wait for this one to finish
+}
+
+- (void)sendChangesToNodeWithPath:(NSString *)apk layout:(NSString *)layout package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId
+{
+    NSString *reqUrl = [NSString stringWithFormat:serverUrl, [self currentIPAddress], apk, layout, package, minSdk, txnId];
     NSLog(@"Sending request: %@", reqUrl);
     NSLog(@"Our file is this many bytes: %ld", [[NSData dataWithContentsOfFile:apk] length]);
     
@@ -356,6 +415,11 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     return nil;
 }
 
+- (NSString *)adbPath
+{
+    return [[self sdkPath] stringByAppendingPathComponent:@"platform-tools/adb"];
+}
+
 - (NSString *)buildScriptPath
 {
     NSBundle *bundle = [NSBundle mainBundle];
@@ -366,6 +430,12 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 {
     NSBundle *bundle = [NSBundle mainBundle];
     return [bundle pathForResource:@"AndroidManifest" ofType:@"xml"];
+}
+
+- (NSString *)publishApkToAdbDevicesPath
+{
+    NSBundle *bundle = [NSBundle mainBundle];
+    return [bundle pathForResource:@"publish_apk_to_adb_devices" ofType:@"sh"];
 }
 
 - (NSString *)ipAddressScriptPath

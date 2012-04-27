@@ -61,6 +61,8 @@ public class RogerActivity extends FragmentActivity {
         public void onCreate(Bundle sharedInstanceState) {
             super.onCreate(sharedInstanceState);
             setRetainInstance(true);
+            Log.i(TAG, Constants.ACTION_NEW_LAYOUT);
+            Log.i(TAG, Constants.EXTRA_LAYOUT_DESCRIPTION);
         }
 
         @Override
@@ -280,6 +282,7 @@ public class RogerActivity extends FragmentActivity {
     	
         if (id == 0) {
         	Log.e(TAG, "ID is 0. Not inflating.");
+        	Log.e(TAG, "    description was: " + description + "");
         	String layoutError = getString(R.string.error_zero_layout_id);
         	ErrorManager.show(getApplicationContext(), layoutError);
         	containerBorder.setVisibility(View.GONE);
@@ -416,23 +419,46 @@ public class RogerActivity extends FragmentActivity {
     protected void onStart() {
     	super.onStart();
         IntentFilter filter = new IntentFilter(Constants.ACTION_NEW_LAYOUT);
+        Log.i(TAG, "registering reciever for " + Constants.ACTION_NEW_LAYOUT + "");
         registerReceiver(downloadReceiver, filter);
+
     }
     
     @Override
     protected void onStop() {
     	super.onStop();
+        Log.i(TAG, "unregistering reciever");
         unregisterReceiver(downloadReceiver);
     }
 
     private BroadcastReceiver downloadReceiver = new BroadcastReceiver() {
         public void onReceive(Context c, Intent i) {
+            Log.i(TAG, "received intent: " + i + "");
+
             if (!Constants.ACTION_NEW_LAYOUT.equals(i.getAction())) return;
 
-            LayoutDescription description = (LayoutDescription)i
+            LayoutDescription desc = (LayoutDescription)i
                 .getSerializableExtra(Constants.EXTRA_LAYOUT_DESCRIPTION);
 
-            loadLayout(description);
+            if (desc == null) {
+                desc = new LayoutDescription();
+
+                String apkPath = i.getStringExtra(Constants.EXTRA_LAYOUT_APK_PATH);
+                String layoutName = i.getStringExtra(Constants.EXTRA_LAYOUT_LAYOUT_NAME).split("\\.")[0];
+                String packageName = i.getStringExtra(Constants.EXTRA_LAYOUT_PACKAGE_NAME);
+                int minimumVersion = i.getIntExtra(Constants.EXTRA_LAYOUT_MIN_VERSION, 1);
+                int txnId = i.getIntExtra(Constants.EXTRA_LAYOUT_TXN_ID, 1);
+
+                desc.setApkPath(apkPath);
+                desc.setLayoutName(layoutName);
+                desc.setPackageName(packageName);
+                desc.setMinVersion(minimumVersion);
+                desc.setTxnId(txnId);
+            }
+
+            if (desc != null) {
+                loadLayout(desc);
+            }
         }
     };
     

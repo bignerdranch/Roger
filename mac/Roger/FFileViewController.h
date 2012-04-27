@@ -21,6 +21,8 @@
     NSDateFormatter *dateFormatter;
     
     NSTask *nodeTask;
+
+    int currentTxnId;
 }
 
 @property (nonatomic, strong) IBOutlet NSTableView *tableView;
@@ -39,14 +41,16 @@
 - (void)androidProjectChangedWithPath:(NSString *)path layout:(NSString *)layout;
 - (NSString *)apkFileInPath:(NSString *)path;
 - (NSString *)packageForManifest:(NSString *)manifest;
-- (void)sendChangesWithPath:(NSString *)apkPath layout:(NSString *)layout package:(NSString *)package;
+- (void)sendChangesWithPath:(NSString *)apk layout:(NSString *)layout package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId;
 - (NSString *)currentIPAddress;
+
+- (int)nextTxnId;
 
 - (void)updateStatusWithText:(NSString *)text;
 - (void)hideStatus;
 - (void)showStatus;
 
-- (void)startServer;
+- (BOOL)startServer;
 - (void)stopServer;
 
 @end

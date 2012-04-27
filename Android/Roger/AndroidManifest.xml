@@ -8,6 +8,7 @@
     
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:icon="@drawable/roger_icon"
@@ -24,6 +25,14 @@
         
         <service android:name=".network.DownloadService" />
         <service android:name=".pair.FindServerService" />
+
+        <!--
+        <receiver android:name=".LayoutReceiver">
+            <intent-filter>
+                <action android:name="com.bignerdranch.franklin.roger.ACTION_NEW_LAYOUT_ADB" />
+            </intent-filter>
+        </receiver>
+        -->
         
     </application>
 

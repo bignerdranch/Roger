@@ -19,8 +19,21 @@ public class LayoutDescription implements Serializable {
     String layoutName;
     String packageName;
     int minVersion;
+    int txnId;
+
     transient LocalApk apk;
     transient Resources resources;
+
+    public LayoutDescription() {
+    }
+
+    public LayoutDescription(String apkPath, String layoutName, String packageName, int minVersion, int txnId) {
+        this.apkPath = apkPath;
+        this.layoutName = layoutName;
+        this.packageName = packageName;
+        this.minVersion = minVersion;
+        this.txnId = txnId;
+    }
 
     public String getApkPath() {
         return this.apkPath;
@@ -65,18 +78,40 @@ public class LayoutDescription implements Serializable {
     public LocalApk getApk(Activity activity) {
         if (apk != null) return apk;
 
-    	Log.d(TAG, "Loading apk with path: " + apkPath + " layout: " + layoutName + " package: " + packageName);
+        Log.d(TAG, "Loading apk with path: " + apkPath + " layout: " + layoutName + " package: " + packageName);
         apk = new FileApk(activity, packageName, apkPath);
 
         return apk;
     }
 
-	public int getMinVersion() {
-		return minVersion;
-	}
+    public int getMinVersion() {
+        return minVersion;
+    }
 
-	public void setMinVersion(int minVersion) {
-		this.minVersion = minVersion;
-	}
+    public void setMinVersion(int minVersion) {
+        this.minVersion = minVersion;
+    }
 
+    /**
+     * Gets the transaction id for this instance.
+     *
+     * @return The txnId.
+     */
+    public int getTxnId() {
+        return this.txnId;
+    }
+
+    /**
+     * Sets the txnId for this instance.
+     *
+     * @param txnId The txnId.
+     */
+    public void setTxnId(int txnId) {
+        this.txnId = txnId;
+    }
+
+    public String toString() {
+        return "apkPath:" + apkPath + " layoutName:" + layoutName + " packageName:" + packageName + 
+                " minVersion:" + minVersion + " txnId:" + txnId;
+    }
 }
