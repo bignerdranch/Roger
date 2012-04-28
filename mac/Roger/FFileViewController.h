@@ -8,6 +8,8 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class FResourceName;
+
 @interface FFileViewController : NSViewController <NSTableViewDelegate, NSTableViewDataSource> {
     NSFileManager* fm;
     NSMutableDictionary* pathModificationDates;
@@ -35,13 +37,13 @@
 - (void) initializeEventStream;
 - (void) addModifiedFilesAtPath: (NSString *)path;
 - (void) updateLastEventId: (uint64_t) eventId;
-- (BOOL)fileIsAndroidXml: (NSString *)path;
+- (BOOL)pathIsLayoutXml: (NSString *)path;
 - (NSString *)androidProjectDirectoryFromPath:(NSString *)path;
 - (void)buildAppWithBuildFile:(NSString *)buildFile;
-- (void)androidProjectChangedWithPath:(NSString *)path layout:(NSString *)layout;
+- (void)androidProjectChangedWithPath:(NSString *)path resourceName:(FResourceName *)resourceName; 
 - (NSString *)apkFileInPath:(NSString *)path;
 - (NSString *)packageForManifest:(NSString *)manifest;
-- (void)sendChangesWithPath:(NSString *)apk layout:(NSString *)layout package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId;
+- (void)sendChangesWithPath:(NSString *)apk layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId;
 - (NSString *)currentIPAddress;
 
 - (int)nextTxnId;

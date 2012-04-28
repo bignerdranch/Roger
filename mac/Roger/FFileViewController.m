@@ -14,8 +14,8 @@
 
 @interface FFileViewController ()
 
-- (void)sendChangesToNodeWithPath:(NSString *)apk layout:(NSString *)layout package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId;
-- (void)sendChangesToAdbWithPath:(NSString *)apk layout:(NSString *)layout package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId;
+- (void)sendChangesToNodeWithPath:(NSString *)apk layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId;
+- (void)sendChangesToAdbWithPath:(NSString *)apk layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId;
 
 - (void)initTxnId;
 - (NSString *)adbPath;
@@ -186,8 +186,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     
 	for (NSString* node in contents) {
         fullPath = [NSString stringWithFormat:@"%@/%@",path,node];
-        if ([self fileIsAndroidXml:fullPath])
-		{
+        if ([self pathIsLayoutXml:fullPath]) {
             NSDictionary *fileAttributes = [fm attributesOfItemAtPath:fullPath error:NULL];
 			NSDate *fileModDate = [fileAttributes objectForKey:NSFileModificationDate];
 			if([fileModDate compare:[self lastModificationDateForPath:path]] == NSOrderedDescending) {
@@ -199,7 +198,12 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
                 
                 [self showStatus];
                 [self updateStatusWithText:[NSString stringWithFormat:@"Processing %@", [fullPath lastPathComponent]]];
-                [self androidProjectChangedWithPath:[self androidProjectDirectoryFromPath:fullPath] layout:[fullPath lastPathComponent]];
+
+                FResourceName *resourceName = [FResourceName 
+                    resourceNameWithType:@"layout"
+                                    name:[[fullPath lastPathComponent] stringByDeletingPathExtension]];
+                [self androidProjectChangedWithPath:[self androidProjectDirectoryFromPath:fullPath] 
+                                       resourceName:resourceName];
                 break;
 			}
 		}
@@ -221,7 +225,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     return isLayout;
 }
 
-- (BOOL)fileIsAndroidXml: (NSString *)path
+- (BOOL)pathIsLayoutXml: (NSString *)path
 {
     return [self isLayoutPath:path] && 
         [self androidProjectDirectoryFromPath:[path stringByDeletingLastPathComponent]];
@@ -249,14 +253,13 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     return [self androidProjectDirectoryFromPath:[path stringByDeletingLastPathComponent]];
 }
 
-- (void)androidProjectChangedWithPath:(NSString *)path layout:(NSString *)layout
+- (void)androidProjectChangedWithPath:(NSString *)path resourceName:(FResourceName *)resourceName
 {
     NSString *manifest = [NSString stringWithFormat:@"%@/AndroidManifest.xml", path];
 
     if (![self sdkPath]) return;
 
-    FResourceName *resName = [FResourceName resourceNameWithType:@"layout" name:[layout stringByDeletingPathExtension]];
-    [self buildAppWithManifest:manifest resourceName:resName];
+    [self buildAppWithManifest:manifest resourceName:resourceName];
 
     NSString *package = [self packageForManifest:manifest];
     int minSdkVersion = [self minSdkForManifest:manifest];
@@ -269,7 +272,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
     int txnId = [self nextTxnId];
     // Send it over to the server
-    [self sendChangesWithPath:apkFile layout:layout package:package minSdk:minSdkVersion txnId:txnId];
+    [self sendChangesWithPath:apkFile layout:[resourceName name] type:[resourceName type] package:package minSdk:minSdkVersion txnId:txnId];
 }
 
 - (int)nextTxnId
@@ -277,13 +280,13 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     return ++currentTxnId;
 }
 
-- (void)sendChangesWithPath:(NSString *)apk layout:(NSString *)layout package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId
+- (void)sendChangesWithPath:(NSString *)apk layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId
 {
-    [self sendChangesToNodeWithPath:apk layout:layout package:package minSdk:minSdk txnId:txnId];
-    [self sendChangesToAdbWithPath:apk layout:layout package:package minSdk:minSdk txnId:txnId];
+    [self sendChangesToNodeWithPath:apk layout:layout type:type package:package minSdk:minSdk txnId:txnId];
+    [self sendChangesToAdbWithPath:apk layout:layout type:type package:package minSdk:minSdk txnId:txnId];
 }
 
-- (void)sendChangesToAdbWithPath:(NSString *)apk layout:(NSString *)layout package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId
+- (void)sendChangesToAdbWithPath:(NSString *)apk layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId
 {
     NSTask *aTask = [[NSTask alloc] init];
 
@@ -316,7 +319,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     // don't wait for this one to finish
 }
 
-- (void)sendChangesToNodeWithPath:(NSString *)apk layout:(NSString *)layout package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId
+- (void)sendChangesToNodeWithPath:(NSString *)apk layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId
 {
     NSString *reqUrl = [NSString stringWithFormat:serverUrl, [self currentIPAddress], apk, layout, package, minSdk, txnId];
     NSLog(@"Sending request: %@", reqUrl);
