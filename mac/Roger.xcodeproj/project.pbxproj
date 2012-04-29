@@ -15,6 +15,7 @@
 		369D98A31544881500616DF5 /* FResourceIndex.m in Sources */ = {isa = PBXBuildFile; fileRef = 369D98A21544881500616DF5 /* FResourceIndex.m */; };
 		369D98A615448B8D00616DF5 /* FResourceName.m in Sources */ = {isa = PBXBuildFile; fileRef = 369D98A515448B8D00616DF5 /* FResourceName.m */; };
 		369D98AA15448F3900616DF5 /* NSString+Resources.m in Sources */ = {isa = PBXBuildFile; fileRef = 369D98A915448F3900616DF5 /* NSString+Resources.m */; };
+		36E98EEB154C541600D48A46 /* NSString+Regexen.m in Sources */ = {isa = PBXBuildFile; fileRef = 36E98EEA154C541600D48A46 /* NSString+Regexen.m */; };
 		8342C50B153F7274007B2447 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8342C50A153F7274007B2447 /* Cocoa.framework */; };
 		8342C515153F7274007B2447 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8342C513153F7274007B2447 /* InfoPlist.strings */; };
 		8342C517153F7274007B2447 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8342C516153F7274007B2447 /* main.m */; };
@@ -44,6 +45,8 @@
 		369D98A515448B8D00616DF5 /* FResourceName.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FResourceName.m; sourceTree = "<group>"; };
 		369D98A815448F3900616DF5 /* NSString+Resources.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+Resources.h"; sourceTree = "<group>"; };
 		369D98A915448F3900616DF5 /* NSString+Resources.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+Resources.m"; sourceTree = "<group>"; };
+		36E98EE9154C541600D48A46 /* NSString+Regexen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+Regexen.h"; sourceTree = "<group>"; };
+		36E98EEA154C541600D48A46 /* NSString+Regexen.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+Regexen.m"; sourceTree = "<group>"; };
 		8342C506153F7274007B2447 /* Roger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Roger.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8342C50A153F7274007B2447 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		8342C50D153F7274007B2447 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -144,6 +147,8 @@
 				369D98A515448B8D00616DF5 /* FResourceName.m */,
 				369D98A815448F3900616DF5 /* NSString+Resources.h */,
 				369D98A915448F3900616DF5 /* NSString+Resources.m */,
+				36E98EE9154C541600D48A46 /* NSString+Regexen.h */,
+				36E98EEA154C541600D48A46 /* NSString+Regexen.m */,
 			);
 			path = Roger;
 			sourceTree = "<group>";
@@ -243,6 +248,7 @@
 				369D98A31544881500616DF5 /* FResourceIndex.m in Sources */,
 				369D98A615448B8D00616DF5 /* FResourceName.m in Sources */,
 				369D98AA15448F3900616DF5 /* NSString+Resources.m in Sources */,
+				36E98EEB154C541600D48A46 /* NSString+Regexen.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

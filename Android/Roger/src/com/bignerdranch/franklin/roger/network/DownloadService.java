@@ -114,7 +114,8 @@ public class DownloadService extends IntentService {
 		}
 
 		byte[] buffer = new byte[BUFFER_SIZE];
-		String layoutFile = "main";
+		String layoutName = "";
+		String layoutType = "";
 		String identifier = "";
 		String pack = "";
 		String minVersionText = "";
@@ -126,15 +127,17 @@ public class DownloadService extends IntentService {
 			String response = data.substring(0, data.indexOf("--"));
 			Log.d(TAG, "Got response: " + response);
 
+            int i = 0;
 			String[] values = response.split("\n");
-			layoutFile = values[0];
-			layoutFile = layoutFile.split("\\.")[0];
-			identifier = values[1];
-			pack = values[2];
-			minVersionText = values[3];
-			txnIdText = values[4];
+			layoutName = values[i++];
+			layoutName = layoutName.split("\\.")[0];
+			layoutType = values[i++];
+			identifier = values[i++];
+			pack = values[i++];
+			minVersionText = values[i++];
+			txnIdText = values[i++];
 
-			Log.d(TAG, "Layout file: " + layoutFile + " identifier " + identifier + " package: " + pack);
+			Log.d(TAG, "Layout file: " + layoutName + " identifier " + identifier + " package: " + pack);
 		}
 
         synchronized (data) {
@@ -158,7 +161,7 @@ public class DownloadService extends IntentService {
         }
         
 
-		return new LayoutDescription(identifier, pack, layoutFile, minVersion, txnId);
+		return new LayoutDescription(identifier, pack, layoutName, layoutType, minVersion, txnId);
 	}
 
 	private void broadcastChange(LayoutDescription description) {

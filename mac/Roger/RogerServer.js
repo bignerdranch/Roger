@@ -33,6 +33,7 @@ http.createServer(function(request, response){
         // Desktop client is posting a file
         var apk = parts.query['apk'];
         var layout = parts.query['layout'];
+		var type = parts.query['type'];
 		var pack = parts.query['pack'];
 		var minSdk = parts.query['minSdk'];
 		var txnId = parts.query['txnId'];
@@ -44,7 +45,7 @@ http.createServer(function(request, response){
 		files[fileIndex] = apk;
         clients.forEach(function(s) {
 			sys.puts("sending data to a client");
-			s.write(layout + "\n" + fileIndex + "\n" + pack + "\n" + minSdk + "\n" + txnId + "--", "utf8");
+			s.write(layout + "\n" + type + "\n" + fileIndex + "\n" + pack + "\n" + minSdk + "\n" + txnId + "--", "utf8");
 			s.end();
         });  
     } else if (parts.pathname == "/get") {

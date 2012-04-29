@@ -17,6 +17,7 @@ public class LayoutDescription implements Serializable {
 
     String apkPath;
     String layoutName;
+    String layoutType;
     String packageName;
     int minVersion;
     int txnId;
@@ -27,9 +28,10 @@ public class LayoutDescription implements Serializable {
     public LayoutDescription() {
     }
 
-    public LayoutDescription(String apkPath, String layoutName, String packageName, int minVersion, int txnId) {
+    public LayoutDescription(String apkPath, String layoutName, String layoutType, String packageName, int minVersion, int txnId) {
         this.apkPath = apkPath;
         this.layoutName = layoutName;
+        this.layoutType = layoutType;
         this.packageName = packageName;
         this.minVersion = minVersion;
         this.txnId = txnId;
@@ -51,6 +53,14 @@ public class LayoutDescription implements Serializable {
         this.layoutName = layoutName;
     }
 
+    public String getLayoutType() {
+        return this.layoutType;
+    }
+
+    public void setLayoutType(String layoutType) {
+        this.layoutType = layoutType;
+    }
+
     public String getPackageName() {
         return this.packageName;
     }
@@ -69,8 +79,8 @@ public class LayoutDescription implements Serializable {
     }
 
     public int getResId(Activity a) {
-        Log.i(TAG, "getting identifier for layoutName " + layoutName + ", packageName " + packageName + "");
-        int id = getResources(a).getIdentifier(layoutName, "layout", packageName);
+        Log.i(TAG, "getting identifier for layoutName " + layoutName + ", type " + layoutType + ", packageName " + packageName + "");
+        int id = getResources(a).getIdentifier(layoutName, layoutType, packageName);
         Log.i(TAG, "here's what we got: " + id + "");
         return id;
     }

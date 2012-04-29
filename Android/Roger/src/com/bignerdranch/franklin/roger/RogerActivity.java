@@ -104,7 +104,7 @@ public class RogerActivity extends FragmentActivity {
         }
 
         if (management.layoutDescription != null) {
-            loadLayout(management.layoutDescription);
+            loadResource(management.layoutDescription);
         }
 
         if (management.rogerParams == null) {
@@ -147,7 +147,7 @@ public class RogerActivity extends FragmentActivity {
     public void setRogerParams(RogerParams params) {
     	management.rogerParams = params;
     	updateLayoutParams(params);
-        loadLayout();
+        loadResource();
     }
     
     private void updateLayoutParams(RogerParams params) {
@@ -257,13 +257,13 @@ public class RogerActivity extends FragmentActivity {
             .unregisterReceiver(foundServersReceiver);
     }
 
-    private void loadLayout() {
+    private void loadResource() {
         if (management.layoutDescription != null) {
-            loadLayout(management.layoutDescription);
+            loadResource(management.layoutDescription);
         }
     }
     
-    private void loadLayout(LayoutDescription description) {
+    private void loadResource(LayoutDescription description) {
         management.layoutDescription = description;
 
         if (description.getMinVersion() != 0 && description.getMinVersion() > Build.VERSION.SDK_INT) {
@@ -275,6 +275,26 @@ public class RogerActivity extends FragmentActivity {
         	return;
         }
         
+        if (description.getLayoutType().equals("layout")) {
+            loadLayout(description);
+        } else if (description.getLayoutType().equals("drawable")) {
+            loadDrawable(description);
+        }
+    }
+
+    private void loadDrawable(LayoutDescription description) {
+        final int id = description.getResId(this);
+        if (id == 0) {
+            Log.e(TAG, "ID is 0. Not displaying drawable.");
+            Log.e(TAG, "    description was: " + description + "");
+        	String layoutError = getString(R.string.error_zero_layout_id);
+        	ErrorManager.show(getApplicationContext(), layoutError);
+        	containerBorder.setVisibility(View.GONE);
+            return;
+        }
+    }
+
+    private void loadLayout(LayoutDescription description) {
     	container.removeAllViews();
     	updateLayoutParams(management.rogerParams);
 
@@ -376,12 +396,12 @@ public class RogerActivity extends FragmentActivity {
     private void updateTextFill() {
     	management.textFillSet = true;
     	management.textFillEnabled = !management.textFillEnabled;
-        loadLayout();
+        loadResource();
     }
 
     private void toggleListView() {
         management.isListView = !management.isListView;
-        loadLayout();
+        loadResource();
     }
     
     @Override
@@ -446,19 +466,21 @@ public class RogerActivity extends FragmentActivity {
 
                 String apkPath = i.getStringExtra(Constants.EXTRA_LAYOUT_APK_PATH);
                 String layoutName = i.getStringExtra(Constants.EXTRA_LAYOUT_LAYOUT_NAME).split("\\.")[0];
+                String layoutType = i.getStringExtra(Constants.EXTRA_LAYOUT_LAYOUT_TYPE).split("\\.")[0];
                 String packageName = i.getStringExtra(Constants.EXTRA_LAYOUT_PACKAGE_NAME);
                 int minimumVersion = i.getIntExtra(Constants.EXTRA_LAYOUT_MIN_VERSION, 1);
                 int txnId = i.getIntExtra(Constants.EXTRA_LAYOUT_TXN_ID, 1);
 
                 desc.setApkPath(apkPath);
                 desc.setLayoutName(layoutName);
+                desc.setLayoutType(layoutType);
                 desc.setPackageName(packageName);
                 desc.setMinVersion(minimumVersion);
                 desc.setTxnId(txnId);
             }
 
             if (desc != null) {
-                loadLayout(desc);
+                loadResource(desc);
             }
         }
     };

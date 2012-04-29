@@ -38,6 +38,7 @@
 - (void) addModifiedFilesAtPath: (NSString *)path;
 - (void) updateLastEventId: (uint64_t) eventId;
 - (BOOL)pathIsLayoutXml: (NSString *)path;
+- (NSString *)resourceTypeForPath:(NSString *)path;
 - (NSString *)androidProjectDirectoryFromPath:(NSString *)path;
 - (void)buildAppWithBuildFile:(NSString *)buildFile;
 - (void)androidProjectChangedWithPath:(NSString *)path resourceName:(FResourceName *)resourceName; 

@@ -14,6 +14,7 @@ public class Constants {
 
     public static final String EXTRA_LAYOUT_APK_PATH = Constants.class.getPackage().getName() + ".EXTRA_LAYOUT_APK_PATH";
     public static final String EXTRA_LAYOUT_LAYOUT_NAME = Constants.class.getPackage().getName() + ".EXTRA_LAYOUT_LAYOUT_NAME";
+    public static final String EXTRA_LAYOUT_LAYOUT_TYPE = Constants.class.getPackage().getName() + ".EXTRA_LAYOUT_LAYOUT_TYPE";
     public static final String EXTRA_LAYOUT_PACKAGE_NAME = Constants.class.getPackage().getName() + ".EXTRA_LAYOUT_PACKAGE_NAME";
     public static final String EXTRA_LAYOUT_MIN_VERSION = Constants.class.getPackage().getName() + ".EXTRA_LAYOUT_MIN_VERSION";
     public static final String EXTRA_LAYOUT_TXN_ID = Constants.class.getPackage().getName() + ".EXTRA_LAYOUT_TXN_ID";

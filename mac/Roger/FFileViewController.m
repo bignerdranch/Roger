@@ -9,6 +9,7 @@
 #import "FFileViewController.h"
 #import "FakeProjectBuilder.h"
 #import "FResourceName.h"
+#import "NSString+Regexen.h"
 
 //#define DEBUG_NODE 1
 
@@ -16,13 +17,14 @@
 
 - (void)sendChangesToNodeWithPath:(NSString *)apk layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId;
 - (void)sendChangesToAdbWithPath:(NSString *)apk layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId;
+- (BOOL)isSupportedType:(NSString *)type;
 
 - (void)initTxnId;
 - (NSString *)adbPath;
 
 @end
 
-static NSString* const serverUrl = @"http://%@:8081/post?apk=%@&layout=%@&pack=%@&minSdk=%d&txnId=%d";
+static NSString* const serverUrl = @"http://%@:8081/post?apk=%@&layout=%@&type=%@&pack=%@&minSdk=%d&txnId=%d";
 
 void fsevents_callback(ConstFSEventStreamRef streamRef,
                        void *userData,
@@ -186,30 +188,48 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     
 	for (NSString* node in contents) {
         fullPath = [NSString stringWithFormat:@"%@/%@",path,node];
-        if ([self pathIsLayoutXml:fullPath]) {
-            NSDictionary *fileAttributes = [fm attributesOfItemAtPath:fullPath error:NULL];
-			NSDate *fileModDate = [fileAttributes objectForKey:NSFileModificationDate];
-			if([fileModDate compare:[self lastModificationDateForPath:path]] == NSOrderedDescending) {
-                NSLog(@"File change at: %@", fullPath);
-                
-                [recentFiles addObject:[fullPath lastPathComponent]];
-                [recentEditTimes addObject:[NSDate date]];
-                [[self tableView] reloadData];
-                
-                [self showStatus];
-                [self updateStatusWithText:[NSString stringWithFormat:@"Processing %@", [fullPath lastPathComponent]]];
+        NSString *type = [self resourceTypeForPath:fullPath];
 
-                FResourceName *resourceName = [FResourceName 
-                    resourceNameWithType:@"layout"
-                                    name:[[fullPath lastPathComponent] stringByDeletingPathExtension]];
-                [self androidProjectChangedWithPath:[self androidProjectDirectoryFromPath:fullPath] 
-                                       resourceName:resourceName];
-                break;
-			}
-		}
+        if (!type || ![self isSupportedType:type]) {
+            continue;
+        }
+
+        NSDictionary *fileAttributes = [fm attributesOfItemAtPath:fullPath error:NULL];
+        NSDate *fileModDate = [fileAttributes objectForKey:NSFileModificationDate];
+
+        if ([fileModDate compare:[self lastModificationDateForPath:path]] != NSOrderedDescending) {
+            continue;
+        }
+
+        NSLog(@"File change at: %@", fullPath);
+        
+        [recentFiles addObject:[fullPath lastPathComponent]];
+        [recentEditTimes addObject:[NSDate date]];
+        [[self tableView] reloadData];
+        
+        [self showStatus];
+        [self updateStatusWithText:[NSString stringWithFormat:@"Processing %@", [fullPath lastPathComponent]]];
+
+        FResourceName *resourceName = [FResourceName 
+            resourceNameWithType:type
+                            name:[[fullPath lastPathComponent] stringByDeletingPathExtension]];
+        [self androidProjectChangedWithPath:[self androidProjectDirectoryFromPath:fullPath] 
+                               resourceName:resourceName];
+        break;
 	}
     
 	[self updateLastModificationDateForPath:path];
+}
+
+- (NSString *)apparentResourceTypeForPath:(NSString *)path
+{
+    NSArray *results = [path stringsFromFirstMatchOfPattern:@"res/([a-z]+)[-a-z0-9]*//*[^/]*\\.xml$"];
+
+    if ([results count]) {
+        return [results objectAtIndex:0];
+    } else {
+        return nil;
+    }
 }
 
 - (BOOL)isLayoutPath:(NSString *)path
@@ -223,6 +243,24 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     
     BOOL isLayout = matches && [matches count];
     return isLayout;
+}
+
+- (BOOL)isSupportedType:(NSString *)type
+{
+    return 
+        [type isEqualToString:@"layout"] ||
+        [type isEqualToString:@"drawable"];
+}
+
+- (NSString *)resourceTypeForPath:(NSString *)path
+{
+    NSString *resourceType = [self apparentResourceTypeForPath:path];
+
+    if (resourceType && [self androidProjectDirectoryFromPath:[path stringByDeletingLastPathComponent]]) {
+        return resourceType;
+    } else {
+        return nil;
+    }
 }
 
 - (BOOL)pathIsLayoutXml: (NSString *)path
@@ -300,6 +338,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     [args addObject:publishApkToAdbDevices]; 
     [args addObject:apk];
     [args addObject:layout];
+    [args addObject:type];
     [args addObject:package];
     [args addObject:[NSString stringWithFormat:@"%d", minSdk]];
     [args addObject:[NSString stringWithFormat:@"%d", txnId]];
@@ -321,7 +360,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
 - (void)sendChangesToNodeWithPath:(NSString *)apk layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId
 {
-    NSString *reqUrl = [NSString stringWithFormat:serverUrl, [self currentIPAddress], apk, layout, package, minSdk, txnId];
+    NSString *reqUrl = [NSString stringWithFormat:serverUrl, [self currentIPAddress], apk, layout, type, package, minSdk, txnId];
     NSLog(@"Sending request: %@", reqUrl);
     NSLog(@"Our file is this many bytes: %ld", [[NSData dataWithContentsOfFile:apk] length]);
     
