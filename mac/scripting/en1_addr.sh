@@ -2,17 +2,18 @@
 
 ifconfig | awk '
 /^[a-z]/ { 
-    if ($1 == "en1:") 
+    if ($1 == "en1:") {
         wifi = 1; 
-    else 
-        wifi = 0 
+    } else {
+        wifi = 0;
+    }
 } 
 
 /^[ \t]*inet / { 
-    if (wifi) wifiAddres = $2; 
+    if (wifi) wifiAddress = $2; 
 }
 
 END {
-    if (wifi) print wifi;
+    if (wifiAddress) print wifiAddress;
     else exit(1);
 }'
