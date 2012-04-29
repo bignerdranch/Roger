@@ -649,12 +649,15 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     NSTask* task = [[NSTask alloc] init];
     [task setStandardOutput:[NSPipe pipe]];
     [task setLaunchPath:@"/bin/sh"];
-    [task setArguments:[NSArray arrayWithObjects:[self ipAddressScriptPath], nil]];
+    [task setArguments:[NSArray arrayWithObjects:
+        [self ipAddressScriptPath], 
+        nil]];
 
     [task setStandardOutput:[NSPipe pipe]];
     [task setStandardInput:[NSPipe pipe]];
     [task launch];
     [task waitUntilExit];
+    NSLog(@"terminationStatus: %d", [task terminationStatus]);
     
     if ([task terminationStatus]) {
         return nil;

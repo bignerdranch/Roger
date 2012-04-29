@@ -6,6 +6,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -23,6 +25,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -278,6 +281,7 @@ public class RogerActivity extends FragmentActivity {
         if (description.getLayoutType().equals("layout")) {
             loadLayout(description);
         } else if (description.getLayoutType().equals("drawable")) {
+            Log.i(TAG, "loading drawable");
             loadDrawable(description);
         }
     }
@@ -291,6 +295,31 @@ public class RogerActivity extends FragmentActivity {
         	ErrorManager.show(getApplicationContext(), layoutError);
         	containerBorder.setVisibility(View.GONE);
             return;
+        }
+
+        container.removeAllViews();
+        updateLayoutParams(management.rogerParams);
+
+        try {
+            Drawable drawable = description.getApk(this).getResources().getDrawable(id);
+            Log.i(TAG, "drawable is: " + drawable + "");
+            Log.i(TAG, "   dimens: (" + drawable.getIntrinsicWidth() + "," + drawable.getIntrinsicHeight() + ")");
+            ImageView imageView = new ImageView(this);
+            imageView.setImageDrawable(drawable);
+            container.addView(imageView);
+
+            ViewGroup.LayoutParams params = imageView.getLayoutParams();
+            if (drawable.getIntrinsicWidth() == -1) {
+                params.width = ViewGroup.LayoutParams.FILL_PARENT;
+            }
+            if (drawable.getIntrinsicHeight() == -1) {
+                params.height = ViewGroup.LayoutParams.FILL_PARENT;
+            }
+            imageView.setLayoutParams(params);
+
+            containerBorder.setVisibility(View.VISIBLE);
+        } catch (RuntimeException re) {
+            Log.e(TAG, "failed to inflate and set drawable", re);
         }
     }
 
