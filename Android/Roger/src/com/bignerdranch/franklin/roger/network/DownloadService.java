@@ -12,7 +12,10 @@ import com.bignerdranch.franklin.roger.pair.ConnectionHelper;
 import com.bignerdranch.franklin.roger.pair.ServerDescription;
 
 import android.app.IntentService;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.util.Log;
 
 public class DownloadService extends IntentService {
@@ -29,10 +32,26 @@ public class DownloadService extends IntentService {
     }
 
     protected ConnectionData data = new ConnectionData(); 
+    private Integer lastAdbTxnId = null;
 
 	public DownloadService() {
 		super("DownloadService");
 	}
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        IntentFilter filter = new IntentFilter(Constants.ACTION_INCOMING_ADB_TXN);
+        registerReceiver(incomingAdbTxnListener, filter);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        unregisterReceiver(incomingAdbTxnListener);
+    }
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
@@ -167,4 +186,12 @@ public class DownloadService extends IntentService {
 	private void broadcastChange(LayoutDescription description) {
 		manager.onDownloadComplete(description);
 	}
+
+    private BroadcastReceiver incomingAdbTxnListener = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            if (intent.hasExtra(Constants.EXTRA_INCOMING_ADB_TXN_ID)) {
+                lastAdbTxnId = intent.getIntExtra(Constants.EXTRA_INCOMING_ADB_TXN_ID, 0);
+            }
+        }
+    };
 }
