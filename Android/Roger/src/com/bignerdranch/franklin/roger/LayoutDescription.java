@@ -15,6 +15,7 @@ public class LayoutDescription implements Serializable {
 
     public static final long serialVersionUID = 0l;
 
+    String identifier;
     String apkPath;
     String layoutName;
     String layoutType;
@@ -28,7 +29,8 @@ public class LayoutDescription implements Serializable {
     public LayoutDescription() {
     }
 
-    public LayoutDescription(String apkPath, String layoutName, String layoutType, String packageName, int minVersion, int txnId) {
+    public LayoutDescription(String identifier, String apkPath, String layoutName, String layoutType, String packageName, int minVersion, int txnId) {
+        this.identifier = identifier;
         this.apkPath = apkPath;
         this.layoutName = layoutName;
         this.layoutType = layoutType;
@@ -102,22 +104,20 @@ public class LayoutDescription implements Serializable {
         this.minVersion = minVersion;
     }
 
-    /**
-     * Gets the transaction id for this instance.
-     *
-     * @return The txnId.
-     */
     public int getTxnId() {
         return this.txnId;
     }
 
-    /**
-     * Sets the txnId for this instance.
-     *
-     * @param txnId The txnId.
-     */
     public void setTxnId(int txnId) {
         this.txnId = txnId;
+    }
+
+    public String getIdentifier() {
+        return this.identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
     public String toString() {

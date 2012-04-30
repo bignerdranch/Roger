@@ -13,7 +13,6 @@ public class Constants {
     public static final String EXTRA_LAYOUT_DESCRIPTION = Constants.class.getPackage().getName() + ".EXTRA_LAYOUT_DESCRIPTION";
 
     public static final String ACTION_INCOMING_ADB_TXN = Constants.class.getPackage().getName() + ".ACTION_INCOMING_TXN";
-    public static final String EXTRA_INCOMING_ADB_TXN_ID = Constants.class.getPackage().getName() + ".EXTRA_INCOMING_ADB_TXN_ID";
 
     public static final String EXTRA_LAYOUT_APK_PATH = Constants.class.getPackage().getName() + ".EXTRA_LAYOUT_APK_PATH";
     public static final String EXTRA_LAYOUT_LAYOUT_NAME = Constants.class.getPackage().getName() + ".EXTRA_LAYOUT_LAYOUT_NAME";

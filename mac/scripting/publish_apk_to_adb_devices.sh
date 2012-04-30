@@ -18,7 +18,20 @@ SDCARD_PATH="/mnt/sdcard/$APK_NAME"
 
 echo Pushing to devices with adb at path: $ADB
 
-for DEVICE in $($ADB devices | sed '1 d' | awk '{print $1}'); do 
+DEVICES=$($ADB devices | sed '1 d' | awk '{print $1}')
+
+for DEVICE in $DEVICES; do
+    # start off by telling everyone what's up - there's a new apk
+    # coming down the line
+    echo $ADB -s $DEVICE shell am broadcast \
+        -a com.bignerdranch.franklin.roger.ACTION_INCOMING_TXN \
+        -e com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID "$TXN_ID" >&2
+    $ADB -s $DEVICE shell am broadcast \
+        -a com.bignerdranch.franklin.roger.ACTION_INCOMING_TXN \
+        -e com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID "$TXN_ID" >&2
+done
+
+for DEVICE in $DEVICES; do 
     echo Pushing to $DEVICE... >&2
 
     # push our apk to the sdcard

@@ -1,5 +1,7 @@
 package com.bignerdranch.franklin.roger.network;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -99,6 +101,11 @@ public class DownloadService extends IntentService {
             }
 			LayoutDescription description = getLayoutDescription();
             connector.setDownloading(data.desc);
+
+            if (description.getTxnId() != lastAdbTxnId) {
+                // indicates that we didn't get pinged by ADB
+                getApk(description.getIdentifier());
+            }
             connector.setFinishDownload(data.desc);
 			broadcastChange(description);
 
@@ -180,7 +187,61 @@ public class DownloadService extends IntentService {
         }
         
 
-		return new LayoutDescription(identifier, pack, layoutName, layoutType, minVersion, txnId);
+		return new LayoutDescription(identifier, null, pack, layoutName, layoutType, minVersion, txnId);
+	}
+
+	private String getApk(String identifier) throws IOException {
+		String address = String.format(data.desc.getApkAddress(), identifier);
+		URL remoteUrl = new URL(address);
+		Log.d(TAG, "Connecting to " + address);
+
+        long startTime = System.currentTimeMillis();
+
+		String filePath = getPath();
+
+        new File(filePath).delete();
+		FileOutputStream output = getOutputStream(filePath);
+        InputStream input;
+        synchronized (data) {
+            validateData();
+
+            data.conn = (HttpURLConnection) remoteUrl.openConnection();
+            data.conn.setChunkedStreamingMode(CHUNK_SIZE);
+            data.conn.connect();
+            input = data.conn.getInputStream();
+            Log.d(TAG, "Content length " + data.conn.getContentLength());
+            input = data.conn.getInputStream();
+        }
+
+		byte[] buffer = new byte[BUFFER_SIZE];
+		int bytesRead = 0;
+		int bytesWritten = 0;
+
+		while ((bytesRead = input.read(buffer)) > 0) {
+			output.write(buffer, 0, bytesRead);
+			bytesWritten += bytesRead;
+            Log.i(TAG, "read " + bytesRead + " " + bytesWritten + " total");
+		}
+
+        synchronized (data) {
+            data.conn.disconnect();
+            data.conn = null;
+        }
+		
+		Log.d(TAG, "Wrote " + bytesWritten + " bytes in " + (System.currentTimeMillis() - startTime) + " ms");
+		return filePath;
+	}
+
+	private String getPath() {
+		String path = manager.getNextPath(this);
+		Log.d(TAG, "Downloading file with path: " + path);
+		return path;
+	}
+
+	private FileOutputStream getOutputStream(String path) throws IOException {
+		File filePath = new File(path);
+		filePath.createNewFile();
+		return new FileOutputStream(filePath);
 	}
 
 	private void broadcastChange(LayoutDescription description) {
@@ -189,8 +250,9 @@ public class DownloadService extends IntentService {
 
     private BroadcastReceiver incomingAdbTxnListener = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
-            if (intent.hasExtra(Constants.EXTRA_INCOMING_ADB_TXN_ID)) {
-                lastAdbTxnId = intent.getIntExtra(Constants.EXTRA_INCOMING_ADB_TXN_ID, 0);
+            if (intent.hasExtra(Constants.EXTRA_LAYOUT_TXN_ID)) {
+                lastAdbTxnId = intent.getIntExtra(Constants.EXTRA_LAYOUT_TXN_ID, 0);
+                Log.i(TAG, "just heard about an ADB transaction: " + lastAdbTxnId + "");
             }
         }
     };
