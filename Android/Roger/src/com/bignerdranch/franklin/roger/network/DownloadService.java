@@ -102,7 +102,7 @@ public class DownloadService extends IntentService {
 			LayoutDescription description = getLayoutDescription();
             connector.setDownloading(data.desc);
 
-            if (description.getTxnId() != lastAdbTxnId) {
+            if (description != null && lastAdbTxnId == null || description.getTxnId() != lastAdbTxnId) {
                 // indicates that we didn't get pinged by ADB
                 getApk(description.getIdentifier());
             }
