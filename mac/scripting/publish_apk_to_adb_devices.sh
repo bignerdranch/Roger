@@ -25,10 +25,10 @@ for DEVICE in $DEVICES; do
     # coming down the line
     echo $ADB -s $DEVICE shell am broadcast \
         -a com.bignerdranch.franklin.roger.ACTION_INCOMING_TXN \
-        -e com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID "$TXN_ID" >&2
+        --ei com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID "$TXN_ID" >&2
     $ADB -s $DEVICE shell am broadcast \
         -a com.bignerdranch.franklin.roger.ACTION_INCOMING_TXN \
-        -e com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID "$TXN_ID" >&2
+        --ei com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID "$TXN_ID" >&2
 done
 
 for DEVICE in $DEVICES; do 
