@@ -37,6 +37,13 @@ http.createServer(function(request, response){
 		var pack = parts.query['pack'];
 		var minSdk = parts.query['minSdk'];
 		var txnId = parts.query['txnId'];
+        sys.puts("parameters: " + 
+            apk + ' - apk ' + 
+            layout + ' - layout ' + 
+            type + ' - type ' + 
+            pack + ' - pack ' + 
+            minSdk + ' - minSdk ' + 
+            txnId + ' - txnId ');
         sys.puts("posting apk: " + apk + " layout: " + layout);
         response.writeHeader(200);
 		response.end();

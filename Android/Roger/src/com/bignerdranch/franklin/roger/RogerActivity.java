@@ -327,6 +327,7 @@ public class RogerActivity extends FragmentActivity {
     	container.removeAllViews();
     	updateLayoutParams(management.rogerParams);
 
+        Log.i(TAG, "loading layout: " + description + "");
         final int id = description.getResId(this);
     	
         if (id == 0) {
@@ -487,10 +488,12 @@ public class RogerActivity extends FragmentActivity {
 
             if (!Constants.ACTION_NEW_LAYOUT.equals(i.getAction())) return;
 
+            Log.i(TAG, "    it's a layout...");
             LayoutDescription desc = (LayoutDescription)i
                 .getSerializableExtra(Constants.EXTRA_LAYOUT_DESCRIPTION);
 
             if (desc == null) {
+                Log.i(TAG, "    building from parts");
                 desc = new LayoutDescription();
 
                 String apkPath = i.getStringExtra(Constants.EXTRA_LAYOUT_APK_PATH);
@@ -507,9 +510,15 @@ public class RogerActivity extends FragmentActivity {
                 desc.setMinVersion(minimumVersion);
                 desc.setTxnId(txnId);
             }
+            Log.i(TAG, "    and it is: " + desc + "");
 
             if (desc != null) {
-                loadResource(desc);
+                LayoutDescription old = management.layoutDescription;
+                if (old != null && old.getTxnId() == desc.getTxnId()) {
+                    Log.i(TAG, "already seen this txnId: " + desc.getTxnId() + " path: " + desc.getApkPath() + "");
+                } else {
+                    loadResource(desc);
+                }
             }
         }
     };

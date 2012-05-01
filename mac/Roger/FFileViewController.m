@@ -11,7 +11,7 @@
 #import "FResourceName.h"
 #import "NSString+Regexen.h"
 
-//#define DEBUG_NODE 1
+#define DEBUG_NODE 1
 
 @interface FFileViewController ()
 
@@ -320,8 +320,8 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
 - (void)sendChangesWithPath:(NSString *)apk layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId
 {
-    [self sendChangesToNodeWithPath:apk layout:layout type:type package:package minSdk:minSdk txnId:txnId];
     [self sendChangesToAdbWithPath:apk layout:layout type:type package:package minSdk:minSdk txnId:txnId];
+    [self sendChangesToNodeWithPath:apk layout:layout type:type package:package minSdk:minSdk txnId:txnId];
 }
 
 - (void)sendChangesToAdbWithPath:(NSString *)apk layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId

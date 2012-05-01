@@ -104,10 +104,15 @@ public class DownloadService extends IntentService {
 
             if (description != null && lastAdbTxnId == null || description.getTxnId() != lastAdbTxnId) {
                 // indicates that we didn't get pinged by ADB
-                getApk(description.getIdentifier());
+                description.setApkPath(getApk(description.getIdentifier()));
+            } else if (description != null && lastAdbTxnId != null) {
+                Log.i(TAG, "aborted download for txnId: " + lastAdbTxnId + "");
             }
             connector.setFinishDownload(data.desc);
-			broadcastChange(description);
+
+            if (description.getApkPath() != null) {
+                broadcastChange(description);
+            }
 
             // still connected, presumably
             Intent i = new Intent(this, this.getClass());
@@ -156,7 +161,6 @@ public class DownloadService extends IntentService {
             int i = 0;
 			String[] values = response.split("\n");
 			layoutName = values[i++];
-			layoutName = layoutName.split("\\.")[0];
 			layoutType = values[i++];
 			identifier = values[i++];
 			pack = values[i++];
@@ -187,7 +191,7 @@ public class DownloadService extends IntentService {
         }
         
 
-		return new LayoutDescription(identifier, null, pack, layoutName, layoutType, minVersion, txnId);
+		return new LayoutDescription(identifier, null, layoutName, layoutType, pack, minVersion, txnId);
 	}
 
 	private String getApk(String identifier) throws IOException {
@@ -250,6 +254,7 @@ public class DownloadService extends IntentService {
 
     private BroadcastReceiver incomingAdbTxnListener = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
+            Log.i(TAG, "received intent " + intent + "");
             if (intent.hasExtra(Constants.EXTRA_LAYOUT_TXN_ID)) {
                 lastAdbTxnId = intent.getIntExtra(Constants.EXTRA_LAYOUT_TXN_ID, 0);
                 Log.i(TAG, "just heard about an ADB transaction: " + lastAdbTxnId + "");
