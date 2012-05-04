@@ -3,6 +3,7 @@ package com.bignerdranch.franklin.roger;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,9 +70,11 @@ public class LayoutDialogFragment extends DialogFragment {
 	
 	private void showEditDialog(ParamType type) {
 		LayoutEditDialogFragment fragment = LayoutEditDialogFragment.newInstance(type, params);
-		fragment.show(getFragmentManager(), TAG_EDIT_DIALOG);
-		
-		dismiss();
+        FragmentTransaction ft = getActivity()
+            .getSupportFragmentManager().beginTransaction();
+        ft.addToBackStack(null);
+        ft.remove(this);
+		fragment.show(ft, TAG_EDIT_DIALOG);
 	}
 	
 	private void updateButtons() {
