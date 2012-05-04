@@ -53,7 +53,7 @@ public class RogerActivity extends FragmentActivity {
     private ViewGroup containerBorder;
     private ProgressBar discoveryProgressBar;
 
-    private static class TheManagement extends Fragment {
+    public static class TheManagement extends Fragment {
         public LayoutDescription layoutDescription;
         public RogerParams rogerParams;
         public boolean textFillSet;
