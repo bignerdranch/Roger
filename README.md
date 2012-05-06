@@ -22,7 +22,7 @@ Features
 * ADB or WiFi connection
 * View layouts and XML drawables
 * Modify container layout params on the fly
-* Support for SDK 11-15
+* Support for SDK 9-15 (v2.3 - v4.0)
 
 
 Getting Started
@@ -57,15 +57,19 @@ As a result, the views you see in Roger are identical to what you see when you i
 in your own application. And because not every resource is included, Roger can also be much faster than building
 and running your entire app.
 
+Roger loads the apks it builds by reflecting on classes and doing inappropriate things with the runtime.
+This is probably why it is not the most stable tool in the world at the moment.
+
 
 Arbitrary Questions
 -------------------
 
 ### Android versions?
 
-We don't know. The goal is "As many as possible." This will probably be hard, because Roger
-relies on intimate knowledge of internal Android classes. We've tested it so far on Gingerbread, 
-Honeycomb, and Ice Cream Sandwich.
+Right now, the build target for the client is v2.1. Layouts do not actually
+load on v2.1, though. Works against v2.2 onwards on the emulator. I can make no
+guarantee about specific devices, apart from the devices I have personal experience
+with (Nexus S w/ICS, Xoom w/3.2, emulators 2.2+).
 
 ### Emulators?
 
