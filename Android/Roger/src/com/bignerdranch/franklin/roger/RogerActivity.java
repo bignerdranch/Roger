@@ -265,18 +265,18 @@ public class RogerActivity extends FragmentActivity {
             loadResource(management.layoutDescription);
         }
     }
+
+    private boolean isInvalidAndroidVersion(LayoutDescription description) {
+        if (description.getMinVersion() != 0 && description.getMinVersion() > Build.VERSION.SDK_INT) {
+            return true;
+        } else {
+            return false;
+        }
+    }
     
     private void loadResource(LayoutDescription description) {
         management.layoutDescription = description;
 
-        if (description.getMinVersion() != 0 && description.getMinVersion() > Build.VERSION.SDK_INT) {
-        	Log.e(TAG, "invalid version of Android");
-        	
-        	String versionFormat = getString(R.string.error_old_android_version_format);
-        	ErrorManager.show(getApplicationContext(), String.format(versionFormat, description.getMinVersion()));
-        	containerBorder.setVisibility(View.GONE);
-        	return;
-        }
         
         if (description.getLayoutType().equals("layout")) {
             loadLayout(description);
@@ -318,8 +318,26 @@ public class RogerActivity extends FragmentActivity {
             imageView.setLayoutParams(params);
 
             containerBorder.setVisibility(View.VISIBLE);
-        } catch (RuntimeException re) {
-            Log.e(TAG, "failed to inflate and set drawable", re);
+        } catch (RuntimeException ex) {
+            Log.e(TAG, "failed to inflate and set drawable", ex);
+
+            if (isInvalidAndroidVersion(description)) {
+                // maybe that's why?
+                Log.e(TAG, "invalid version of Android");
+                
+                String versionFormat = getString(R.string.error_old_android_version_format);
+                ErrorManager.show(getApplicationContext(), String.format(versionFormat, description.getMinVersion()));
+                containerBorder.setVisibility(View.GONE);
+                return;
+            } else {
+                Throwable cause = ex;
+                while (cause.getCause() != null) {
+                    cause = cause.getCause();
+                }
+
+                Log.i(TAG, "root cause", cause);
+                ErrorManager.show(getApplicationContext(), cause.getMessage());
+            }
         }
     }
 
@@ -327,7 +345,7 @@ public class RogerActivity extends FragmentActivity {
     	container.removeAllViews();
     	updateLayoutParams(management.rogerParams);
 
-        Log.i(TAG, "loading layout: " + description + "");
+        Log.i(TAG, "loading layout: " + description + "", new RuntimeException());
         final int id = description.getResId(this);
     	
         if (id == 0) {
@@ -378,12 +396,23 @@ public class RogerActivity extends FragmentActivity {
             containerBorder.setVisibility(View.VISIBLE);
         } catch (InflateException ex) {
             Log.i(TAG, "InflateException", ex);
-            Throwable cause = ex;
-            while (cause.getCause() != null) {
-                cause = cause.getCause();
-            }
+            if (isInvalidAndroidVersion(description)) {
+                // maybe that's why?
+                Log.e(TAG, "invalid version of Android");
+                
+                String versionFormat = getString(R.string.error_old_android_version_format);
+                ErrorManager.show(getApplicationContext(), String.format(versionFormat, description.getMinVersion()));
+                containerBorder.setVisibility(View.GONE);
+                return;
+            } else {
+                Throwable cause = ex;
+                while (cause.getCause() != null) {
+                    cause = cause.getCause();
+                }
 
-            ErrorManager.show(getApplicationContext(), cause.getMessage());
+                Log.i(TAG, "root cause", cause);
+                ErrorManager.show(getApplicationContext(), cause.getMessage());
+            }
         }
     }
 
