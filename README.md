@@ -22,7 +22,7 @@ Features
 * ADB or WiFi connection
 * View layouts and XML drawables
 * Modify container layout params on the fly
-* Support for 2.3.4, 3.0, and 4.0
+* Support for SDK 11-15
 
 
 Getting Started
