@@ -14,7 +14,9 @@ TXN_ID=$1
 shift
 
 APK_NAME=$(echo "$APK_PATH" | sed 's ^.*/  ')
-SDCARD_PATH="/mnt/sdcard/$APK_NAME"
+APK_NAME_INITIAL=$(echo "$APK_NAME" | sed 's/\..*//')
+
+REMOTE_PATH="/mnt/sdcard/"
 
 echo Pushing to devices with adb at path: $ADB
 
@@ -34,7 +36,34 @@ done
 for DEVICE in $DEVICES; do 
     echo Pushing to $DEVICE... >&2
 
-    # push our apk to the sdcard
+    # find out what our actual target path should be
+    LAST_NAME=$($ADB -s $DEVICE shell ls $REMOTE_PATH | grep -F "$APK_NAME_INITIAL" | sed 's/\..*//')
+    echo Last name: "$LAST_NAME" >&2
+
+    NEXT_NAME=$(echo "$LAST_NAME" | awk -F '-' ' {
+        seen[$2] = true;
+        count = $2;
+        print "    saw this line: " $0 " count: " count > "/dev/stderr";
+        if (count > max_count) 
+            max_count = count;
+    }
+
+    END {
+        # get rid of old versions
+        for (old_version_number in seen) {
+            old_filename = "'"$REMOTE_PATH$APK_NAME_INITIAL-"'" old_version_number ".apk";
+            print "    removing old file: " old_filename > "/dev/stderr";
+            print "    old version number was: " old_version_number > "/dev/stderr";
+            system("'"$ADB -s $DEVICE shell rm "'" old_filename " &>/dev/null");
+        }
+
+        print "'"$APK_NAME_INITIAL"'-" (max_count + 1) ".apk";
+    }')
+
+    SDCARD_PATH="$REMOTE_PATH$NEXT_NAME"
+    echo "next name is $NEXT_NAME"
+    echo pushing our apk to the sdcard to "$SDCARD_PATH" >&2
+    echo $ADB -s $DEVICE push "$APK_PATH" "$SDCARD_PATH" >&2
     $ADB -s $DEVICE push "$APK_PATH" "$SDCARD_PATH"
 
     # then send out a broadcast intent 
