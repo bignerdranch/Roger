@@ -1,29 +1,21 @@
 package com.bignerdranch.franklin.roger;
 
 import java.io.File;
-
-import java.lang.ClassLoader;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import android.app.Activity;
-
 import android.content.Context;
 import android.content.ContextWrapper;
-
 import android.content.pm.ApplicationInfo;
-
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 
 import android.os.Build;
-
 import android.util.DisplayMetrics;
 import android.util.Log;
-
 import android.view.LayoutInflater;
 import android.view.WindowManager;
 
@@ -45,28 +37,64 @@ public abstract class LocalApk {
             }
         }
 
-        public int getThemeResId() {
-            return themeResource;
+        private int getDefaultThemeResource() {
+            try {
+                Class<?> c = getReflectedClass("com.android.internal.R.style");
+                Object v = getFieldValue(c, "Theme");
+                return (int)(Integer)(v);
+            } catch (Exception ex) {
+                Log.i(TAG, "failed to get default theme resource", ex);
+                return 0;
+            }
+        }
+
+        private Resources.Theme getThemeGingerbread() {
+            // would be really awesome to be able to fix the default
+            // theme handling here. -BP
+            //
+            // corresponding code from android source:
+            //
+            //if (mThemeResource == 0) {
+            //    mThemeResource = com.android.internal.R.style.Theme;
+            //}
+            //mTheme = mResources.newTheme();
+            //mTheme.applyStyle(mThemeResource, true);
+            //
+
+            if (theme == null) {
+                if (themeResource == 0) {
+                    themeResource = getDefaultThemeResource();
+                }
+                theme = getResources().newTheme();
+                theme.applyStyle(0, true);
+            }
+
+            return theme;
+        }
+        
+
+        private Resources.Theme getThemePostAPI10() {
+            // hack around it?
+            if (theme == null) {
+                Method selectDefaultTheme = getMethod(Resources.class, 
+                        "selectDefaultTheme", int.class, int.class);
+                try {
+                    themeResource = (int)(Integer)selectDefaultTheme.invoke(null, 
+                            themeResource, getApplicationInfo().targetSdkVersion);
+                    theme = getResources().newTheme();
+                    theme.applyStyle(themeResource, true);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            return theme;
         }
 
         public Resources.Theme getTheme() {
             if (Build.VERSION.SDK_INT < 11) {
-                return activity.getTheme();
+                return getThemeGingerbread();
             } else {
-                // hack around it?
-                if (theme == null) {
-                    Method selectDefaultTheme = getMethod(Resources.class, 
-                            "selectDefaultTheme", int.class, int.class);
-                    try {
-                        themeResource = (int)(Integer)selectDefaultTheme.invoke(null, 
-                                themeResource, getApplicationInfo().targetSdkVersion);
-                        theme = getResources().newTheme();
-                        theme.applyStyle(themeResource, true);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                return theme;
+                return getThemePostAPI10();
             }
         }
 
@@ -83,9 +111,25 @@ public abstract class LocalApk {
             info.sourceDir = getFile().getParent();
             info.packageName = packageName;
             info.uid = containingInfo.uid;
-            info.sharedLibraryFiles = containingInfo.sharedLibraryFiles;
-            info.dataDir = containingInfo.dataDir;
+            //info.sharedLibraryFiles = containingInfo.sharedLibraryFiles;
+            //info.dataDir = containingInfo.dataDir;
             info.targetSdkVersion = containingInfo.targetSdkVersion;
+
+            info.className = android.app.Application.class.getName();;
+            info.descriptionRes = 0;
+            info.theme = 0; // populate later on from apk?
+            info.manageSpaceActivityName = null;
+            info.flags = 0;
+            info.publicSourceDir = info.sourceDir;
+            info.sharedLibraryFiles = null;
+            info.dataDir = null;
+            info.enabled = false;
+
+            // newer stuff? not sure if we need it
+            //info.backupAgentName = null;
+            //info.resourceDirs = null;
+            //info.nativeLibraryDir = null;
+            //info.installLocation = PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
 
             if (Build.VERSION.SDK_INT >= 9) {
                 Object value = getFieldValue(containingInfo, "nativeLibraryDir");
@@ -140,6 +184,28 @@ public abstract class LocalApk {
         return resources;
     }
 
+    public void showAllFields(Object instance) {
+        try {
+        Class<?> klass = instance.getClass();
+
+        Log.i(TAG, "showing everything for instance: " + instance + "");
+        while (klass != null) {
+            Log.i(TAG, "   for class: " + klass.getName() + "");
+            for (Field field : klass.getDeclaredFields()) {
+                field.setAccessible(true);
+                
+                Log.i(TAG, "    field name: " + field.getName() + " class: " + field.getType().getName() + 
+                        "\n        value: " + field.get(instance) + "");
+            }
+
+            klass = klass.getSuperclass();
+        }
+        } catch (Exception ex) {
+            Log.i(TAG, "exception while showing all fields", ex);
+        }
+    }
+
+    // debugging
     private void scan(Class<?> klass) {
         Log.i(TAG, "scanning " + klass + "");
         Log.i(TAG, "    constructors:");
@@ -205,8 +271,8 @@ public abstract class LocalApk {
         throw new RuntimeException("failed to find " + name);
     }
 
-    private Constructor<?> getConstructor(Class<?> klass, Class<?>... paramTypes) {
-        for (Constructor<?> constructor : klass.getDeclaredConstructors()) {
+    private <C> Constructor<C> getConstructor(Class<C> klass, Class<?>... paramTypes) {
+        for (Constructor<C> constructor : klass.getDeclaredConstructors()) {
             if (areEqual(paramTypes, constructor.getParameterTypes())) {
                 constructor.setAccessible(true);
                 return constructor;
@@ -220,6 +286,15 @@ public abstract class LocalApk {
         Field f = getField(o.getClass(), name);
         try {
             f.set(o, value);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Object getFieldValue(Class<?> klass, String name) {
+        Field f = getField(klass, name);
+        try {
+            return f.get(null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -250,25 +325,32 @@ public abstract class LocalApk {
         throw new RuntimeException("failed to find field " + name);
     }
 
+    public LayoutInflater getLayoutInflaterHackingAroundCrap(LayoutInflater original, Context c) {
+        LayoutInflater inflater = getLayoutInflaterUsingCloneInContext(original, c);
+
+        setFieldValue(inflater, "mContext", c);
+
+        return inflater;
+    }
+
+    public LayoutInflater getLayoutInflaterUsingCloneInContext(LayoutInflater original, Context c) {
+        Log.i(TAG, "and calling getApplicationInfo");
+
+        LayoutInflater inflater = original.cloneInContext(c);
+        showAllFields(inflater);
+
+        return inflater;
+    }
+
     public LayoutInflater getLayoutInflater(LayoutInflater original) {
         Resources r = getResources();
         Context c = createPackageContext(r);
-        Log.i(TAG, "and calling getApplicationInfo");
+        return getLayoutInflaterHackingAroundCrap(original, c);
+    }
 
-        return original.cloneInContext(c);
-
-        //Constructor<?> constructor = getConstructor(LayoutInflater.class, LayoutInflater.class, Context.class);
-        //try {
-        //    Log.i(TAG, "constructor args: ");
-        //    for (Class<?> klass : constructor.getParameterTypes()) {
-        //        Log.i(TAG, "    " + klass +"");
-        //    }
-        //    Log.i(TAG, "is it accessible? " + constructor.isAccessible() + "");
-        //    //return (LayoutInflater)constructor.newInstance(c);
-        //} catch (Exception e) {
-        //    Log.e(TAG, "failed to construct layoutinflater", e);
-        //    throw new RuntimeException(e);
-        //}
+    private Class<?> getReflectedClass(String name) throws ClassNotFoundException {
+        ClassLoader cl = ClassLoader.getSystemClassLoader();
+        return cl.loadClass(name);
     }
 
     public Context createPackageContext(Resources resources) {
@@ -294,13 +376,6 @@ public abstract class LocalApk {
             init.invoke(c, resources, activityThread);
 
             return new LocalApkContext(c);
-
-            //if (c.mResources != null) {
-            //}
-
-            //// Should be a better exception.
-            //throw new PackageManager.NameNotFoundException(
-            //    "Application package " + packageName + " not found");
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
