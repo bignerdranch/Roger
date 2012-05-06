@@ -1,6 +1,5 @@
 package com.bignerdranch.franklin.roger;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentTransaction;
@@ -58,16 +57,6 @@ public class LayoutDialogFragment extends DialogFragment {
 		updateButtons();
 	}
 	
-	@Override
-	public void onPause() {
-		super.onPause();
-		
-		Activity activity = getActivity();
-		if (activity instanceof RogerActivity) {
-			((RogerActivity) activity).setRogerParams(params);
-		}
-	}
-	
 	private void showEditDialog(ParamType type) {
 		LayoutEditDialogFragment fragment = LayoutEditDialogFragment.newInstance(type, params);
         FragmentTransaction ft = getActivity()
@@ -93,7 +82,6 @@ public class LayoutDialogFragment extends DialogFragment {
 	}
 	
 	private View.OnClickListener widthButtonClick = new View.OnClickListener() {
-		
 		@Override
 		public void onClick(View v) {
 			showEditDialog(ParamType.WIDTH);
@@ -102,7 +90,6 @@ public class LayoutDialogFragment extends DialogFragment {
 	
 	
 	private View.OnClickListener heightButtonClick = new View.OnClickListener() {
-		
 		@Override
 		public void onClick(View v) {
 			showEditDialog(ParamType.HEIGHT);

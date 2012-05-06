@@ -88,13 +88,16 @@ public class LayoutEditDialogFragment extends DialogFragment {
 		updateView();
 	}
 	
-	private void updateParam(int value) {
-		
-		if (type == ParamType.HEIGHT) {
+	private boolean updateParam(int value) {
+		if (type == ParamType.HEIGHT && value != params.getHeightParam()) {
 			params.setHeightParam(value);
-		} else if (type == ParamType.WIDTH) {
+		} else if (type == ParamType.WIDTH && value != params.getWidthParam()) {
 			params.setWidthParam(value);
-		}
+		} else {
+            return false;
+        }
+
+        return true;
 	}
 	
 	private int getLayoutValue() {
@@ -146,8 +149,9 @@ public class LayoutEditDialogFragment extends DialogFragment {
 		try {
 			String text = pixelText.getText().toString();
 			int value = Integer.parseInt(text);
-			updateParam(value);
-			valueChanged();
+			if (updateParam(value)) {
+                valueChanged();
+            }
 		} catch (NumberFormatException e) {
 			Log.e(TAG, "Unable to parse number ", e);
 		}
@@ -165,15 +169,18 @@ public class LayoutEditDialogFragment extends DialogFragment {
 		@Override
 		public void onCheckedChanged(RadioGroup group, int checkedId) {
 			
+            boolean valueChanged = false;
 			if (checkedId == fillButton.getId()) {
-				updateParam(ViewGroup.LayoutParams.FILL_PARENT);
+				valueChanged |= updateParam(ViewGroup.LayoutParams.FILL_PARENT);
 			} else if (checkedId == wrapButton.getId()) {
-				updateParam(ViewGroup.LayoutParams.WRAP_CONTENT);
+				valueChanged |= updateParam(ViewGroup.LayoutParams.WRAP_CONTENT);
 			} else {
 				parsePixelValue();
 			}
 			
-			valueChanged();
+            if (valueChanged) {
+                valueChanged();
+            }
 		}
 	};
 	
