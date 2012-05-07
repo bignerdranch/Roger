@@ -69,7 +69,7 @@ Arbitrary Questions
 Right now, the build target for the client is v2.1. Layouts do not actually
 load on v2.1, though. Works against v2.2 onwards on the emulator. I can make no
 guarantee about specific devices, apart from the devices I have personal experience
-with (Nexus S w/ICS, Xoom w/3.2, emulators 2.2+).
+with (Nexus S w/ICS, Xoom w/3.2, emulators 2.2+). 
 
 ### Emulators?
 
@@ -81,9 +81,12 @@ are supported exclusively over ADB.
 ADB is more reliable right now, but WiFi is faster. I usually end up being lazy and letting the WiFi
 connection lapse.
 
-### Themes on pre-Honeycomb devices?
+### Themes?
 
-You might run into some problems there.
+There is currently no support for application or activity specific themese.
+Honeycomb and later use the default theme, previous versions currently have no
+theme at all.  The lack of a default theme causes lots of minor irritations
+(e.g., "Where are my RadioButton graphics?" The answer is "Nowhere.").
 
 ### Libraries?
 
