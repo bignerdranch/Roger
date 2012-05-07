@@ -39,9 +39,13 @@ public abstract class LocalApk {
 
         private int getDefaultThemeResource() {
             try {
-                Class<?> c = getReflectedClass("com.android.internal.R.style");
-                Object v = getFieldValue(c, "Theme");
-                return (int)(Integer)(v);
+                // well what if we don't use a theme for our own app?
+                // call to populate mThemeResource
+                activity.getTheme();
+                Object v = getFieldValue(activity, "mThemeResource");
+                int resId = (int)(Integer)v;
+                Log.i(TAG, "getDefaultThemeResource: " + resId + "");
+                return resId;
             } catch (Exception ex) {
                 Log.i(TAG, "failed to get default theme resource", ex);
                 return 0;
