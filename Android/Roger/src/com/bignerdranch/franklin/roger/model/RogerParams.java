@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import android.view.ViewGroup.LayoutParams;
 
-public class RogerParams implements Serializable{
+public class RogerParams implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private int widthParam;
