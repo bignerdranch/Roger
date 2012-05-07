@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:background="@drawable/transparent_border"
-        android:padding="20dp">
+        android:padding="0dp">
 
         <FrameLayout
             android:id="@+id/container"
