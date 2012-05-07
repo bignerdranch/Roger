@@ -1,6 +1,7 @@
 package com.bignerdranch.franklin.roger;
 
-import android.app.Activity;
+import com.bignerdranch.franklin.roger.model.Persistence;
+
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.text.Editable;
@@ -158,10 +159,10 @@ public class LayoutEditDialogFragment extends DialogFragment {
 	}
 	
 	private void valueChanged() {
-		Activity activity = getActivity();
-		if (activity instanceof RogerActivity) {
-			((RogerActivity) activity).setRogerParams(params);
-		}
+        Persistence.getInstance(getActivity())
+            .setRogerParams(params);
+        Persistence.getInstance(getActivity())
+            .forceUpdate();
 	}
 	
 	private OnCheckedChangeListener checkedChagned = new OnCheckedChangeListener() {

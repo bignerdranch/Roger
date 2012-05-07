@@ -124,4 +124,63 @@ public class LayoutDescription implements Serializable {
         return "apkPath:" + apkPath + " layoutName:" + layoutName + " packageName:" + packageName + 
                 " minVersion:" + minVersion + " txnId:" + txnId;
     }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((apkPath == null) ? 0 : apkPath.hashCode());
+		result = prime * result
+				+ ((identifier == null) ? 0 : identifier.hashCode());
+		result = prime * result
+				+ ((layoutName == null) ? 0 : layoutName.hashCode());
+		result = prime * result
+				+ ((layoutType == null) ? 0 : layoutType.hashCode());
+		result = prime * result + minVersion;
+		result = prime * result
+				+ ((packageName == null) ? 0 : packageName.hashCode());
+		result = prime * result + txnId;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		LayoutDescription other = (LayoutDescription) obj;
+		if (apkPath == null) {
+			if (other.apkPath != null)
+				return false;
+		} else if (!apkPath.equals(other.apkPath))
+			return false;
+		if (identifier == null) {
+			if (other.identifier != null)
+				return false;
+		} else if (!identifier.equals(other.identifier))
+			return false;
+		if (layoutName == null) {
+			if (other.layoutName != null)
+				return false;
+		} else if (!layoutName.equals(other.layoutName))
+			return false;
+		if (layoutType == null) {
+			if (other.layoutType != null)
+				return false;
+		} else if (!layoutType.equals(other.layoutType))
+			return false;
+		if (minVersion != other.minVersion)
+			return false;
+		if (packageName == null) {
+			if (other.packageName != null)
+				return false;
+		} else if (!packageName.equals(other.packageName))
+			return false;
+		if (txnId != other.txnId)
+			return false;
+		return true;
+	}
 }

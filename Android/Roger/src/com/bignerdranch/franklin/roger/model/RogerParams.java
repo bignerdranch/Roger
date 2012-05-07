@@ -58,4 +58,35 @@ public class RogerParams implements Serializable {
 	public int getPixelWidth() {
 		return widthParam;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Float.floatToIntBits(displayDensity);
+		result = prime * result + heightParam;
+		result = prime * result + widthParam;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		RogerParams other = (RogerParams) obj;
+		if (Float.floatToIntBits(displayDensity) != Float
+				.floatToIntBits(other.displayDensity))
+			return false;
+		if (heightParam != other.heightParam)
+			return false;
+		if (widthParam != other.widthParam)
+			return false;
+		return true;
+	}
+	
+	
 }
