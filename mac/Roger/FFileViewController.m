@@ -554,6 +554,11 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
         }
     }];
     [taskStream addErrorEvent:@"." withBlock:^(NSString *line) {
+        if ([line stringsFromFirstMatchOfPattern:@"^/.*:[1-9]+[0-9]*: "]) {
+            
+            line = [line stringByReplacingPattern:@"^/.*/(res/[^/]*/[^.]*\\.xml)"
+                                     withTemplate:@"$1"];
+        }
         if (line) {
             NSLog(@"BUILD ERROR: %@", line);
         }

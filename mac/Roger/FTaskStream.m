@@ -155,8 +155,6 @@
 -(NSArray *)linesFromData:(NSData *)available withDataStash:(NSMutableData *)data
 {
     NSMutableArray *results = [[NSMutableArray alloc] init];
-    NSString *indicator = [NSString stringWithFormat:@"%@:%@",
-             self.task.launchPath, [((NSString *)[self.task.arguments objectAtIndex:0]) lastPathComponent]];
 
     if (![available length]) {
         return nil;

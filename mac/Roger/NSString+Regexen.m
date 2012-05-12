@@ -10,15 +10,29 @@
 
 @implementation NSString (Regexen)
 
+- (NSString *)stringByReplacingPattern:(NSString *)pattern 
+                          withTemplate:(NSString *)replacement
+{
+    NSError *err = nil;
+    NSRegularExpression *regex = [NSRegularExpression
+        regularExpressionWithPattern:pattern
+                             options:0
+                               error:&err];
+    return [regex stringByReplacingMatchesInString:self
+                                           options:0
+                                             range:NSMakeRange(0, [self length])
+                                      withTemplate:replacement];
+}
+
 - (NSArray *)stringsFromFirstMatchOfPattern:(NSString *)pattern
 {
     NSError *err = nil;
     NSRegularExpression *regex = [NSRegularExpression
         regularExpressionWithPattern:pattern
-                             options:nil
+                             options:0
                                error:&err];
     NSArray *matches = [regex matchesInString:self 
-                                      options:nil 
+                                      options:0
                                         range:NSMakeRange(0, [self length])];
     if ([matches count] < 1) {
         return nil;

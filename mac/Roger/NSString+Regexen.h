@@ -11,5 +11,6 @@
 @interface NSString (Regexen)
 
 - (NSArray *)stringsFromFirstMatchOfPattern:(NSString *)pattern;
-
+- (NSString *)stringByReplacingPattern:(NSString *)pattern 
+                          withTemplate:(NSString *)replacement;
 @end
