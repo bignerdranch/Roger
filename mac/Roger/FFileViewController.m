@@ -9,9 +9,8 @@
 #import "FFileViewController.h"
 #import "FakeProjectBuilder.h"
 #import "FResourceName.h"
+#import "FTaskStream.h"
 #import "NSString+Regexen.h"
-
-#define DEBUG_NODE 1
 
 @interface FFileViewController ()
 
@@ -326,7 +325,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
 - (void)sendChangesToAdbWithPath:(NSString *)apk layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId
 {
-    NSTask *aTask = [[NSTask alloc] init];
+    NSTask *task = [[NSTask alloc] init];
 
     NSString *publishApkToAdbDevices = [self publishApkToAdbDevicesPath];
     NSLog(@"Calling %@ to send to adb...", publishApkToAdbDevices);
@@ -342,18 +341,18 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     [args addObject:package];
     [args addObject:[NSString stringWithFormat:@"%d", minSdk]];
     [args addObject:[NSString stringWithFormat:@"%d", txnId]];
-    [aTask setCurrentDirectoryPath:NSHomeDirectory()];
-    [aTask setLaunchPath:@"/bin/sh"];
-    [aTask setEnvironment:env];
-    [aTask setArguments:args];
+    [task setCurrentDirectoryPath:NSHomeDirectory()];
+    [task setLaunchPath:@"/bin/sh"];
+    [task setEnvironment:env];
+    [task setArguments:args];
     
     // If the output from this task is not piped somewhere else, regular NSLog messages will not show up
     // after the task logs any messages
     NSPipe *outputPipe = [NSPipe pipe];
-    [aTask setStandardInput:[NSPipe pipe]];
-    [aTask setStandardOutput:outputPipe];
+    [task setStandardInput:[NSPipe pipe]];
+    [task setStandardOutput:outputPipe];
     
-    [aTask launch];
+    [task launch];
 
     // don't wait for this one to finish
 }
@@ -521,7 +520,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     NSString *fakeProjectPath = [self buildFakeProjectForProjectPath:projectPath resourceName:resName];
     NSLog(@"Fake project path is: %@", fakeProjectPath);
 
-    NSTask *aTask = [[NSTask alloc] init];
+    NSTask *task = [[NSTask alloc] init];
     NSMutableArray *args = [NSMutableArray array];
     
     NSMutableDictionary *env = [NSMutableDictionary dictionaryWithObjectsAndKeys:
@@ -537,19 +536,37 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     [args addObject:manifest];
     [args addObject:[self apkPath]];
     [args addObject:fakeProjectPath];
-    [aTask setCurrentDirectoryPath:NSHomeDirectory()];
-    [aTask setEnvironment:env];
-    [aTask setLaunchPath:@"/bin/sh"];
-    [aTask setArguments:args];
-    
-    // If the output from this task is not piped somewhere else, regular NSLog messages will not show up
-    // after the task logs any messages
+    [task setCurrentDirectoryPath:NSHomeDirectory()];
+    [task setEnvironment:env];
+    [task setLaunchPath:@"/bin/sh"];
+    [task setArguments:args];
+
+    //// If the output from this task is not piped somewhere else, regular NSLog messages will not show up
+    //// after the task logs any messages
     NSPipe *outputPipe = [NSPipe pipe];
-    [aTask setStandardInput:[NSPipe pipe]];
-    [aTask setStandardOutput:outputPipe];
+    [task setStandardInput:[NSPipe pipe]];
+    [task setStandardOutput:outputPipe];
     
-    [aTask launch];
-    [aTask waitUntilExit];
+    FTaskStream *taskStream = [[FTaskStream alloc] initWithUnlaunchedTask:task];
+    [taskStream addOutputEvent:@"." withBlock:^(NSString *line) {
+        if (line) {
+            NSLog(@"BUILD: %@", line);
+        }
+    }];
+    [taskStream addErrorEvent:@"." withBlock:^(NSString *line) {
+        if (line) {
+            NSLog(@"BUILD ERROR: %@", line);
+        }
+    }];
+    
+    [task launch];
+    [task waitUntilExit];
+
+    if ([task terminationStatus]) {
+        NSLog(@"failed to build package");
+    } else {
+        NSLog(@"succeeded in building package");
+    }
 
     [self cleanupFakeProjectAtPath:fakeProjectPath];
 }
@@ -557,7 +574,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 - (void)buildAppWithBuildFile:(NSString *)buildFile 
 {
     NSLog(@"Building apk with build.xml: %@", [buildFile stringByDeletingLastPathComponent]);
-    NSTask *aTask = [[NSTask alloc] init];
+    NSTask *task = [[NSTask alloc] init];
     NSMutableArray *args = [NSMutableArray array];
     
     NSMutableDictionary *env = [NSMutableDictionary dictionaryWithObjectsAndKeys:
@@ -569,19 +586,19 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     [args addObject:@"debug"];
     [args addObject:@"-buildfile"];
     [args addObject:buildFile];
-    [aTask setCurrentDirectoryPath:NSHomeDirectory()];
-    [aTask setEnvironment:env];
-    [aTask setLaunchPath:@"/bin/sh"];
-    [aTask setArguments:args];
+    [task setCurrentDirectoryPath:NSHomeDirectory()];
+    [task setEnvironment:env];
+    [task setLaunchPath:@"/bin/sh"];
+    [task setArguments:args];
     
     // If the output from this task is not piped somewhere else, regular NSLog messages will not show up
     // after the task logs any messages
     NSPipe *outputPipe = [NSPipe pipe];
-    [aTask setStandardInput:[NSPipe pipe]];
-    [aTask setStandardOutput:outputPipe];
+    [task setStandardInput:[NSPipe pipe]];
+    [task setStandardOutput:outputPipe];
     
-    [aTask launch];
-    [aTask waitUntilExit];
+    [task launch];
+    [task waitUntilExit];
 }
 
 - (NSString *)currentMulticastAddress
@@ -602,8 +619,8 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
         return NO;
     }
 
-    NSOperationQueue *queue = [[NSOperationQueue alloc] init];
-    [queue addOperationWithBlock:^(void) {
+    //NSOperationQueue *queue = [[NSOperationQueue alloc] init];
+    //[queue addOperationWithBlock:^(void) {
         nodeTask = [[NSTask alloc] init];
         NSMutableArray *args = [NSMutableArray array];
      
@@ -615,21 +632,22 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
         [args addObject:[self currentMulticastAddress]];
         [nodeTask setLaunchPath:@"/usr/local/bin/node"];
         [nodeTask setArguments:args];
-        
-#ifndef DEBUG_NODE
-        NSPipe *output = [NSPipe pipe];
-        [nodeTask setStandardOutput:output];
         [nodeTask setStandardInput:[NSPipe pipe]];
-#endif
         
-        [nodeTask launch];
-        
-#ifndef DEBUG_NODE
-        NSData *data = [[output fileHandleForReading] availableData];
-        NSLog(@"Output %@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
-#endif
+        FTaskStream *taskStream = [[FTaskStream alloc] initWithUnlaunchedTask:nodeTask];
+        [taskStream addOutputEvent:@"." withBlock:^(NSString *line) {
+            if (line) {
+                NSLog(@"NODE: %@", line);
+            }
+        }];
+        [taskStream addErrorEvent:@"." withBlock:^(NSString *line) {
+            if (line) {
+                NSLog(@"NODE ERROR: %@", line);
+            }
+        }];
 
-    }];
+        [nodeTask launch];
+    //}];
 
     return YES;
 }
@@ -657,7 +675,6 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     [task setStandardInput:[NSPipe pipe]];
     [task launch];
     [task waitUntilExit];
-    NSLog(@"terminationStatus: %d", [task terminationStatus]);
     
     if ([task terminationStatus]) {
         return nil;

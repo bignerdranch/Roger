@@ -27,18 +27,18 @@ for DEVICE in $DEVICES; do
     # coming down the line
     echo $ADB -s $DEVICE shell am broadcast \
         -a com.bignerdranch.franklin.roger.ACTION_INCOMING_TXN \
-        --ei com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID "$TXN_ID" >&2
+        --ei com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID "$TXN_ID" 
     $ADB -s $DEVICE shell am broadcast \
         -a com.bignerdranch.franklin.roger.ACTION_INCOMING_TXN \
-        --ei com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID "$TXN_ID" >&2
+        --ei com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID "$TXN_ID" 
 done
 
 for DEVICE in $DEVICES; do 
-    echo Pushing to $DEVICE... >&2
+    echo Pushing to $DEVICE... 
 
     # find out what our actual target path should be
     LAST_NAME=$($ADB -s $DEVICE shell ls $REMOTE_PATH | grep -F "$APK_NAME_INITIAL" | sed 's/\..*//')
-    echo Last name: "$LAST_NAME" >&2
+    echo Last name: "$LAST_NAME" 
 
     NEXT_NAME=$(echo "$LAST_NAME" | awk -F '-' ' {
         seen[$2] = true;
@@ -62,12 +62,12 @@ for DEVICE in $DEVICES; do
 
     SDCARD_PATH="$REMOTE_PATH$NEXT_NAME"
     echo "next name is $NEXT_NAME"
-    echo pushing our apk to the sdcard to "$SDCARD_PATH" >&2
-    echo $ADB -s $DEVICE push "$APK_PATH" "$SDCARD_PATH" >&2
+    echo pushing our apk to the sdcard to "$SDCARD_PATH" 
+    echo $ADB -s $DEVICE push "$APK_PATH" "$SDCARD_PATH" 
     $ADB -s $DEVICE push "$APK_PATH" "$SDCARD_PATH"
 
     # then send out a broadcast intent 
-    echo Sending broadcast intent like so... >&2
+    echo Sending broadcast intent like so... 
     echo $ADB -s $DEVICE shell am broadcast \
         -a com.bignerdranch.franklin.roger.ACTION_NEW_LAYOUT \
         -e com.bignerdranch.franklin.roger.EXTRA_LAYOUT_APK_PATH "$SDCARD_PATH" \
@@ -75,7 +75,7 @@ for DEVICE in $DEVICES; do
         -e com.bignerdranch.franklin.roger.EXTRA_LAYOUT_LAYOUT_TYPE "$LAYOUT_TYPE" \
         -e com.bignerdranch.franklin.roger.EXTRA_LAYOUT_PACKAGE_NAME "$PACKAGE_NAME" \
         --ei com.bignerdranch.franklin.roger.EXTRA_LAYOUT_MIN_VERSION "$MIN_VERSION" \
-        --ei com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID "$TXN_ID" >&2
+        --ei com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID "$TXN_ID" 
     $ADB -s $DEVICE shell am broadcast \
         -a com.bignerdranch.franklin.roger.ACTION_NEW_LAYOUT \
         -e com.bignerdranch.franklin.roger.EXTRA_LAYOUT_APK_PATH "$SDCARD_PATH" \
@@ -83,5 +83,5 @@ for DEVICE in $DEVICES; do
         -e com.bignerdranch.franklin.roger.EXTRA_LAYOUT_LAYOUT_TYPE "$LAYOUT_TYPE" \
         -e com.bignerdranch.franklin.roger.EXTRA_LAYOUT_PACKAGE_NAME "$PACKAGE_NAME" \
         --ei com.bignerdranch.franklin.roger.EXTRA_LAYOUT_MIN_VERSION "$MIN_VERSION" \
-        --ei com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID "$TXN_ID" >&2
+        --ei com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID "$TXN_ID" 
 done

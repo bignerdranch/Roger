@@ -20,14 +20,20 @@ fi
 PROJECT_RESOURCES="$PROJECT_DIR"/res
 TARGET=$(cat "$PROJECT_PROPERTIES" | grep 'target=' | sed 's/^.*=//')
 
+# for now, only handle android targets - anything else, strip down
+if [ ! $(echo $TARGET | grep -q 'android-') ]; then
+    TARGET=$(echo $TARGET | sed 's/^.*:/android-/')
+fi
+
 FAKE_PROJECT_RESOURCES="$FAKE_PROJECT_PATH"/res
 
 PLATFORM_JAR="$ANDROID_SDK/platforms/$TARGET/android.jar"
 
 rm -f "$APK_NAME"
 
-echo Building $APK_NAME at $FAKE_PROJECT_PATH using $ANDROID_MANIFEST >&2
-echo Resources: $PROJECT_RESOURCES >&2
-echo Fake Resources: $FAKE_PROJECT_RESOURCES >&2
+echo Building $APK_NAME at $FAKE_PROJECT_PATH using $ANDROID_MANIFEST
+echo Resources: $PROJECT_RESOURCES
+echo Fake Resources: $FAKE_PROJECT_RESOURCES
 
-$AAPT package -F "$APK_NAME" -S "$FAKE_PROJECT_RESOURCES" -M "$ANDROID_MANIFEST" -I "$PLATFORM_JAR" 
+$AAPT package -F "$APK_NAME" -S "$FAKE_PROJECT_RESOURCES" -M "$ANDROID_MANIFEST" -I "$PLATFORM_JAR"
+exit $?

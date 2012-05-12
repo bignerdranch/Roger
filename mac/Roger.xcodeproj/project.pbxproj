@@ -16,6 +16,8 @@
 		369D98A615448B8D00616DF5 /* FResourceName.m in Sources */ = {isa = PBXBuildFile; fileRef = 369D98A515448B8D00616DF5 /* FResourceName.m */; };
 		369D98AA15448F3900616DF5 /* NSString+Resources.m in Sources */ = {isa = PBXBuildFile; fileRef = 369D98A915448F3900616DF5 /* NSString+Resources.m */; };
 		36E98EEB154C541600D48A46 /* NSString+Regexen.m in Sources */ = {isa = PBXBuildFile; fileRef = 36E98EEA154C541600D48A46 /* NSString+Regexen.m */; };
+		36EEAE02155EA0E70066AB57 /* FTaskStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 36EEAE01155EA0E70066AB57 /* FTaskStream.m */; };
+		36EEAE09155F1BEE0066AB57 /* libobjc.A.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 36EEAE08155F1BEE0066AB57 /* libobjc.A.dylib */; };
 		8342C50B153F7274007B2447 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8342C50A153F7274007B2447 /* Cocoa.framework */; };
 		8342C515153F7274007B2447 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8342C513153F7274007B2447 /* InfoPlist.strings */; };
 		8342C517153F7274007B2447 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8342C516153F7274007B2447 /* main.m */; };
@@ -47,6 +49,11 @@
 		369D98A915448F3900616DF5 /* NSString+Resources.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+Resources.m"; sourceTree = "<group>"; };
 		36E98EE9154C541600D48A46 /* NSString+Regexen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+Regexen.h"; sourceTree = "<group>"; };
 		36E98EEA154C541600D48A46 /* NSString+Regexen.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+Regexen.m"; sourceTree = "<group>"; };
+		36EEAE00155EA0E70066AB57 /* FTaskStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FTaskStream.h; sourceTree = "<group>"; };
+		36EEAE01155EA0E70066AB57 /* FTaskStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FTaskStream.m; sourceTree = "<group>"; };
+		36EEAE04155F1AB20066AB57 /* dylib1.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; name = dylib1.o; path = usr/lib/dylib1.o; sourceTree = SDKROOT; };
+		36EEAE06155F1ABD0066AB57 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+		36EEAE08155F1BEE0066AB57 /* libobjc.A.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libobjc.A.dylib; path = usr/lib/libobjc.A.dylib; sourceTree = SDKROOT; };
 		8342C506153F7274007B2447 /* Roger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Roger.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8342C50A153F7274007B2447 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		8342C50D153F7274007B2447 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -76,6 +83,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				36EEAE09155F1BEE0066AB57 /* libobjc.A.dylib in Frameworks */,
 				8342C50B153F7274007B2447 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -86,6 +94,9 @@
 		8342C4FB153F7274007B2447 = {
 			isa = PBXGroup;
 			children = (
+				36EEAE08155F1BEE0066AB57 /* libobjc.A.dylib */,
+				36EEAE06155F1ABD0066AB57 /* CoreFoundation.framework */,
+				36EEAE04155F1AB20066AB57 /* dylib1.o */,
 				3680B8891549CED8005CD1B3 /* publish_apk_to_adb_devices.sh */,
 				8395D943154771E70023F804 /* RogerIcon.icns */,
 				361B445A1540A56200C4F80B /* AndroidManifest.xml */,
@@ -149,6 +160,8 @@
 				369D98A915448F3900616DF5 /* NSString+Resources.m */,
 				36E98EE9154C541600D48A46 /* NSString+Regexen.h */,
 				36E98EEA154C541600D48A46 /* NSString+Regexen.m */,
+				36EEAE00155EA0E70066AB57 /* FTaskStream.h */,
+				36EEAE01155EA0E70066AB57 /* FTaskStream.m */,
 			);
 			path = Roger;
 			sourceTree = "<group>";
@@ -249,6 +262,7 @@
 				369D98A615448B8D00616DF5 /* FResourceName.m in Sources */,
 				369D98AA15448F3900616DF5 /* NSString+Resources.m in Sources */,
 				36E98EEB154C541600D48A46 /* NSString+Regexen.m in Sources */,
+				36EEAE02155EA0E70066AB57 /* FTaskStream.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

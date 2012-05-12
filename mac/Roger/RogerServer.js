@@ -99,12 +99,13 @@ sys.puts("Mobile server Running on " + hostname + ":" + mobilePort);
 var udpSocket = dgram.createSocket("udp4");
 udpSocket.on("message", function(msg, rinfo) {
     // send back a response
-    sys.puts("received something from address: " + rinfo.address);
-	sys.puts("Host name " + os.hostname());
+	sys.puts("received query from address " + rinfo.address + ", host name " + os.hostname() + ", sending response");
 
     var message = new Buffer("SECRETS!" + os.hostname());
     udpSocket.send(message, 0, message.length, multicastPort, rinfo.address, function (err, bytes) {
-        sys.puts("error sending udp message: " + err);
+        if (err) {
+            sys.puts("error sending udp message: " + err);
+        }
     });
 });
 
