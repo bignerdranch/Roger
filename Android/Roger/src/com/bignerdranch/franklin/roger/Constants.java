@@ -1,6 +1,8 @@
 package com.bignerdranch.franklin.roger;
 
 public class Constants {
+    public static final String ACTION_PING = Constants.class.getPackage().getName() + ".ACTION_PING";
+
     public static final String ACTION_FOUND_SERVERS = Constants.class.getPackage().getName() + ".ACTION_FOUND_SERVERS";
     public static final String EXTRA_IP_ADDRESSES = Constants.class.getPackage().getName() + ".EXTRA_IP_ADDRESSES";
 
