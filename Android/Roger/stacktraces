@@ -1,0 +1,44 @@
+Failure for gingerbread emulator to load resources:
+
+05-05 21:11:37.028 I/RogerActivity(  390): InflateException
+05-05 21:11:37.028 I/RogerActivity(  390): android.view.InflateException: Binary XML file line #12: Error inflating class <unknown>
+05-05 21:11:37.028 I/RogerActivity(  390): 	at android.view.LayoutInflater.createView(LayoutInflater.java:518)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at com.android.internal.policy.impl.PhoneLayoutInflater.onCreateView(PhoneLayoutInflater.java:56)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at android.view.LayoutInflater.createViewFromTag(LayoutInflater.java:568)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at android.view.LayoutInflater.rInflate(LayoutInflater.java:623)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at android.view.LayoutInflater.inflate(LayoutInflater.java:408)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at android.view.LayoutInflater.inflate(LayoutInflater.java:320)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at com.bignerdranch.franklin.roger.RogerActivity.loadLayout(RogerActivity.java:373)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at com.bignerdranch.franklin.roger.RogerActivity.loadResource(RogerActivity.java:282)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at com.bignerdranch.franklin.roger.RogerActivity.access$2(RogerActivity.java:269)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at com.bignerdranch.franklin.roger.RogerActivity$2.onReceive(RogerActivity.java:520)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at android.app.LoadedApk$ReceiverDispatcher$Args.run(LoadedApk.java:709)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at android.os.Handler.handleCallback(Handler.java:587)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at android.os.Handler.dispatchMessage(Handler.java:92)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at android.os.Looper.loop(Looper.java:130)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at android.app.ActivityThread.main(ActivityThread.java:3683)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at java.lang.reflect.Method.invokeNative(Native Method)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at java.lang.reflect.Method.invoke(Method.java:507)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:839)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:597)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at dalvik.system.NativeStart.main(Native Method)
+05-05 21:11:37.028 I/RogerActivity(  390): Caused by: java.lang.reflect.InvocationTargetException
+05-05 21:11:37.028 I/RogerActivity(  390): 	at java.lang.reflect.Constructor.constructNative(Native Method)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at java.lang.reflect.Constructor.newInstance(Constructor.java:415)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at android.view.LayoutInflater.createView(LayoutInflater.java:505)
+05-05 21:11:37.028 I/RogerActivity(  390): 	... 19 more
+05-05 21:11:37.028 I/RogerActivity(  390): Caused by: android.content.res.Resources$NotFoundException: File Yeah this is not a one week project. :) - Dianne Hackborn. Yeah this is not a one week project. :) - Dianne Hackborn. Yeah this is not a one week project. :) - Dianne Hackborn from drawable resource ID #0x7f050002
+05-05 21:11:37.028 I/RogerActivity(  390): 	at android.content.res.Resources.loadDrawable(Resources.java:1714)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at android.content.res.TypedArray.getDrawable(TypedArray.java:601)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at android.view.View.<init>(View.java:1951)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at android.view.ViewGroup.<init>(ViewGroup.java:292)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at android.widget.FrameLayout.<init>(FrameLayout.java:88)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at android.widget.FrameLayout.<init>(FrameLayout.java:84)
+05-05 21:11:37.028 I/RogerActivity(  390): 	... 22 more
+05-05 21:11:37.028 I/RogerActivity(  390): Caused by: java.io.FileNotFoundException: Yeah this is not a one week project. :) - Dianne Hackborn. Yeah this is not a one week project. :) - Dianne Hackborn. Yeah this is not a one week project. :) - Dianne Hackborn
+05-05 21:11:37.028 I/RogerActivity(  390): 	at android.content.res.AssetManager.openNonAssetNative(Native Method)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at android.content.res.AssetManager.openNonAsset(AssetManager.java:406)
+05-05 21:11:37.028 I/RogerActivity(  390): 	at android.content.res.Resources.loadDrawable(Resources.java:1706)
+05-05 21:11:37.028 I/RogerActivity(  390): 	... 27 more
+05-05 21:11:37.028 I/ErrorManager(  390): error toast: Yeah this is not a one week project. :) - Dianne Hackborn. Yeah this is not a one week project. :) - Dianne Hackborn. Yeah this is not a one week project. :) - Dianne Hackborn
+
