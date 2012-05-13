@@ -38,7 +38,7 @@
         _adb = adb;
         self.connectedDeviceNames = [[NSMutableSet alloc] init];
         self.deviceMap = [[NSMutableDictionary alloc] init];
-        [NSTimer scheduledTimerWithTimeInterval:2.0 
+        [NSTimer scheduledTimerWithTimeInterval:2.0
                                          target:self 
                                        selector:@selector(checkDevices:)
                                        userInfo:nil

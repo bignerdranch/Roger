@@ -26,7 +26,7 @@
     [task setCurrentDirectoryPath:NSHomeDirectory()];
     [task setEnvironment:env];
     [task setArguments:args];
-    [task setStandardInput:[NSPipe pipe]];
+    //[task setStandardInput:[NSPipe pipe]];
 
     return task;
 }

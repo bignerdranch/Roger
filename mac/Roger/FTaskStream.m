@@ -73,12 +73,21 @@
 
         NSPipe *standardOutputPipe = [NSPipe pipe];
         NSPipe *standardErrorPipe = [NSPipe pipe];
+        if (!(standardOutputPipe && standardErrorPipe)) {
+            NSLog(@"error, a pipe is nil standardOutput: %@ standardError: %@", standardOutputPipe, standardErrorPipe);
+            return nil;
+        }
 
         task.standardOutput = standardOutputPipe;
         task.standardError = standardErrorPipe;
 
         self.outputHandle = [standardOutputPipe fileHandleForReading];
         self.errorHandle = [standardErrorPipe fileHandleForReading];
+
+        if (!(self.outputHandle && self.errorHandle)) {
+            NSLog(@"error, a handle is nil standardOutput: %@ standardError: %@", self.outputHandle, self.errorHandle);
+            return nil;
+        }
 
         self.outputData = [[NSMutableData alloc] init];
         self.errorData = [[NSMutableData alloc] init];
@@ -178,6 +187,18 @@
             removeObserver:self 
                       name:NSFileHandleReadCompletionNotification
                     object:handle];
+        // signal that a handle is done by nilling it
+        if (handle == self.outputHandle) {
+            self.outputHandle = nil;
+        }
+        if (handle == self.errorHandle) {
+            self.errorHandle = nil;
+        }
+
+        // if both handles are done, release the task
+        if (!self.errorHandle && !self.outputHandle) {
+            self.task = nil;
+        }
     }
 }
 
@@ -236,11 +257,6 @@
     }
 
     return results;
-}
-
--(void)dealloc
-{
-    NSLog(@"FTaskStream dealloc");
 }
 
 @end
