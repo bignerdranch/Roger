@@ -12,8 +12,8 @@
 
 @interface FTaskStream ()
 
-@property (atomic, strong) NSMutableDictionary *outputEvents;
-@property (atomic, strong) NSMutableDictionary *errorEvents;
+@property (atomic, strong) NSMutableArray *outputEvents;
+@property (atomic, strong) NSMutableArray *errorEvents;
 @property (atomic, strong) NSFileHandle *outputHandle;
 @property (atomic, strong) NSFileHandle *errorHandle;
 @property (atomic, strong) NSMutableData *outputData;
@@ -22,7 +22,7 @@
 @property (nonatomic, strong) NSTask *task;
 
 -(void)readComplete:(NSNotification *)notification;
--(BOOL)processData:(NSData *)data withEventMap:(NSMutableDictionary *)eventMap dataStash:(NSMutableData *)dataStash;
+-(BOOL)processData:(NSData *)data withEventMap:(NSMutableArray *)eventMap dataStash:(NSMutableData *)dataStash;
 -(NSArray *)linesFromData:(NSData *)available withDataStash:(NSMutableData *)data;
 
 @end
@@ -38,8 +38,29 @@
 
 @synthesize task=_task;
 
++(FTaskStream *)taskStreamForLaunchedTask:(NSTask *)task
+{
+    FTaskStream *taskStream = (FTaskStream *)objc_getAssociatedObject(task, @"FTaskStream_TaskAssociation");
+
+    return taskStream;
+}
+
++(FTaskStream *)taskStreamForUnlaunchedTask:(NSTask *)task
+{
+    FTaskStream *taskStream = (FTaskStream *)objc_getAssociatedObject(task, @"FTaskStream_TaskAssociation");
+
+    if (!taskStream) {
+        taskStream = [[FTaskStream alloc] initWithUnlaunchedTask:task];
+    }
+
+    return taskStream;
+}
+
 -(id)initWithUnlaunchedTask:(NSTask *)task
 {
+    // can't launch without a task
+    if (task == nil) return nil;
+
     if ((self = [super init])) {
         self.task = task;
 
@@ -47,8 +68,8 @@
         // per nstask
         objc_setAssociatedObject(task, @"FTaskStream_TaskAssociation", self, OBJC_ASSOCIATION_RETAIN);
 
-        self.outputEvents = [[NSMutableDictionary alloc] init];
-        self.errorEvents = [[NSMutableDictionary alloc] init];
+        self.outputEvents = [[NSMutableArray alloc] init];
+        self.errorEvents = [[NSMutableArray alloc] init];
 
         NSPipe *standardOutputPipe = [NSPipe pipe];
         NSPipe *standardErrorPipe = [NSPipe pipe];
@@ -83,29 +104,60 @@
 
 -(void)addOutputEvent:(NSString *)regexEvent withBlock:(FTaskEvent)block
 {
-    [self.outputEvents setObject:[block copy] forKey:regexEvent];
+    block = [block copy];
+    NSArray *event = [NSArray arrayWithObjects:regexEvent, block, nil];
+    [self.outputEvents addObject:event];
 }
 
--(void)removeOutputEvent:(NSString *)regexEvent
+-(void)removeOutputEvent:(NSString *)regexEvent withBlock:(FTaskEvent)block
 {
-    [self.outputEvents removeObjectForKey:regexEvent];
+    block = [block copy];
+    NSArray *event = [NSArray arrayWithObjects:regexEvent, block, nil];
+    [self.outputEvents removeObject:event];
 }
 
 -(void)addErrorEvent:(NSString *)regexEvent withBlock:(FTaskEvent)block
 {
-    [self.errorEvents setObject:[block copy] forKey:regexEvent];
+    block = [block copy];
+    NSArray *event = [NSArray arrayWithObjects:regexEvent, block, nil];
+    [self.errorEvents addObject:event];
 }
 
--(void)removeErrorEvent:(NSString *)regexEvent
+-(void)removeErrorEvent:(NSString *)regexEvent withBlock:(FTaskEvent)block
 {
-    [self.errorEvents removeObjectForKey:regexEvent];
+    block = [block copy];
+    NSArray *event = [NSArray arrayWithObjects:regexEvent, block, nil];
+    [self.errorEvents removeObject:event];
+}
+
+-(void)addLogEventsWithPrefix:(NSString *)logPrefix isOutput:(BOOL)isOutput
+{
+    if (isOutput) {
+        [self addOutputEvent:@"." withBlock:^(NSString *line) {
+            if (line) {
+                NSLog(@"%@: %@", logPrefix, line);
+            }
+        }];
+    } else {
+        [self addErrorEvent:@"." withBlock:^(NSString *line) {
+            if (line) {
+                NSLog(@"%@ ERROR: %@", logPrefix, line);
+            }
+        }];
+    }
+}
+
+-(void)addLogEventsWithPrefix:(NSString *)logPrefix
+{
+    [self addLogEventsWithPrefix:logPrefix isOutput:YES];
+    [self addLogEventsWithPrefix:logPrefix isOutput:NO];
 }
 
 -(void)readComplete:(NSNotification *)notification
 {
     NSData *data = [notification.userInfo objectForKey:NSFileHandleNotificationDataItem];
 
-    NSMutableDictionary *eventMap;
+    NSMutableArray *eventMap;
     NSMutableData *dataStash;
     NSFileHandle *handle = notification.object;
 
@@ -129,22 +181,24 @@
     }
 }
 
--(BOOL)processData:(NSData *)data withEventMap:(NSMutableDictionary *)eventMap dataStash:(NSMutableData *)dataStash
+-(BOOL)processData:(NSData *)data withEventMap:(NSMutableArray *)eventMap dataStash:(NSMutableData *)dataStash
 {
     NSArray *lines = [self linesFromData:data withDataStash:dataStash];
     if (lines) {
         for (NSString *line in lines) {
-            for (NSString *pattern in [eventMap keyEnumerator]) {
-                FTaskEvent eventBlock = [eventMap objectForKey:pattern];
+            for (NSArray *event in eventMap ) {
+                NSString *pattern = [event objectAtIndex:0];
 
                 if ([line stringsFromFirstMatchOfPattern:pattern]) {
+                    FTaskEvent eventBlock = [event objectAtIndex:1];
                     eventBlock(line);
                 }
             }
         }
         return YES;
     } else { 
-        for (FTaskEvent eventBlock in [eventMap objectEnumerator]) {
+        for (NSArray *event in eventMap ) {
+            FTaskEvent eventBlock = [event objectAtIndex:1];
             eventBlock(nil);
         }
         return NO;
@@ -184,5 +238,9 @@
     return results;
 }
 
+-(void)dealloc
+{
+    NSLog(@"FTaskStream dealloc");
+}
 
 @end
