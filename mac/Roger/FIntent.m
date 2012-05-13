@@ -37,7 +37,7 @@ NSString * const kJSONExtras = @"extras";
 
 @synthesize extraStore;
 
--(id)initIntentWithAction:(NSString *)action type:(NSString *)type
+-(id)initWithAction:(NSString *)action type:(NSString *)type
 {
     if ((self = [super init])) {
         self.type = type;
@@ -50,9 +50,9 @@ NSString * const kJSONExtras = @"extras";
     return self;
 }
 
--(id)initBroadcastIntentWithAction:(NSString *)action
+-(id)initBroadcastWithAction:(NSString *)action
 {
-    return [self initIntentWithAction:action type:kFIntent_Broadcast];
+    return [self initWithAction:action type:kFIntent_Broadcast];
 }
 
 -(void)setBroadcast

@@ -18,8 +18,8 @@ extern NSString * const kFIntent_Service;
 @property (nonatomic, copy) NSString *data;
 @property (nonatomic, copy) NSString *type;
 
--(id)initIntentWithAction:(NSString *)action type:(NSString *)type;
--(id)initBroadcastIntentWithAction:(NSString *)action;
+-(id)initWithAction:(NSString *)action type:(NSString *)type;
+-(id)initBroadcastWithAction:(NSString *)action;
 
 -(void)setBroadcast;
 -(void)setActivity;
