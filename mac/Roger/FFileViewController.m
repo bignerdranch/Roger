@@ -12,11 +12,13 @@
 #import "FTaskStream.h"
 #import "NSString+Regexen.h"
 #import "FIntent.h"
+#import "FADB.h"
+#import "FADBMonitor.h"
 
 @interface FFileViewController ()
 
-- (void)sendIntent:(FIntent *)intent toDevice:(NSString *)serial;
-- (void)listDevicesWithBlock:(void (^)(NSArray *devices))block;
+@property (nonatomic, strong) FADB *adb;
+@property (nonatomic, strong) FADBMonitor *adbMonitor;
 
 - (void)sendChangesToNodeWithPath:(NSString *)apk layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId;
 - (void)sendChangesToAdbWithPath:(NSString *)apk layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId;
@@ -47,17 +49,22 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
 @implementation FFileViewController
 
-@synthesize sdkPath;
-@synthesize apkPath;
+@dynamic sdkPath;
+@synthesize apkPath=_apkPath;
 @synthesize tableView;
 @synthesize statusText;
 @synthesize statusProgress;
+
+@synthesize adb=_adb;
+@synthesize adbMonitor=_adbMonitor;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         fm = [NSFileManager defaultManager];
+        [self setAdb:[[FADB alloc] init]];
+        [self setAdbMonitor:[[FADBMonitor alloc] initWithAdb:[self adb]]];
         [self setApkPath:[NSString stringWithFormat:@"%@/stripped.apk", NSHomeDirectory()]];
         [self setSdkPath:[[NSUserDefaults standardUserDefaults] stringForKey:@"SdkDirKey"]];
         if (![self sdkPath]) [self setSdkPath:@""];
@@ -70,6 +77,18 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     }
     
     return self;
+}
+
+- (void)setSdkPath:(NSString *)sdkPath
+{
+    _sdkPath = [sdkPath copy];
+
+    [[self adb] setAdbPath:[self adbPath]];
+}
+
+- (NSString *)sdkPath
+{
+    return _sdkPath;
 }
 
 - (void) awakeFromNib
@@ -327,145 +346,52 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     [self sendChangesToNodeWithPath:apk layout:layout type:type package:package minSdk:minSdk txnId:txnId];
 }
 
-- (NSTask *)adbTaskWithArgs:(NSArray *)arguments
-{
-    NSMutableDictionary *env = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-        nil];
-
-    NSTask *task = [[NSTask alloc] init];
-    [task setLaunchPath:[self adbPath]];
-    [task setCurrentDirectoryPath:NSHomeDirectory()];
-    [task setEnvironment:env];
-    [task setArguments:arguments];
-    [task setStandardInput:[NSPipe pipe]];
-
-    return task;
-}
-
-- (void)listDevicesWithBlock:(void (^)(NSArray *devices))block
-{
-    block = [block copy];
-
-    NSLog(@"listing devices...");
-    NSMutableArray *results = [[NSMutableArray alloc] init];
-    NSTask *task = [self adbTaskWithArgs:[NSArray arrayWithObjects:@"devices", nil]];
-
-    FTaskStream *taskStream = [[FTaskStream alloc] initWithUnlaunchedTask:task];
-    [taskStream addErrorEvent:@"." withBlock:^(NSString *line) {
-        if (line) {
-            NSLog(@"ADB ERROR: %@", line);
-        }
-    }];
-    [taskStream addOutputEvent:@"device$" withBlock:^(NSString *line) {
-        if (line) {
-            NSArray *components = [line componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-            if ([components count] > 0) {
-                NSString *serial = [components objectAtIndex:0];
-                [results addObject:serial];
-            }
-        } else {
-            block(results);
-        }
-    }];
-
-    [task launch];
-}
-
-- (void)sendIntent:(FIntent *)intent toDevice:(NSString *)serial
-{
-    NSMutableArray *args = [[NSMutableArray alloc] init];
-
-    [args addObjectsFromArray:[NSArray arrayWithObjects:
-        @"-s", serial, @"shell", @"am", intent.type, nil]];
-    if (intent.action) {
-        [args addObjectsFromArray:[NSArray arrayWithObjects:@"-a", intent.action, nil]];
-    }
-
-    NSDictionary *extras = [intent extras];
-    for (NSString *key in [extras keyEnumerator]) {
-        NSObject *value = [extras objectForKey:key];
-        if ([value isKindOfClass:[NSString class]]) { 
-            [args addObjectsFromArray:[NSArray arrayWithObjects:@"--es", key, value, nil]];
-        } else if ([value isKindOfClass:[NSNumber class]]) {
-            NSNumber *number = (NSNumber *)value;
-            BOOL isBool = NO;
-            int intValue;
-
-            // ripped off from CJSONSerializer
-            switch (CFNumberGetType((__bridge CFNumberRef)number)) {
-                case kCFNumberCharType:
-                    intValue = [number intValue];
-                    if (intValue == 0 || intValue == 1) {
-                        isBool = YES;
-                    }
-                    break;
-                case kCFNumberFloat32Type:
-                case kCFNumberFloat64Type:
-                case kCFNumberFloatType:
-                case kCFNumberDoubleType:
-                case kCFNumberSInt8Type:
-                case kCFNumberSInt16Type:
-                case kCFNumberSInt32Type:
-                case kCFNumberSInt64Type:
-                case kCFNumberShortType:
-                case kCFNumberIntType:
-                case kCFNumberLongType:
-                case kCFNumberLongLongType:
-                case kCFNumberCFIndexType:
-                default:
-                    intValue = [number intValue];
-                    break;
-            }
-
-            if (isBool) {
-                NSString *boolString = intValue ? @"true" : @"false";
-                [args addObjectsFromArray:[NSArray arrayWithObjects:
-                    @"--ez", key, boolString, nil]];
-            } else {
-                [args addObjectsFromArray:[NSArray arrayWithObjects:
-                    @"--ei", key, [NSString stringWithFormat:@"%d", intValue], nil]];
-            }
-        } else {
-            NSLog(@"unsupported extra type: %@", value);
-        }
-    }
-
-    NSLog(@"send intent args: %@", args);
-    NSTask *task = [self adbTaskWithArgs:args];
-
-    FTaskStream *taskStream = [[FTaskStream alloc] initWithUnlaunchedTask:task];
-    [taskStream addErrorEvent:@"." withBlock:^(NSString *line) {
-        if (line) {
-            NSLog(@"ADB SEND INTENT ERROR: %@", line);
-        }
-    }];
-    [taskStream addOutputEvent:@"." withBlock:^(NSString *line) {
-        if (line) {
-            NSLog(@"ADB SEND INTENT: %@", line);
-        }
-    }];
-
-    NSLog(@"sending intent to device %@", serial);
-    [task launch];
-}
-
 - (void)sendChangesToAdbWithPath:(NSString *)apk layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId
 {
     NSTask *task = [[NSTask alloc] init];
 
     NSString *publishApkToAdbDevices = [self publishApkToAdbDevicesPath];
+    NSString *devicePath = @"";
 
-    FIntent *intent = [[FIntent alloc] 
-        initBroadcastIntentWithAction:@"com.bignerdranch.franklin.roger.ACTION_INCOMING_TXN"];
-    [intent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID"
+    FIntent *incomingIntent = [[FIntent alloc] 
+        initBroadcastWithAction:@"com.bignerdranch.franklin.roger.ACTION_INCOMING_TXN"];
+    [incomingIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID"
               number:[NSNumber numberWithInt:txnId]];
 
-    NSLog(@"intent created: %@", [intent simpleRepresentation]);
-    NSLog(@"   string json: %@", [[NSString alloc] initWithData:[intent json] encoding:NSUTF8StringEncoding]);
+    FIntent *newLayoutIntent = [[FIntent alloc]
+        initBroadcastWithAction:@"com.bignerdranch.franklin.roger.ACTION_NEW_LAYOUT"];
+    [newLayoutIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_APK_PATH" 
+                       string:devicePath];
+    [newLayoutIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_LAYOUT_NAME" 
+                       string:layout];
+    [newLayoutIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_LAYOUT_TYPE" 
+                       string:type];
+    [newLayoutIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_PACKAGE_NAME"
+                       string:package];
+    [newLayoutIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_MIN_VERSION"
+                       number:[NSNumber numberWithInt:minSdk]];
+    [newLayoutIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID" 
+                       number:[NSNumber numberWithInt:txnId]];
+    
+    NSLog(@"intent created: %@", [incomingIntent simpleRepresentation]);
+    NSLog(@"   string json: %@", [[NSString alloc] initWithData:[incomingIntent json] encoding:NSUTF8StringEncoding]);
 
-    [self listDevicesWithBlock:^(NSArray *devices) {
+
+    [self.adb listDevicesWithBlock:^(NSArray *devices) {
+        // first, notify them all they'll be getting a file - this should be
+        // relatively quick, blocks for now
         for (NSString *device in devices) {
-            [self sendIntent:intent toDevice:device];
+            void (^onIncomingIntentSent)(void);
+            void (^onCopyFileComplete)(void);
+
+            onIncomingIntentSent = ^{
+                // then copy over the file
+                [self.adb copyLocalPath:apk toDevicePath:devicePath device:device completion:onCopyFileComplete];
+            };
+            // then send the file and 
+            onCopyFileComplete = ^{
+                [self.adb sendIntent:newLayoutIntent toDevice:device completion:nil];
+            };
         }
     }];
 
@@ -689,12 +615,9 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     [task setStandardInput:[NSPipe pipe]];
     [task setStandardOutput:outputPipe];
     
-    FTaskStream *taskStream = [[FTaskStream alloc] initWithUnlaunchedTask:task];
-    [taskStream addOutputEvent:@"." withBlock:^(NSString *line) {
-        if (line) {
-            NSLog(@"BUILD: %@", line);
-        }
-    }];
+    FTaskStream *taskStream = [FTaskStream taskStreamForUnlaunchedTask:task];
+    [taskStream addLogEventsWithPrefix:@"BUILD" isOutput:YES];
+    // rewrite error lines
     [taskStream addErrorEvent:@"." withBlock:^(NSString *line) {
         if ([line stringsFromFirstMatchOfPattern:@"^/.*:[1-9]+[0-9]*: "]) {
             
@@ -854,5 +777,10 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
 }
 
+-(void)dealloc
+{
+    // kill the monitor so that its timer will stop
+    [[self adbMonitor] kill];
+}
 
 @end

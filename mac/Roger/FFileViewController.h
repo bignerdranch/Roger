@@ -24,6 +24,8 @@
     
     NSTask *nodeTask;
 
+    NSString *_sdkPath;
+
     int currentTxnId;
 }
 
