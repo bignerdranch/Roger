@@ -120,4 +120,28 @@ NSString * const kJSONExtras = @"extras";
     return json;
 }
 
+- (id)copyWithZone:(NSZone *)zone
+{
+    FIntent *new = [[FIntent allocWithZone:zone]
+                            initWithAction:[self action]
+                                      type:[self type]];
+    new.data = self.data;
+
+    for (NSString *key in [self.extraStore keyEnumerator]) {
+        NSObject *value = [self.extraStore objectForKey:key];
+        if ([value isKindOfClass:[NSString class]]) {
+
+            [new setExtra:key string:(NSString *)value];
+        } else if ([value isKindOfClass:[NSNumber class]]) {
+            [new setExtra:key number:(NSNumber *)value];
+        }
+    }
+
+    for (NSString *category in self.categories) {
+        [new addCategory:category];
+    }
+
+    return new;
+}
+
 @end

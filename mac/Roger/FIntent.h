@@ -12,7 +12,7 @@ extern NSString * const kFIntent_Broadcast;
 extern NSString * const kFIntent_Activity;
 extern NSString * const kFIntent_Service;
 
-@interface FIntent : NSObject
+@interface FIntent : NSObject <NSCopying>
 
 @property (nonatomic, copy) NSString *action;
 @property (nonatomic, copy) NSString *data;

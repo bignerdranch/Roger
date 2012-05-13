@@ -14,6 +14,7 @@
 #import "FIntent.h"
 #import "FADB.h"
 #import "FADBMonitor.h"
+#import "FADBDevice.h"
 
 @interface FFileViewController ()
 
@@ -351,7 +352,6 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     NSTask *task = [[NSTask alloc] init];
 
     NSString *publishApkToAdbDevices = [self publishApkToAdbDevicesPath];
-    NSString *devicePath = @"";
 
     FIntent *incomingIntent = [[FIntent alloc] 
         initBroadcastWithAction:@"com.bignerdranch.franklin.roger.ACTION_INCOMING_TXN"];
@@ -360,8 +360,6 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
     FIntent *newLayoutIntent = [[FIntent alloc]
         initBroadcastWithAction:@"com.bignerdranch.franklin.roger.ACTION_NEW_LAYOUT"];
-    [newLayoutIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_APK_PATH" 
-                       string:devicePath];
     [newLayoutIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_LAYOUT_NAME" 
                        string:layout];
     [newLayoutIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_LAYOUT_TYPE" 
@@ -376,53 +374,32 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     NSLog(@"intent created: %@", [incomingIntent simpleRepresentation]);
     NSLog(@"   string json: %@", [[NSString alloc] initWithData:[incomingIntent json] encoding:NSUTF8StringEncoding]);
 
+    for (FADBDevice *device in [self.adbMonitor devices]) {
+        FIntent *deviceLayoutIntent = [newLayoutIntent copy];
 
-    [self.adb listDevicesWithBlock:^(NSArray *devices) {
-        // first, notify them all they'll be getting a file - this should be
-        // relatively quick, blocks for now
-        for (NSString *device in devices) {
-            void (^onIncomingIntentSent)(void);
-            void (^onCopyFileComplete)(void);
+        NSString *fileName = [apk lastPathComponent];
+        NSString *devicePath = [device.externalStoragePath stringByAppendingPathComponent:fileName];
 
-            onIncomingIntentSent = ^{
-                // then copy over the file
-                [self.adb copyLocalPath:apk toDevicePath:devicePath device:device completion:onCopyFileComplete];
-            };
-            // then send the file and 
-            onCopyFileComplete = ^{
-                [self.adb sendIntent:newLayoutIntent toDevice:device completion:nil];
-            };
-        }
-    }];
+        [deviceLayoutIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_APK_PATH" 
+                           string:devicePath];
 
+        void (^onIncomingIntentSent)(void);
+        void (^onCopyFileComplete)(void);
 
-    //NSLog(@"Calling %@ to send to adb...", publishApkToAdbDevices);
-    //NSMutableArray *args = [[NSMutableArray alloc] init];
-    //NSMutableDictionary *env = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-    //    [self adbPath], @"ADB",
-    //    nil];
+        onCopyFileComplete = ^{
+            // then send the file
+            [self.adb sendIntent:deviceLayoutIntent toDevice:[device serial] completion:nil];
+        };
 
-    //[args addObject:publishApkToAdbDevices]; 
-    //[args addObject:apk];
-    //[args addObject:layout];
-    //[args addObject:type];
-    //[args addObject:package];
-    //[args addObject:[NSString stringWithFormat:@"%d", minSdk]];
-    //[args addObject:[NSString stringWithFormat:@"%d", txnId]];
-    //[task setCurrentDirectoryPath:NSHomeDirectory()];
-    //[task setLaunchPath:@"/bin/sh"];
-    //[task setEnvironment:env];
-    //[task setArguments:args];
-    //
-    //// If the output from this task is not piped somewhere else, regular NSLog messages will not show up
-    //// after the task logs any messages
-    //NSPipe *outputPipe = [NSPipe pipe];
-    //[task setStandardInput:[NSPipe pipe]];
-    //[task setStandardOutput:outputPipe];
-    //
-    //[task launch];
+        // send the incoming intent
+        onIncomingIntentSent = ^{
+            NSLog(@"incoming intent sent, copying file with completion block %@", onCopyFileComplete);
+            // then copy over the file
+            [self.adb copyLocalPath:apk toDevicePath:devicePath device:[device serial] completion:onCopyFileComplete];
+        };
 
-    //// don't wait for this one to finish
+        [self.adb sendIntent:incomingIntent toDevice:[device serial] completion:onIncomingIntentSent];
+    }
 }
 
 - (void)sendChangesToNodeWithPath:(NSString *)apk layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId

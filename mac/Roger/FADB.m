@@ -14,7 +14,7 @@
 
 @synthesize adbPath=_adbPath;
 
-- (NSTask *)adbTaskWithArgs:(NSArray *)arguments
+- (NSTask *)adbTaskWithArgs:(NSArray *)args
 {
     if (![self adbPath]) return nil;
 
@@ -25,20 +25,20 @@
     [task setLaunchPath:[self adbPath]];
     [task setCurrentDirectoryPath:NSHomeDirectory()];
     [task setEnvironment:env];
-    [task setArguments:arguments];
+    [task setArguments:args];
     [task setStandardInput:[NSPipe pipe]];
 
     return task;
 }
 
-- (NSTask *)runAdbTaskWithArgs:(NSArray *)arguments 
+- (NSTask *)runAdbTaskWithArgs:(NSArray *)args 
                      logPrefix:(NSString *)logPrefix
                     completion:(void (^)(void))completion
 {
     if (![self adbPath]) return nil;
 
     completion = [completion copy];
-    NSTask *task = [self adbTaskWithArgs:arguments];
+    NSTask *task = [self adbTaskWithArgs:args];
 
     FTaskStream *taskStream = [FTaskStream taskStreamForUnlaunchedTask:task];
 
@@ -63,14 +63,11 @@
                device:(NSString *)serial
            completion:(void (^)(void))completion
 {
-    //echo "next name is $NEXT_NAME"
-    //echo pushing our apk to the sdcard to "$SDCARD_PATH" 
-    //echo $ADB -s $DEVICE push "$APK_PATH" "$SDCARD_PATH" 
-    //$ADB -s $DEVICE push "$APK_PATH" "$SDCARD_PATH"
-    NSArray *arguments = [NSArray arrayWithObjects:
+    NSArray *args = [NSArray arrayWithObjects:
         @"-s", serial, @"push", localPath, devicePath, nil];
 
-    [self runAdbTaskWithArgs:arguments logPrefix:@"ADB copy" completion:completion];
+    NSString *logPrefix = [NSString stringWithFormat:@"ADB copy %@", serial];
+    [self runAdbTaskWithArgs:args logPrefix:logPrefix completion:completion];
 }
 
 - (void)sendIntent:(FIntent *)intent toDevice:(NSString *)serial completion:(void(^)(void))completion

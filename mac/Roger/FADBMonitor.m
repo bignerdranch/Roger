@@ -136,6 +136,7 @@
     // and when we do find one, map it
     [stream addOutputEvent:@"external files dir ::::= " withBlock:^(NSString *line) {
         if (line) {
+            line = [line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
             NSArray *components = [line componentsSeparatedByString:@" ::::= "];
             if ([components count] == 2) {
                 NSString *storagePath = [components objectAtIndex:1];
