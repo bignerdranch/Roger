@@ -64,7 +64,6 @@
 
     if ((self = [super init])) {
 
-        NSLog(@"adding another task");
         @autoreleasepool {
             // throw the task in the corral so that it doesn't die
             [[FTaskCorral sharedInstance] addTask:task];
@@ -278,11 +277,6 @@
     }
 
     return results;
-}
-
-- (void)dealloc
-{
-    NSLog(@"dealloc ftaskstream");
 }
 
 @end
