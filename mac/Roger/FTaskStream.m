@@ -64,11 +64,9 @@
 
     if ((self = [super init])) {
 
-        @autoreleasepool {
-            // throw the task in the corral so that it doesn't die
-            [[FTaskCorral sharedInstance] addTask:task];
-            self.task = task;
-        }
+        // throw the task in the corral so that it doesn't die
+        [[FTaskCorral sharedInstance] addTask:task];
+        self.task = task;
         
         // associate ourselves with the task; means only one instance
         // per nstask
