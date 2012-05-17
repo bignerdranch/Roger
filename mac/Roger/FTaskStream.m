@@ -8,6 +8,7 @@
 
 #import <objc/runtime.h>
 #import "FTaskStream.h"
+#import "FTaskCorral.h"
 #import "NSString+Regexen.h"
 
 @interface FTaskStream ()
@@ -19,7 +20,7 @@
 @property (atomic, strong) NSMutableData *outputData;
 @property (atomic, strong) NSMutableData *errorData;
 
-@property (nonatomic, strong) NSTask *task;
+@property (atomic, weak) NSTask *task;
 
 -(void)readComplete:(NSNotification *)notification;
 -(BOOL)processData:(NSData *)data withEventMap:(NSMutableArray *)eventMap dataStash:(NSMutableData *)dataStash;
@@ -62,8 +63,14 @@
     if (task == nil) return nil;
 
     if ((self = [super init])) {
-        self.task = task;
 
+        NSLog(@"adding another task");
+        @autoreleasepool {
+            // throw the task in the corral so that it doesn't die
+            [[FTaskCorral sharedInstance] addTask:task];
+            self.task = task;
+        }
+        
         // associate ourselves with the task; means only one instance
         // per nstask
         objc_setAssociatedObject(task, @"FTaskStream_TaskAssociation", self, OBJC_ASSOCIATION_RETAIN);
@@ -211,7 +218,7 @@
 
         // if both handles are done, release the task
         if (!self.errorHandle && !self.outputHandle) {
-            self.task = nil;
+            [[FTaskCorral sharedInstance] removeTask:self.task];
         }
     }
 }
@@ -271,6 +278,11 @@
     }
 
     return results;
+}
+
+- (void)dealloc
+{
+    NSLog(@"dealloc ftaskstream");
 }
 
 @end

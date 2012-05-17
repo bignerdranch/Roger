@@ -31,6 +31,7 @@
 		36EEAE6A155FF7460066AB57 /* FADBMonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 36EEAE69155FF7460066AB57 /* FADBMonitor.m */; };
 		36EEAE6E155FF9450066AB57 /* FADB.m in Sources */ = {isa = PBXBuildFile; fileRef = 36EEAE6D155FF9450066AB57 /* FADB.m */; };
 		36F0822415648CDA00771500 /* FNodeServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 36F0822315648CDA00771500 /* FNodeServer.m */; };
+		36F0822715649B1500771500 /* FTaskCorral.m in Sources */ = {isa = PBXBuildFile; fileRef = 36F0822615649B1500771500 /* FTaskCorral.m */; };
 		8342C50B153F7274007B2447 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8342C50A153F7274007B2447 /* Cocoa.framework */; };
 		8342C515153F7274007B2447 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8342C513153F7274007B2447 /* InfoPlist.strings */; };
 		8342C517153F7274007B2447 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8342C516153F7274007B2447 /* main.m */; };
@@ -94,6 +95,8 @@
 		36EEAE6D155FF9450066AB57 /* FADB.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FADB.m; sourceTree = "<group>"; };
 		36F0822215648CDA00771500 /* FNodeServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FNodeServer.h; sourceTree = "<group>"; };
 		36F0822315648CDA00771500 /* FNodeServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FNodeServer.m; sourceTree = "<group>"; };
+		36F0822515649B1500771500 /* FTaskCorral.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FTaskCorral.h; sourceTree = "<group>"; };
+		36F0822615649B1500771500 /* FTaskCorral.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FTaskCorral.m; sourceTree = "<group>"; };
 		8342C506153F7274007B2447 /* Roger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Roger.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8342C50A153F7274007B2447 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		8342C50D153F7274007B2447 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -252,6 +255,8 @@
 				36EEAE01155EA0E70066AB57 /* FTaskStream.m */,
 				36EEAE1C155F4A960066AB57 /* FIntent.h */,
 				36EEAE1D155F4A960066AB57 /* FIntent.m */,
+				36F0822515649B1500771500 /* FTaskCorral.h */,
+				36F0822615649B1500771500 /* FTaskCorral.m */,
 			);
 			path = Roger;
 			sourceTree = "<group>";
@@ -367,6 +372,7 @@
 				36EEAE6A155FF7460066AB57 /* FADBMonitor.m in Sources */,
 				36EEAE6E155FF9450066AB57 /* FADB.m in Sources */,
 				36F0822415648CDA00771500 /* FNodeServer.m in Sources */,
+				36F0822715649B1500771500 /* FTaskCorral.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
