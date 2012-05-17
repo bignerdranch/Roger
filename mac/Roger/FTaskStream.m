@@ -14,8 +14,8 @@
 
 @property (atomic, strong) NSMutableArray *outputEvents;
 @property (atomic, strong) NSMutableArray *errorEvents;
-@property (atomic, strong) NSFileHandle *outputHandle;
-@property (atomic, strong) NSFileHandle *errorHandle;
+@property (atomic, weak) NSFileHandle *outputHandle;
+@property (atomic, weak) NSFileHandle *errorHandle;
 @property (atomic, strong) NSMutableData *outputData;
 @property (atomic, strong) NSMutableData *errorData;
 
@@ -73,8 +73,15 @@
 
         NSPipe *standardOutputPipe = [NSPipe pipe];
         NSPipe *standardErrorPipe = [NSPipe pipe];
+
         if (!(standardOutputPipe && standardErrorPipe)) {
             NSLog(@"error, a pipe is nil standardOutput: %@ standardError: %@", standardOutputPipe, standardErrorPipe);
+            int inOut[2];
+            if (!pipe(inOut)) {
+                NSLog(@"errno is: %d", errno);
+            } else {
+                NSLog(@"pipe() returned success");
+            }
             return nil;
         }
 
@@ -86,6 +93,12 @@
 
         if (!(self.outputHandle && self.errorHandle)) {
             NSLog(@"error, a handle is nil standardOutput: %@ standardError: %@", self.outputHandle, self.errorHandle);
+            int inOut[2];
+            if (!pipe(inOut)) {
+                NSLog(@"errno is: %d", errno);
+            } else {
+                NSLog(@"pipe() returned success");
+            }
             return nil;
         }
 
@@ -194,6 +207,7 @@
         if (handle == self.errorHandle) {
             self.errorHandle = nil;
         }
+        [handle closeFile];
 
         // if both handles are done, release the task
         if (!self.errorHandle && !self.outputHandle) {

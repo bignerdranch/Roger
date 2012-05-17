@@ -16,6 +16,7 @@
 @property (readonly, strong) NSArray *devices;
 
 -(id)initWithAdb:(FADB *)adb;
+-(void)checkDevices;
 
 -(void)kill;
 

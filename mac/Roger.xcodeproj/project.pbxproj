@@ -30,6 +30,7 @@
 		36EEAE67155FF7390066AB57 /* FADBDevice.m in Sources */ = {isa = PBXBuildFile; fileRef = 36EEAE66155FF7390066AB57 /* FADBDevice.m */; };
 		36EEAE6A155FF7460066AB57 /* FADBMonitor.m in Sources */ = {isa = PBXBuildFile; fileRef = 36EEAE69155FF7460066AB57 /* FADBMonitor.m */; };
 		36EEAE6E155FF9450066AB57 /* FADB.m in Sources */ = {isa = PBXBuildFile; fileRef = 36EEAE6D155FF9450066AB57 /* FADB.m */; };
+		36F0822415648CDA00771500 /* FNodeServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 36F0822315648CDA00771500 /* FNodeServer.m */; };
 		8342C50B153F7274007B2447 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8342C50A153F7274007B2447 /* Cocoa.framework */; };
 		8342C515153F7274007B2447 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8342C513153F7274007B2447 /* InfoPlist.strings */; };
 		8342C517153F7274007B2447 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8342C516153F7274007B2447 /* main.m */; };
@@ -91,6 +92,8 @@
 		36EEAE69155FF7460066AB57 /* FADBMonitor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FADBMonitor.m; sourceTree = "<group>"; };
 		36EEAE6C155FF9450066AB57 /* FADB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FADB.h; sourceTree = "<group>"; };
 		36EEAE6D155FF9450066AB57 /* FADB.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FADB.m; sourceTree = "<group>"; };
+		36F0822215648CDA00771500 /* FNodeServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FNodeServer.h; sourceTree = "<group>"; };
+		36F0822315648CDA00771500 /* FNodeServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FNodeServer.m; sourceTree = "<group>"; };
 		8342C506153F7274007B2447 /* Roger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Roger.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8342C50A153F7274007B2447 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		8342C50D153F7274007B2447 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -166,6 +169,15 @@
 			name = ADB;
 			sourceTree = "<group>";
 		};
+		36F0822015648CBA00771500 /* Server */ = {
+			isa = PBXGroup;
+			children = (
+				36F0822215648CDA00771500 /* FNodeServer.h */,
+				36F0822315648CDA00771500 /* FNodeServer.m */,
+			);
+			name = Server;
+			sourceTree = "<group>";
+		};
 		8342C4FB153F7274007B2447 = {
 			isa = PBXGroup;
 			children = (
@@ -212,6 +224,7 @@
 		8342C510153F7274007B2447 /* Roger */ = {
 			isa = PBXGroup;
 			children = (
+				36F0822015648CBA00771500 /* Server */,
 				36EEAE6B155FF74B0066AB57 /* ADB */,
 				36EEAE0E155F30350066AB57 /* TouchJSON */,
 				369D989D1544800900616DF5 /* FakeProjectBuilder.h */,
@@ -353,6 +366,7 @@
 				36EEAE67155FF7390066AB57 /* FADBDevice.m in Sources */,
 				36EEAE6A155FF7460066AB57 /* FADBMonitor.m in Sources */,
 				36EEAE6E155FF9450066AB57 /* FADB.m in Sources */,
+				36F0822415648CDA00771500 /* FNodeServer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

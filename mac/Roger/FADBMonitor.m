@@ -38,7 +38,7 @@
         _adb = adb;
         self.connectedDeviceNames = [[NSMutableSet alloc] init];
         self.deviceMap = [[NSMutableDictionary alloc] init];
-        [NSTimer scheduledTimerWithTimeInterval:2.0
+        [NSTimer scheduledTimerWithTimeInterval:1.0
                                          target:self 
                                        selector:@selector(checkDevices:)
                                        userInfo:nil
@@ -71,6 +71,11 @@
         return;
     }
 
+    [self checkDevices];
+}
+
+-(void)checkDevices
+{
     [self.adb listDevicesWithBlock:^(NSArray *deviceNames) {
         NSMutableArray *newConnections = [[NSMutableArray alloc] init];
 

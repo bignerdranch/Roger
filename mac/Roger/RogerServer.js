@@ -19,13 +19,18 @@ var clients = [];
 var files = {};
 var fileIndex = 0;
 
+process.stdin.resume();
+process.stdin.on('end', function() {
+    process.exit(0);
+});
+
 Array.prototype.remove = function(e) {
     for (var i = 0; i < this.length; i++) {
         if (e == this[i]) { return this.splice(i, 1); }
     }
 };
 
-http.createServer(function(request, response){  
+var httpServer = http.createServer(function(request, response){  
     var parts = url.parse(request.url, true);
     sys.puts("got path: " + parts.pathname + " query: " + parts.query);
 
@@ -72,10 +77,12 @@ http.createServer(function(request, response){
             }
         });
     }
-}).listen(port);  
+});
+httpServer.listen(port);  
+
 sys.puts("Server Running on " + port);
 
-var server = net.createServer(function (stream) {
+var fileServer = net.createServer(function (stream) {
     clients.push(stream);
 
     stream.setTimeout(0);
@@ -92,25 +99,23 @@ var server = net.createServer(function (stream) {
         stream.end();
     });
 });
-server.listen(mobilePort, hostname);
+fileServer.listen(mobilePort, hostname);
 sys.puts("Mobile server Running on " + hostname + ":" + mobilePort);
 
 // setup server discovery listener
-var udpSocket = dgram.createSocket("udp4");
-udpSocket.on("message", function(msg, rinfo) {
+var broadcastServer = dgram.createSocket("udp4");
+broadcastServer.on("message", function(msg, rinfo) {
     // send back a response
 	sys.puts("received query from address " + rinfo.address + ", host name " + os.hostname() + ", sending response");
 
     var message = new Buffer("SECRETS!" + os.hostname());
-    udpSocket.send(message, 0, message.length, multicastPort, rinfo.address, function (err, bytes) {
+    broadcastServer.send(message, 0, message.length, multicastPort, rinfo.address, function (err, bytes) {
         if (err) {
             sys.puts("error sending udp message: " + err);
         }
     });
 });
 
-udpSocket.bind(multicastPort);
-udpSocket.setBroadcast(true);
-udpSocket.addMembership(multicast);
-
-
+broadcastServer.bind(multicastPort);
+broadcastServer.setBroadcast(true);
+broadcastServer.addMembership(multicast);

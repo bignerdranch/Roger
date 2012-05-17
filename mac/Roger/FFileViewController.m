@@ -15,11 +15,13 @@
 #import "FADB.h"
 #import "FADBMonitor.h"
 #import "FADBDevice.h"
+#import "FNodeServer.h"
 
 @interface FFileViewController ()
 
 @property (nonatomic, strong) FADB *adb;
 @property (nonatomic, strong) FADBMonitor *adbMonitor;
+@property (nonatomic, strong) FNodeServer *nodeServer;
 
 - (void)sendChangesToNodeWithPath:(NSString *)apk layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId;
 - (void)sendChangesToAdbWithPath:(NSString *)apk layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId;
@@ -58,6 +60,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
 @synthesize adb=_adb;
 @synthesize adbMonitor=_adbMonitor;
+@synthesize nodeServer=_nodeServer;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -90,6 +93,11 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 - (NSString *)sdkPath
 {
     return _sdkPath;
+}
+
+- (IBAction) checkDevicesButtonClicked:(id)sender
+{
+    [self.adbMonitor checkDevices];
 }
 
 - (void) awakeFromNib
@@ -349,10 +357,6 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
 - (void)sendChangesToAdbWithPath:(NSString *)apk layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId
 {
-    NSTask *task = [[NSTask alloc] init];
-
-    NSString *publishApkToAdbDevices = [self publishApkToAdbDevicesPath];
-
     FIntent *incomingIntent = [[FIntent alloc] 
         initBroadcastWithAction:@"com.bignerdranch.franklin.roger.ACTION_INCOMING_TXN"];
     [incomingIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID"
@@ -659,44 +663,16 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     //return multicastAddress;
 }
 
-- (BOOL)startServer
+- (void)startServer
 {
+    if (self.nodeServer) return;
+
     if (!ipAddress) {
         NSLog(@"unable to start server - no wifi ip address");
-        return NO;
+        return;
     }
 
-    //NSOperationQueue *queue = [[NSOperationQueue alloc] init];
-    //[queue addOperationWithBlock:^(void) {
-        nodeTask = [[NSTask alloc] init];
-        NSMutableArray *args = [NSMutableArray array];
-     
-        NSString *path = [self serverPath];
-        NSLog(@"Server path: %@", path);
-        
-        [args addObject:path];
-        [args addObject:ipAddress];
-        [args addObject:[self currentMulticastAddress]];
-        [nodeTask setLaunchPath:@"/usr/local/bin/node"];
-        [nodeTask setArguments:args];
-        [nodeTask setStandardInput:[NSPipe pipe]];
-        
-        FTaskStream *taskStream = [[FTaskStream alloc] initWithUnlaunchedTask:nodeTask];
-        [taskStream addOutputEvent:@"." withBlock:^(NSString *line) {
-            if (line) {
-                NSLog(@"NODE: %@", line);
-            }
-        }];
-        [taskStream addErrorEvent:@"." withBlock:^(NSString *line) {
-            if (line) {
-                NSLog(@"NODE ERROR: %@", line);
-            }
-        }];
-
-        [nodeTask launch];
-    //}];
-
-    return YES;
+    self.nodeServer = [[FNodeServer alloc] initWithIpAddress:ipAddress];
 }
 
 - (void)stopServer
