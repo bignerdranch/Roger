@@ -34,7 +34,20 @@ var httpServer = http.createServer(function(request, response){
     var parts = url.parse(request.url, true);
     sys.puts("got path: " + parts.pathname + " query: " + parts.query);
 
-    if (parts.pathname == "/post") {
+    if (parts.pathname == "/sendIntent") {
+        request.setEncoding('utf-8');
+        var allData = "";
+        
+        request.on('data', function (chunk) {
+            allData = allData + chunk;
+        });
+        request.on('end', function () {
+            var intent = JSON.parse(allData);
+            sys.puts('intent received: ' + sys.inspect(intent));
+            sys.puts('    txnId: ' + intent["extras"]["com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID"]);
+        });
+
+    } else if (parts.pathname == "/post") {
         // Desktop client is posting a file
         var apk = parts.query['apk'];
         var layout = parts.query['layout'];

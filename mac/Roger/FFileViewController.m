@@ -375,6 +375,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     [newLayoutIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID" 
                        number:[NSNumber numberWithInt:txnId]];
     
+    [self.nodeServer sendIntent:newLayoutIntent];
     NSLog(@"intent created: %@", [incomingIntent simpleRepresentation]);
     NSLog(@"   string json: %@", [[NSString alloc] initWithData:[incomingIntent json] encoding:NSUTF8StringEncoding]);
 

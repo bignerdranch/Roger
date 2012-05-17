@@ -8,6 +8,7 @@
 
 #import "FNodeServer.h"
 #import "FTaskStream.h"
+#import "FIntent.h"
 
 @interface FNodeServer ()
 
@@ -18,6 +19,8 @@
 - (NSString *)currentMulticastAddress;
 
 @end
+
+static NSString* const serverUrl = @"http://%@:8081/sendIntent";
 
 @implementation FNodeServer
 
@@ -80,6 +83,22 @@
     [nodeTask launch];
 
     return YES;
+}
+
+- (void)sendIntent:(FIntent *)intent
+{
+    NSString *reqUrl = [NSString stringWithFormat:serverUrl, self.ipAddress];
+    NSLog(@"Attempting to send intent: %@", reqUrl);
+    
+    NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:reqUrl]]; 
+    [req setHTTPMethod:@"POST"];
+    [req setHTTPBody:[intent json]];
+    [NSURLConnection sendAsynchronousRequest:req queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
+        
+        if (error) {
+            NSLog(@"Unable to send to server: %@", error);
+        }
+    }];
 }
 
 @end

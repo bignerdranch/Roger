@@ -11,9 +11,11 @@
 
 #import <Foundation/Foundation.h>
 
+@class FIntent;
 
 @interface FNodeServer : NSObject
 
 -(id)initWithIpAddress:(NSString *)ipAddress;
+- (void)sendIntent:(FIntent *)intent;
 
 @end
