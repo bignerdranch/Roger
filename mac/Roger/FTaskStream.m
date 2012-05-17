@@ -20,7 +20,7 @@
 @property (atomic, strong) NSMutableData *outputData;
 @property (atomic, strong) NSMutableData *errorData;
 
-@property (atomic, weak) NSTask *task;
+@property (atomic, assign) NSTask *task;
 
 -(void)readComplete:(NSNotification *)notification;
 -(BOOL)processData:(NSData *)data withEventMap:(NSMutableArray *)eventMap dataStash:(NSMutableData *)dataStash;
