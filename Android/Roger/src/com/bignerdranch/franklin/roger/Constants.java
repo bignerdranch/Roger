@@ -2,6 +2,9 @@ package com.bignerdranch.franklin.roger;
 
 public class Constants {
     private static final String PKG = Constants.class.getPackage().getName();
+
+    public static final String CATEGORY_DEDUPE = PKG + ".CATEGORY_DEDUPE";
+
     public static final String ACTION_BUILD_START = PKG + ".ACTION_BUILD_START";
 
     public static final String ACTION_BUILD_ERROR = PKG + ".ACTION_BUILD_ERROR";
