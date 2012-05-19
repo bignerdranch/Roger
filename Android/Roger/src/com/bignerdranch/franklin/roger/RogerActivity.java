@@ -63,9 +63,128 @@ public class RogerActivity extends AutoFragmentActivity {
             loadResource();
         }};
 
+        private ArrayList<ReceiverSet> receivers = new ArrayList<ReceiverSet>();
+
+        private void registerReceivers(int span) {
+            for (ReceiverSet receiverSet : receivers) {
+                if (receiverSet.getSpan() != span) continue;
+
+                IntentFilter filter = receiverSet.getFilter();
+                BroadcastReceiver receiver = receiverSet.getReceiver();
+                getActivity().registerReceiver(receiver, filter);
+            }
+        }
+
+        private void unregisterReceivers(int span) {
+            for (ReceiverSet receiverSet : receivers) {
+                if (receiverSet.getSpan() != span) continue;
+
+                BroadcastReceiver receiver = receiverSet.getReceiver();
+                getActivity().unregisterReceiver(receiver);
+            }
+        }
+
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+
+            receivers.add(new ReceiverSet() {
+                public IntentFilter getFilter() {
+                    return new IntentFilter(Constants.ACTION_FOUND_SERVERS);
+                }
+
+                public int getSpan() {
+                    return RESUME;
+                }
+
+                public BroadcastReceiver createReceiver() {
+                    return new BroadcastReceiver() {
+                        public void onReceive(Context c, Intent i) {
+                            ArrayList<?> addresses = (ArrayList<?>)i.getSerializableExtra(Constants.EXTRA_IP_ADDRESSES);
+                            if (addresses == null || addresses.size() == 0) return;
+
+                            ConnectionHelper connector = ConnectionHelper.getInstance(c);
+                            int state = connector.getState();
+                            if (addresses.size() == 1 && 
+                                    (state == ConnectionHelper.STATE_DISCONNECTED || state == ConnectionHelper.STATE_FAILED)) {
+                                // auto connect
+                                connector.connectToServer((ServerDescription)addresses.get(0));
+                                return;
+                            }
+
+                            Bundle args = new Bundle();
+                            args.putSerializable(Constants.EXTRA_IP_ADDRESSES, addresses);
+
+                            FragmentManager fm = getActivity().getSupportFragmentManager();
+                            if (fm.findFragmentByTag(SERVER_SELECT) == null) {
+                                DialogFragment f = new SelectServerDialog();
+                                f.setArguments(args);
+                                f.show(fm, SERVER_SELECT);
+                            }
+                        }
+                    };
+                }
+            });
+
+            receivers.add(new ReceiverSet() {
+                public IntentFilter getFilter() {
+                    IntentFilter filter = new IntentFilter(Constants.ACTION_NEW_LAYOUT);
+                    filter.addCategory(Constants.CATEGORY_REMOTE);
+                    return filter;
+                }
+
+                public int getSpan() {
+                    return START;
+                }
+
+                public BroadcastReceiver createReceiver() {
+                    return new BroadcastReceiver() {
+                        public void onReceive(Context c, Intent i) {
+                            Log.i(TAG, "received remote intent:" + IntentUtils.getDescription(i) + "");
+                            if (!Constants.ACTION_NEW_LAYOUT.equals(i.getAction())) return;
+                            // route it to a service for local download
+                            Log.i(TAG, "rerouting remote intent to download service");
+                            getActivity().startService(i);
+                        }
+                    };
+                }
+            });
+
+            receivers.add(new ReceiverSet() {
+                public IntentFilter getFilter() {
+                    IntentFilter filter = new IntentFilter(Constants.ACTION_NEW_LAYOUT);
+                    filter.addCategory(Constants.CATEGORY_LOCAL);
+                    return filter;
+                }
+
+                public int getSpan() {
+                    return START;
+                }
+
+                public BroadcastReceiver createReceiver() {
+                    return new BroadcastReceiver() {
+                        public void onReceive(Context c, Intent i) {
+                            Log.i(TAG, "received local intent: " + IntentUtils.getDescription(i) + "");
+
+                            if (!Constants.ACTION_NEW_LAYOUT.equals(i.getAction())) return;
+
+                            LayoutDescription desc = IntentUtils.getLayoutDescription(i);
+
+                            Log.i(TAG, "    its layout is: " + desc + "");
+
+                            if (desc != null) {
+                                LayoutDescription old = persistence.getLayoutDescription();
+                                if (old != null && old.getTxnId() == desc.getTxnId()) {
+                                    Log.i(TAG, "already seen this txnId: " + desc.getTxnId() + " path: " + desc.getApkPath() + "");
+                                } else {
+                                    loadResource(desc);
+                                }
+                            }
+                        }
+                    };
+                }
+            });
+
             setHasOptionsMenu(true);
             persistence = Persistence.getInstance(getActivity());
             persistence.addListener(persistenceListener);
@@ -75,6 +194,8 @@ public class RogerActivity extends AutoFragmentActivity {
                         ViewGroup.LayoutParams.WRAP_CONTENT, 
                         ViewGroup.LayoutParams.WRAP_CONTENT)));
             }
+
+            registerReceivers(ReceiverSet.CREATE);
         }
 
         /** Called when the activity is first created. */
@@ -121,6 +242,7 @@ public class RogerActivity extends AutoFragmentActivity {
                 .removeListener(connectionStateListener);
             DiscoveryHelper.getInstance(getActivity())
                 .removeListener(discoveryListener);
+            unregisterReceivers(ReceiverSet.CREATE);
         }
 
         private void updateDiscovery() {
@@ -203,43 +325,16 @@ public class RogerActivity extends AutoFragmentActivity {
             connectionStatusTextView.setText(stateResId);
         }
 
-        private BroadcastReceiver foundServersReceiver = new BroadcastReceiver() {
-            public void onReceive(Context c, Intent i) {
-                ArrayList<?> addresses = (ArrayList<?>)i.getSerializableExtra(Constants.EXTRA_IP_ADDRESSES);
-                if (addresses == null || addresses.size() == 0) return;
-
-                ConnectionHelper connector = ConnectionHelper.getInstance(c);
-                int state = connector.getState();
-                if (addresses.size() == 1 && 
-                        (state == ConnectionHelper.STATE_DISCONNECTED || state == ConnectionHelper.STATE_FAILED)) {
-                    // auto connect
-                    connector.connectToServer((ServerDescription)addresses.get(0));
-                    return;
-                }
-
-                Bundle args = new Bundle();
-                args.putSerializable(Constants.EXTRA_IP_ADDRESSES, addresses);
-
-                FragmentManager fm = getActivity().getSupportFragmentManager();
-                if (fm.findFragmentByTag(SERVER_SELECT) == null) {
-                    DialogFragment f = new SelectServerDialog();
-                    f.setArguments(args);
-                    f.show(fm, SERVER_SELECT);
-                }
-            }
-        };
-
         @Override
         public void onResume() {
             super.onResume();
-            IntentFilter filter = new IntentFilter(Constants.ACTION_FOUND_SERVERS);
-            getActivity().registerReceiver(foundServersReceiver, filter);
+            registerReceivers(ReceiverSet.RESUME);
         }
         
         @Override
         public void onPause() {
             super.onPause();
-            getActivity().unregisterReceiver(foundServersReceiver);
+            unregisterReceivers(ReceiverSet.RESUME);
         }
 
         private void loadResource() {
@@ -480,57 +575,15 @@ public class RogerActivity extends AutoFragmentActivity {
         @Override
         public void onStart() {
             super.onStart();
-            IntentFilter localFilter = new IntentFilter(Constants.ACTION_NEW_LAYOUT);
-            localFilter.addCategory(Constants.CATEGORY_LOCAL);
-            Log.i(TAG, "registering receiver for " + IntentUtils.getDescription(localFilter) + "");
-            getActivity().registerReceiver(localLayoutReceiver, localFilter);
-
-            IntentFilter remoteFilter = new IntentFilter(Constants.ACTION_NEW_LAYOUT);
-            remoteFilter.addCategory(Constants.CATEGORY_REMOTE);
-            Log.i(TAG, "registering receiver for " + IntentUtils.getDescription(remoteFilter) + "");
-            getActivity().registerReceiver(remoteLayoutReceiver, remoteFilter);
-
+            registerReceivers(ReceiverSet.START);
         }
         
         @Override
         public void onStop() {
             super.onStop();
-            Log.i(TAG, "unregistering reciever");
-            getActivity().unregisterReceiver(localLayoutReceiver);
-            getActivity().unregisterReceiver(remoteLayoutReceiver);
+            unregisterReceivers(ReceiverSet.START);
         }
 
-        private BroadcastReceiver remoteLayoutReceiver = new BroadcastReceiver() {
-            public void onReceive(Context c, Intent i) {
-                Log.i(TAG, "received remote intent:" + IntentUtils.getDescription(i) + "");
-                if (!Constants.ACTION_NEW_LAYOUT.equals(i.getAction())) return;
-                // route it to a service for local download
-                Log.i(TAG, "rerouting remote intent to download service");
-                getActivity().startService(i);
-            }
-        };
-
-        private BroadcastReceiver localLayoutReceiver = new BroadcastReceiver() {
-            public void onReceive(Context c, Intent i) {
-                Log.i(TAG, "received local intent: " + IntentUtils.getDescription(i) + "");
-
-                if (!Constants.ACTION_NEW_LAYOUT.equals(i.getAction())) return;
-
-                LayoutDescription desc = IntentUtils.getLayoutDescription(i);
-
-                Log.i(TAG, "    its layout is: " + desc + "");
-
-                if (desc != null) {
-                    LayoutDescription old = persistence.getLayoutDescription();
-                    if (old != null && old.getTxnId() == desc.getTxnId()) {
-                        Log.i(TAG, "already seen this txnId: " + desc.getTxnId() + " path: " + desc.getApkPath() + "");
-                    } else {
-                        loadResource(desc);
-                    }
-                }
-            }
-        };
-        
         private DiscoveryHelper.Listener discoveryListener = new DiscoveryHelper.Listener() {
             public void onStateChanged(DiscoveryHelper discover) {
                 if (discoveryProgressBar != null) {
