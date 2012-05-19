@@ -15,7 +15,6 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.InflateException;
 import android.view.LayoutInflater;
@@ -234,15 +233,13 @@ public class RogerActivity extends AutoFragmentActivity {
         public void onResume() {
             super.onResume();
             IntentFilter filter = new IntentFilter(Constants.ACTION_FOUND_SERVERS);
-            LocalBroadcastManager.getInstance(getActivity())
-                .registerReceiver(foundServersReceiver, filter);
+            getActivity().registerReceiver(foundServersReceiver, filter);
         }
         
         @Override
         public void onPause() {
             super.onPause();
-            LocalBroadcastManager.getInstance(getActivity())
-                .unregisterReceiver(foundServersReceiver);
+            getActivity().unregisterReceiver(foundServersReceiver);
         }
 
         private void loadResource() {
@@ -483,9 +480,15 @@ public class RogerActivity extends AutoFragmentActivity {
         @Override
         public void onStart() {
             super.onStart();
-            IntentFilter filter = new IntentFilter(Constants.ACTION_NEW_LAYOUT);
-            Log.i(TAG, "registering reciever for " + Constants.ACTION_NEW_LAYOUT + "");
-            getActivity().registerReceiver(downloadReceiver, filter);
+            IntentFilter localFilter = new IntentFilter(Constants.ACTION_NEW_LAYOUT);
+            localFilter.addCategory(Constants.CATEGORY_LOCAL);
+            Log.i(TAG, "registering receiver for " + IntentUtils.getDescription(localFilter) + "");
+            getActivity().registerReceiver(localLayoutReceiver, localFilter);
+
+            IntentFilter remoteFilter = new IntentFilter(Constants.ACTION_NEW_LAYOUT);
+            remoteFilter.addCategory(Constants.CATEGORY_REMOTE);
+            Log.i(TAG, "registering receiver for " + IntentUtils.getDescription(remoteFilter) + "");
+            getActivity().registerReceiver(remoteLayoutReceiver, remoteFilter);
 
         }
         
@@ -493,38 +496,29 @@ public class RogerActivity extends AutoFragmentActivity {
         public void onStop() {
             super.onStop();
             Log.i(TAG, "unregistering reciever");
-            getActivity().unregisterReceiver(downloadReceiver);
+            getActivity().unregisterReceiver(localLayoutReceiver);
+            getActivity().unregisterReceiver(remoteLayoutReceiver);
         }
 
-        private BroadcastReceiver downloadReceiver = new BroadcastReceiver() {
+        private BroadcastReceiver remoteLayoutReceiver = new BroadcastReceiver() {
             public void onReceive(Context c, Intent i) {
-                Log.i(TAG, "received intent: " + i + "");
+                Log.i(TAG, "received remote intent:" + IntentUtils.getDescription(i) + "");
+                if (!Constants.ACTION_NEW_LAYOUT.equals(i.getAction())) return;
+                // route it to a service for local download
+                Log.i(TAG, "rerouting remote intent to download service");
+                getActivity().startService(i);
+            }
+        };
+
+        private BroadcastReceiver localLayoutReceiver = new BroadcastReceiver() {
+            public void onReceive(Context c, Intent i) {
+                Log.i(TAG, "received local intent: " + IntentUtils.getDescription(i) + "");
 
                 if (!Constants.ACTION_NEW_LAYOUT.equals(i.getAction())) return;
 
-                Log.i(TAG, "    it's a layout...");
-                LayoutDescription desc = (LayoutDescription)i
-                    .getSerializableExtra(Constants.EXTRA_LAYOUT_DESCRIPTION);
+                LayoutDescription desc = IntentUtils.getLayoutDescription(i);
 
-                if (desc == null) {
-                    Log.i(TAG, "    building from parts");
-                    desc = new LayoutDescription();
-
-                    String apkPath = i.getStringExtra(Constants.EXTRA_LAYOUT_APK_PATH);
-                    String layoutName = i.getStringExtra(Constants.EXTRA_LAYOUT_LAYOUT_NAME).split("\\.")[0];
-                    String layoutType = i.getStringExtra(Constants.EXTRA_LAYOUT_LAYOUT_TYPE).split("\\.")[0];
-                    String packageName = i.getStringExtra(Constants.EXTRA_LAYOUT_PACKAGE_NAME);
-                    int minimumVersion = i.getIntExtra(Constants.EXTRA_LAYOUT_MIN_VERSION, 1);
-                    int txnId = i.getIntExtra(Constants.EXTRA_LAYOUT_TXN_ID, 1);
-
-                    desc.setApkPath(apkPath);
-                    desc.setLayoutName(layoutName);
-                    desc.setLayoutType(layoutType);
-                    desc.setPackageName(packageName);
-                    desc.setMinVersion(minimumVersion);
-                    desc.setTxnId(txnId);
-                }
-                Log.i(TAG, "    and it is: " + desc + "");
+                Log.i(TAG, "    its layout is: " + desc + "");
 
                 if (desc != null) {
                     LayoutDescription old = persistence.getLayoutDescription();

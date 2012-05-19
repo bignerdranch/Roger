@@ -24,7 +24,14 @@
             </intent-filter>
         </activity>
         
-        <service android:name=".network.DownloadService" />
+        <service android:name=".network.DownloadService">
+            <intent-filter>
+                <action android:name="com.bignerdranch.franklin.roger.ACTION_NEW_LAYOUT" />
+
+                <category android:name="com.bignerdranch.franklin.roger.CATEGORY_REMOTE" />
+            </intent-filter>
+        </service>
+        <service android:name=".network.RemoteIntentService" />
         <service android:name=".pair.FindServerService" />
 
         <receiver android:name=".PingReceiver">

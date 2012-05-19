@@ -26,9 +26,12 @@ extern NSString * const kFIntent_Service;
 -(void)setService;
 
 -(NSDictionary *)extras;
+-(NSArray *)categories;
 
 -(void)setExtra:(NSString *)key string:(NSString *)string;
 -(void)setExtra:(NSString *)key number:(NSNumber *)number;
+-(void)copyExtra:(NSString *)key fromIntent:(FIntent *)intent;
+-(id)extra:(NSString *)key;
 
 -(void)addCategory:(NSString *)category;
 

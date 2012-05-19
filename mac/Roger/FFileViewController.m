@@ -23,12 +23,14 @@
 @property (nonatomic, strong) FADBMonitor *adbMonitor;
 @property (nonatomic, strong) FNodeServer *nodeServer;
 
-- (void)sendChangesToNodeWithPath:(NSString *)apk layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId;
-- (void)sendChangesToAdbWithPath:(NSString *)apk layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId;
+- (void)sendToAdbApkPath:(NSString *)apkPath intent:(FIntent *)intent;
+- (void)sendToNodeApkPath:(NSString *)apkPath intent:(FIntent *)intent;
+
 - (BOOL)isSupportedType:(NSString *)type;
 
 - (void)initTxnId;
 - (NSString *)adbPath;
+- (NSString *)fileServerPath;
 
 @end
 
@@ -69,7 +71,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
         fm = [NSFileManager defaultManager];
         [self setAdb:[[FADB alloc] init]];
         [self setAdbMonitor:[[FADBMonitor alloc] initWithAdb:[self adb]]];
-        [self setApkPath:[NSString stringWithFormat:@"%@/stripped.apk", NSHomeDirectory()]];
+        [self setApkPath:[[self fileServerPath] stringByAppendingPathComponent:@"stripped.apk"]];
         [self setSdkPath:[[NSUserDefaults standardUserDefaults] stringForKey:@"SdkDirKey"]];
         if (![self sdkPath]) [self setSdkPath:@""];
         
@@ -349,19 +351,8 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     return ++currentTxnId;
 }
 
-- (void)sendChangesWithPath:(NSString *)apk layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId
+- (void)sendChangesWithPath:(NSString *)apkPath layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId
 {
-    [self sendChangesToAdbWithPath:apk layout:layout type:type package:package minSdk:minSdk txnId:txnId];
-    [self sendChangesToNodeWithPath:apk layout:layout type:type package:package minSdk:minSdk txnId:txnId];
-}
-
-- (void)sendChangesToAdbWithPath:(NSString *)apk layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId
-{
-    FIntent *incomingIntent = [[FIntent alloc] 
-        initBroadcastWithAction:@"com.bignerdranch.franklin.roger.ACTION_INCOMING_TXN"];
-    [incomingIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID"
-              number:[NSNumber numberWithInt:txnId]];
-
     FIntent *newLayoutIntent = [[FIntent alloc]
         initBroadcastWithAction:@"com.bignerdranch.franklin.roger.ACTION_NEW_LAYOUT"];
     [newLayoutIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_LAYOUT_NAME" 
@@ -374,56 +365,54 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
                        number:[NSNumber numberWithInt:minSdk]];
     [newLayoutIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID" 
                        number:[NSNumber numberWithInt:txnId]];
-    
-    [self.nodeServer sendIntent:newLayoutIntent];
-    NSLog(@"intent created: %@", [incomingIntent simpleRepresentation]);
-    NSLog(@"   string json: %@", [[NSString alloc] initWithData:[incomingIntent json] encoding:NSUTF8StringEncoding]);
+
+    [self sendToAdbApkPath:apkPath intent:newLayoutIntent];
+    [self sendToNodeApkPath:apkPath intent:newLayoutIntent];
+}
+
+
+- (void)sendToAdbApkPath:(NSString *)apkPath intent:(FIntent *)newLayoutIntent
+{
+    // build a notification of an upcoming transaction
+    FIntent *incomingIntent = [[FIntent alloc] 
+        initBroadcastWithAction:@"com.bignerdranch.franklin.roger.ACTION_INCOMING_TXN"];
+    [incomingIntent copyExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID"
+                   fromIntent:newLayoutIntent];
+
+    NSString *fileName = [apkPath lastPathComponent];
 
     for (FADBDevice *device in [self.adbMonitor devices]) {
         FIntent *deviceLayoutIntent = [newLayoutIntent copy];
 
-        NSString *fileName = [apk lastPathComponent];
         NSString *devicePath = [device.externalStoragePath stringByAppendingPathComponent:fileName];
 
+        [deviceLayoutIntent addCategory:@"com.bignerdranch.franklin.roger.CATEGORY_LOCAL"];
         [deviceLayoutIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_APK_PATH" 
-                           string:devicePath];
+                              string:devicePath];
 
-        void (^onIncomingIntentSent)(void);
-        void (^onCopyFileComplete)(void);
-
-        onCopyFileComplete = ^{
-            // then send the file
+        // send incoming notification first
+        [self.adb sendIntent:incomingIntent toDevice:[device serial] completion:nil];
+        [self.adb copyLocalPath:apkPath toDevicePath:devicePath device:[device serial] completion:^{
+            // then send the new layout notification
             [self.adb sendIntent:deviceLayoutIntent toDevice:[device serial] completion:nil];
-        };
+        }];
 
-        // send the incoming intent
-        onIncomingIntentSent = ^{
-            NSLog(@"incoming intent sent, copying file with completion block %@", onCopyFileComplete);
-            // then copy over the file
-            [self.adb copyLocalPath:apk toDevicePath:devicePath device:[device serial] completion:onCopyFileComplete];
-        };
-
-        [self.adb sendIntent:incomingIntent toDevice:[device serial] completion:onIncomingIntentSent];
     }
 }
 
-- (void)sendChangesToNodeWithPath:(NSString *)apk layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId
+- (void)sendToNodeApkPath:(NSString *)apkPath intent:(FIntent *)newLayoutIntent
 {
-    NSString *reqUrl = [NSString stringWithFormat:serverUrl, [self currentIPAddress], apk, layout, type, package, minSdk, txnId];
-    NSLog(@"Sending request: %@", reqUrl);
-    NSLog(@"Our file is this many bytes: %ld", [[NSData dataWithContentsOfFile:apk] length]);
-    
-    NSURLRequest *req = [NSURLRequest requestWithURL:[NSURL URLWithString:reqUrl]]; 
-    [NSURLConnection sendAsynchronousRequest:req queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
-        
-        if (error) {
-            NSLog(@"Unable to send to server: %@", error);
-        }
-        
-        [self hideStatus];
-    }];
+    newLayoutIntent = [newLayoutIntent copy];
+
+    NSString *fileName = [apkPath lastPathComponent];
+    NSString *serverPath = [self.nodeServer urlPathForFile:fileName];
+
+    [newLayoutIntent addCategory:@"com.bignerdranch.franklin.roger.CATEGORY_REMOTE"];
+    [newLayoutIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_APK_PATH" 
+                          string:serverPath];
+    [self.nodeServer sendIntent:newLayoutIntent];
 }
- 
+
 - (NSString *)apkFileInPath:(NSString *)path
 {
     NSLog(@"apkFileInPath with path: %@", path);
@@ -504,6 +493,20 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     }
     
     return nil;
+}
+
+- (NSString *)fileServerPath
+{
+    // return something temporary
+    NSString *fileServerPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"rogerFileServer"];
+    [[NSFileManager defaultManager] 
+        createDirectoryAtPath:fileServerPath 
+  withIntermediateDirectories:YES 
+                   attributes:[NSDictionary dictionaryWithObjectsAndKeys:
+                               [NSNumber numberWithBool:NO], NSFileImmutable,
+                    nil]
+                        error:nil];
+    return fileServerPath;
 }
 
 - (NSString *)adbPath
@@ -673,7 +676,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
         return;
     }
 
-    self.nodeServer = [[FNodeServer alloc] initWithIpAddress:ipAddress];
+    self.nodeServer = [[FNodeServer alloc] initWithIpAddress:ipAddress fileServerPath:[self fileServerPath]];
 }
 
 - (void)stopServer

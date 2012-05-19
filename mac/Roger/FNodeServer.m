@@ -14,23 +14,26 @@
 
 @property (retain) NSPipe *taskInput;
 @property (copy) NSString *ipAddress;
+@property (copy) NSString *fileServerPath;
 
 - (NSString *)serverPath;
 - (NSString *)currentMulticastAddress;
 
 @end
 
-static NSString* const serverUrl = @"http://%@:8081/sendIntent";
+static NSString* const serverUrl = @"http://localhost:8081/sendIntent";
 
 @implementation FNodeServer
 
 @synthesize taskInput=_taskInput;
 @synthesize ipAddress=_ipAddress;
+@synthesize fileServerPath=_fileServerPath;
 
--(id)initWithIpAddress:(NSString *)ipAddress
+-(id)initWithIpAddress:(NSString *)ipAddress fileServerPath:(NSString *)fileServerPath
 {
     if ((self = [super init])) {
         self.ipAddress = ipAddress;
+        self.fileServerPath = fileServerPath;
 
         if (![self startServer]) {
             self = nil;
@@ -57,6 +60,10 @@ static NSString* const serverUrl = @"http://%@:8081/sendIntent";
         NSLog(@"unable to start server - no wifi ip address");
         return NO;
     }
+    if (!self.fileServerPath) {
+        NSLog(@"unable to start server - no file server path");
+        return NO;
+    }
 
     NSTask *nodeTask = [[NSTask alloc] init];
     NSMutableArray *args = [NSMutableArray array];
@@ -67,6 +74,7 @@ static NSString* const serverUrl = @"http://%@:8081/sendIntent";
     [args addObject:path];
     [args addObject:self.ipAddress];
     [args addObject:[self currentMulticastAddress]];
+    [args addObject:self.fileServerPath];
     [nodeTask setLaunchPath:@"/usr/local/bin/node"];
     [nodeTask setArguments:args];
     self.taskInput = [NSPipe pipe];
@@ -87,7 +95,7 @@ static NSString* const serverUrl = @"http://%@:8081/sendIntent";
 
 - (void)sendIntent:(FIntent *)intent
 {
-    NSString *reqUrl = [NSString stringWithFormat:serverUrl, self.ipAddress];
+    NSString *reqUrl = serverUrl;
     NSLog(@"Attempting to send intent: %@", reqUrl);
     
     NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:reqUrl]]; 
@@ -99,6 +107,11 @@ static NSString* const serverUrl = @"http://%@:8081/sendIntent";
             NSLog(@"Unable to send to server: %@", error);
         }
     }];
+}
+
+- (NSString *)urlPathForFile:(NSString *)fileName
+{
+    return [NSString stringWithFormat:@"http://%@:8081/file/%@", self.ipAddress, fileName];
 }
 
 @end

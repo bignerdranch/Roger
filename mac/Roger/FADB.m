@@ -129,6 +129,11 @@
         }
     }
 
+    for (NSString *category in [intent categories]) {
+        [args addObjectsFromArray:[NSArray arrayWithObjects:
+            @"-c", category, nil]];
+    }
+
     NSLog(@"send intent args: %@", args);
     NSTask *task = [self adbTaskWithArgs:args];
 

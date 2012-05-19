@@ -4,10 +4,12 @@ import java.util.ArrayList;
 
 import com.bignerdranch.franklin.roger.Constants;
 
-import com.bignerdranch.franklin.roger.network.DownloadService;
+import com.bignerdranch.franklin.roger.network.RemoteIntentService;
 
 import android.content.Context;
 import android.content.Intent;
+
+import android.util.Log;
 
 public class ConnectionHelper {
     public static final String TAG = "ConnectionHelper";
@@ -108,7 +110,7 @@ public class ConnectionHelper {
     }
 
     protected void serviceDisconnect() {
-        Intent i = new Intent(context, DownloadService.class);
+        Intent i = new Intent(context, RemoteIntentService.class);
         i.setAction(Constants.ACTION_DISCONNECT);
         context.startService(i);
         connectedServer = null;
@@ -116,8 +118,9 @@ public class ConnectionHelper {
     }
 
     protected void connect(ServerDescription server) {
+        Log.i(TAG, "connecting to: " + server + "");
         connectedServer = server;
-        Intent i = new Intent(context, DownloadService.class);
+        Intent i = new Intent(context, RemoteIntentService.class);
         i.setAction(Constants.ACTION_CONNECT);
         i.putExtra(Constants.EXTRA_SERVER_DESCRIPTION, server);
         context.startService(i);

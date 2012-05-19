@@ -13,6 +13,8 @@ multicastPort = 8099;
 
 hostname = process.argv[2];
 multicast = process.argv[3];
+fileDirectory = process.argv[4];
+
 sys.puts("address for server: " + hostname);
 sys.puts("multicast address for server: " + multicast);
 var clients = [];
@@ -32,9 +34,11 @@ Array.prototype.remove = function(e) {
 
 var httpServer = http.createServer(function(request, response){  
     var parts = url.parse(request.url, true);
-    sys.puts("got path: " + parts.pathname + " query: " + parts.query);
+    sys.puts("got path: " + parts.pathname + " query: " + sys.inspect(parts.query));
+    var pathname = parts.pathname;
 
-    if (parts.pathname == "/sendIntent") {
+    if (pathname.match(/^\/sendIntent$/)) {
+        sys.puts("got intent");
         request.setEncoding('utf-8');
         var allData = "";
         
@@ -43,50 +47,29 @@ var httpServer = http.createServer(function(request, response){
         });
         request.on('end', function () {
             var intent = JSON.parse(allData);
-            sys.puts('intent received: ' + sys.inspect(intent));
-            sys.puts('    txnId: ' + intent["extras"]["com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID"]);
+            sys.puts('forwarding intent:' + sys.inspect(intent));
+
+            clients.forEach(function(s) {
+                sys.puts("    sending intent to client");
+                s.write(allData);
+                s.end();
+            });
         });
 
-    } else if (parts.pathname == "/post") {
-        // Desktop client is posting a file
-        var apk = parts.query['apk'];
-        var layout = parts.query['layout'];
-		var type = parts.query['type'];
-		var pack = parts.query['pack'];
-		var minSdk = parts.query['minSdk'];
-		var txnId = parts.query['txnId'];
-        sys.puts("parameters: " + 
-            apk + ' - apk ' + 
-            layout + ' - layout ' + 
-            type + ' - type ' + 
-            pack + ' - pack ' + 
-            minSdk + ' - minSdk ' + 
-            txnId + ' - txnId ');
-        sys.puts("posting apk: " + apk + " layout: " + layout);
-        response.writeHeader(200);
-		response.end();
+    } else if (pathname.match(/^\/file\//)) {
+        var subPath = pathname.replace(/^\/file\//, "");
+        var localPath = path.join(fileDirectory, subPath);
 
-		fileIndex++;
-		files[fileIndex] = apk;
-        clients.forEach(function(s) {
-			sys.puts("sending data to a client");
-			s.write(layout + "\n" + type + "\n" + fileIndex + "\n" + pack + "\n" + minSdk + "\n" + txnId + "--", "utf8");
-			s.end();
-        });  
-    } else if (parts.pathname == "/get") {
-        var hash = parts.query['hash'];
-        var fileName = files[hash];
-
-        sys.puts("sending " + fileName + " to a client");
+        sys.puts("sending " + localPath + " to a client");
         response.writeHead(200, {
             'Transfer-Encoding' : 'chunked',
             'Content-Encoding' : 'application/octet-stream'
         });
 
-        var readStream = filesys.createReadStream(fileName);
+        var readStream = filesys.createReadStream(localPath);
         sys.pump(readStream, response, function (err) {
             if (err) {
-                sys.puts("error writing " + fileName + " to client: " + err);
+                sys.puts("error writing " + localPath + " to client: " + err);
             }
         });
     }
@@ -95,7 +78,8 @@ httpServer.listen(port);
 
 sys.puts("Server Running on " + port);
 
-var fileServer = net.createServer(function (stream) {
+// server to send intents through - clients long poll on this guy
+var intentServer = net.createServer(function (stream) {
     clients.push(stream);
 
     stream.setTimeout(0);
@@ -112,7 +96,7 @@ var fileServer = net.createServer(function (stream) {
         stream.end();
     });
 });
-fileServer.listen(mobilePort, hostname);
+intentServer.listen(mobilePort, hostname);
 sys.puts("Mobile server Running on " + hostname + ":" + mobilePort);
 
 // setup server discovery listener

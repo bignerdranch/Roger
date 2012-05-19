@@ -15,7 +15,8 @@
 
 @interface FNodeServer : NSObject
 
--(id)initWithIpAddress:(NSString *)ipAddress;
+-(id)initWithIpAddress:(NSString *)ipAddress fileServerPath:(NSString *)fileServerPath;
 - (void)sendIntent:(FIntent *)intent;
+- (NSString *)urlPathForFile:(NSString *)fileName;
 
 @end

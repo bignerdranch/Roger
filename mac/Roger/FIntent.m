@@ -22,7 +22,7 @@ NSString * const kJSONExtras = @"extras";
 @interface FIntent ()
     
 @property (nonatomic, strong) NSMutableDictionary *extraStore;
-@property (nonatomic, strong) NSMutableArray *categories;
+@property (nonatomic, strong) NSMutableArray *categoryStore;
 
 -(id)objectOrNSNull:(id)object;
 
@@ -32,7 +32,7 @@ NSString * const kJSONExtras = @"extras";
 
 @synthesize action=_action;
 @synthesize data=_data;
-@synthesize categories=_categories;
+@synthesize categoryStore=_categoryStore;
 @synthesize type=_type;
 
 @synthesize extraStore;
@@ -44,7 +44,7 @@ NSString * const kJSONExtras = @"extras";
         self.action = action;
 
         self.extraStore = [[NSMutableDictionary alloc] init];
-        self.categories = [[NSMutableArray alloc] init];
+        self.categoryStore = [[NSMutableArray alloc] init];
     }
 
     return self;
@@ -80,14 +80,30 @@ NSString * const kJSONExtras = @"extras";
     [self.extraStore setObject:number forKey:key];
 }
 
+-(id)extra:(NSString *)key
+{
+    return [self.extraStore objectForKey:key];
+}
+
+-(void)copyExtra:(NSString *)key fromIntent:(FIntent *)intent
+{
+    id object = [[intent extras] objectForKey:key];
+    [self.extraStore setObject:object forKey:key];
+}
+
 -(void)addCategory:(NSString *)category
 {
-    [self.categories addObject:category];
+    [self.categoryStore addObject:category];
 }
 
 -(NSDictionary *)extras
 {
     return self.extraStore;
+}
+
+-(NSArray *)categories
+{
+    return self.categoryStore;
 }
 
 -(id)objectOrNSNull:(id)object
@@ -100,7 +116,7 @@ NSString * const kJSONExtras = @"extras";
     return [NSDictionary dictionaryWithObjectsAndKeys:
         [self objectOrNSNull:self.action], kJSONAction, 
         [self objectOrNSNull:self.data], kJSONData, 
-        [self objectOrNSNull:self.categories], kJSONCategories, 
+        [self objectOrNSNull:self.categoryStore], kJSONCategories, 
         [self objectOrNSNull:self.type], kJSONType, 
         [self objectOrNSNull:self.extras], kJSONExtras, 
         nil];
@@ -137,7 +153,7 @@ NSString * const kJSONExtras = @"extras";
         }
     }
 
-    for (NSString *category in self.categories) {
+    for (NSString *category in self.categoryStore) {
         [new addCategory:category];
     }
 

@@ -3,7 +3,6 @@ package com.bignerdranch.franklin.roger.network;
 import java.io.File;
 
 import com.bignerdranch.franklin.roger.Constants;
-import com.bignerdranch.franklin.roger.LayoutDescription;
 
 import android.content.Context;
 import android.content.Intent;
@@ -47,13 +46,17 @@ public class DownloadManager {
 			apkIndex = 0;
 		}
 	}
-	
-	public void onDownloadComplete(LayoutDescription desc) {
-        Intent i = new Intent(Constants.ACTION_NEW_LAYOUT);
-        i.putExtra(Constants.EXTRA_LAYOUT_DESCRIPTION, desc);
-        context.sendBroadcast(i);
-	}
 
+    public void onDownloadComplete(Intent remoteIntent) {
+        Intent localIntent = new Intent(remoteIntent);
+        // replace categories with local
+        for (String category : localIntent.getCategories()) {
+            localIntent.removeCategory(category);
+        }
+        localIntent.addCategory(Constants.CATEGORY_LOCAL);
+        context.sendBroadcast(localIntent);
+    }
+	
     public File getExternalFilesDirPreAPIv8() {
         if (!Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
             return null;
