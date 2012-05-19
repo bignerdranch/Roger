@@ -11,10 +11,10 @@ Ideas for new features:
 
 - Dependent resource analysis - e.g. why is this deployment taking so long? show resource sizes
 - Other resource types:
-    - Drawables
+**    - Drawables (DONE)
     - Styles? No idea how to do this.
 - Draw view boundaries
 - HierarchyViewer-type stuff
-- Running on an emulator (wanted it today)
+**- Running on an emulator (wanted it today) (DONE)
 - Wake up Roger client from background
     - For adb connected devices, this actually would be pretty easy - just send an intent
