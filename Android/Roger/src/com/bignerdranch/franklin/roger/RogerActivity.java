@@ -128,6 +128,25 @@ public class RogerActivity extends AutoFragmentActivity {
 
             receivers.add(new ReceiverSet() {
                 public IntentFilter getFilter() {
+                    return new IntentFilter(Constants.ACTION_BUILD_ERROR);
+                }
+
+                public int getSpan() {
+                    return RESUME;
+                }
+
+                public BroadcastReceiver createReceiver() {
+                    return new BroadcastReceiver() {
+                        public void onReceive(Context c, Intent i) {
+                            String errorString = i.getStringExtra(Constants.EXTRA_ERROR);
+                            ErrorManager.show(c.getApplicationContext(), errorString);
+                        }
+                    };
+                }
+            });
+
+            receivers.add(new ReceiverSet() {
+                public IntentFilter getFilter() {
                     IntentFilter filter = new IntentFilter(Constants.ACTION_NEW_LAYOUT);
                     filter.addCategory(Constants.CATEGORY_REMOTE);
                     return filter;

@@ -2,6 +2,9 @@ package com.bignerdranch.franklin.roger;
 
 public class Constants {
     private static final String PKG = Constants.class.getPackage().getName();
+    public static final String ACTION_BUILD_ERROR = PKG + ".ACTION_BUILD_ERROR";
+    public static final String EXTRA_ERROR = PKG + ".EXTRA_ERROR";
+
     public static final String ACTION_PING = PKG + ".ACTION_PING";
 
     public static final String ACTION_FOUND_SERVERS = PKG + ".ACTION_FOUND_SERVERS";
