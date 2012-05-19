@@ -159,6 +159,14 @@
     [self pingDeviceName:name];
 }
 
+- (void)sendIntent:(FIntent *)intent
+{
+    for (FADBDevice *device in self.devices) {
+        [self.adb sendIntent:intent toDevice:device.serial completion:nil];
+    }
+}
+
+
 -(void)dealloc
 {
     NSLog(@"FADBMonitor dealloc");

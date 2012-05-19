@@ -23,8 +23,13 @@
 @property (nonatomic, strong) FADBMonitor *adbMonitor;
 @property (nonatomic, strong) FNodeServer *nodeServer;
 
+- (BOOL)buildAppWithManifest:(NSString *)manifest resourceName:(FResourceName *)resName;
+
+- (void)sendIntentToAll:(FIntent *)intent;
 - (void)sendToAdbApkPath:(NSString *)apkPath intent:(FIntent *)intent;
 - (void)sendToNodeApkPath:(NSString *)apkPath intent:(FIntent *)intent;
+
+- (NSString *)rogerConstant:(NSString *)name;
 
 - (BOOL)isSupportedType:(NSString *)type;
 
@@ -330,7 +335,12 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
     if (![self sdkPath]) return;
 
-    [self buildAppWithManifest:manifest resourceName:resourceName];
+    BOOL success = [self buildAppWithManifest:manifest resourceName:resourceName];
+
+    if (!success) {
+        NSLog(@"bailing on publish");
+        return;
+    }
 
     NSString *package = [self packageForManifest:manifest];
     int minSdkVersion = [self minSdkForManifest:manifest];
@@ -343,7 +353,12 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
     int txnId = [self nextTxnId];
     // Send it over to the server
-    [self sendChangesWithPath:apkFile layout:[resourceName name] type:[resourceName type] package:package minSdk:minSdkVersion txnId:txnId];
+    [self sendChangesWithPath:apkFile 
+                       layout:[resourceName name] 
+                         type:[resourceName type] 
+                      package:package 
+                       minSdk:minSdkVersion 
+                        txnId:txnId];
 }
 
 - (int)nextTxnId
@@ -351,32 +366,42 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     return ++currentTxnId;
 }
 
+- (NSString *)rogerConstant:(NSString *)name
+{
+    return [@"com.bignerdranch.franklin.roger." stringByAppendingString:name];
+}
+
 - (void)sendChangesWithPath:(NSString *)apkPath layout:(NSString *)layout type:(NSString *)type package:(NSString *)package minSdk:(int)minSdk txnId:(int)txnId
 {
     FIntent *newLayoutIntent = [[FIntent alloc]
-        initBroadcastWithAction:@"com.bignerdranch.franklin.roger.ACTION_NEW_LAYOUT"];
-    [newLayoutIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_LAYOUT_NAME" 
+        initBroadcastWithAction:[self rogerConstant:@"ACTION_NEW_LAYOUT"]];
+    [newLayoutIntent setExtra:[self rogerConstant:@"EXTRA_LAYOUT_LAYOUT_NAME"]
                        string:layout];
-    [newLayoutIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_LAYOUT_TYPE" 
+    [newLayoutIntent setExtra:[self rogerConstant:@"EXTRA_LAYOUT_LAYOUT_TYPE"]
                        string:type];
-    [newLayoutIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_PACKAGE_NAME"
+    [newLayoutIntent setExtra:[self rogerConstant:@"EXTRA_LAYOUT_PACKAGE_NAME"]
                        string:package];
-    [newLayoutIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_MIN_VERSION"
+    [newLayoutIntent setExtra:[self rogerConstant:@"EXTRA_LAYOUT_MIN_VERSION"]
                        number:[NSNumber numberWithInt:minSdk]];
-    [newLayoutIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID" 
+    [newLayoutIntent setExtra:[self rogerConstant:@"EXTRA_LAYOUT_TXN_ID"]
                        number:[NSNumber numberWithInt:txnId]];
 
     [self sendToAdbApkPath:apkPath intent:newLayoutIntent];
     [self sendToNodeApkPath:apkPath intent:newLayoutIntent];
 }
 
+- (void)sendIntentToAll:(FIntent *)intent
+{
+    [self.adbMonitor sendIntent:intent];
+    [self.nodeServer sendIntent:intent];
+}
 
 - (void)sendToAdbApkPath:(NSString *)apkPath intent:(FIntent *)newLayoutIntent
 {
     // build a notification of an upcoming transaction
     FIntent *incomingIntent = [[FIntent alloc] 
-        initBroadcastWithAction:@"com.bignerdranch.franklin.roger.ACTION_INCOMING_TXN"];
-    [incomingIntent copyExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_TXN_ID"
+        initBroadcastWithAction:[self rogerConstant:@"ACTION_INCOMING_TXN"]];
+    [incomingIntent copyExtra:[self rogerConstant:@"EXTRA_LAYOUT_TXN_ID"]
                    fromIntent:newLayoutIntent];
 
     NSString *fileName = [apkPath lastPathComponent];
@@ -386,8 +411,8 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
         NSString *devicePath = [device.externalStoragePath stringByAppendingPathComponent:fileName];
 
-        [deviceLayoutIntent addCategory:@"com.bignerdranch.franklin.roger.CATEGORY_LOCAL"];
-        [deviceLayoutIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_APK_PATH" 
+        [deviceLayoutIntent addCategory:[self rogerConstant:@"CATEGORY_LOCAL"]];
+        [deviceLayoutIntent setExtra:[self rogerConstant:@"EXTRA_LAYOUT_APK_PATH"] 
                               string:devicePath];
 
         // send incoming notification first
@@ -407,8 +432,8 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     NSString *fileName = [apkPath lastPathComponent];
     NSString *serverPath = [self.nodeServer urlPathForFile:fileName];
 
-    [newLayoutIntent addCategory:@"com.bignerdranch.franklin.roger.CATEGORY_REMOTE"];
-    [newLayoutIntent setExtra:@"com.bignerdranch.franklin.roger.EXTRA_LAYOUT_APK_PATH" 
+    [newLayoutIntent addCategory:[self rogerConstant:@"CATEGORY_REMOTE"]];
+    [newLayoutIntent setExtra:[self rogerConstant:@"EXTRA_LAYOUT_APK_PATH"] 
                           string:serverPath];
     [self.nodeServer sendIntent:newLayoutIntent];
 }
@@ -565,7 +590,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     }
 }
 
-- (void)buildAppWithManifest:(NSString *)manifest resourceName:(FResourceName *)resName
+- (BOOL)buildAppWithManifest:(NSString *)manifest resourceName:(FResourceName *)resName
 {
     NSString *projectPath = [manifest stringByDeletingLastPathComponent];
     NSLog(@"Building apk with manifest: %@", projectPath);
@@ -603,6 +628,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     FTaskStream *taskStream = [FTaskStream taskStreamForUnlaunchedTask:task];
     [taskStream addLogEventsWithPrefix:@"BUILD" isOutput:YES];
     // rewrite error lines
+    NSMutableArray *errorLines = [[NSMutableArray alloc] init];
     [taskStream addErrorEvent:@"." withBlock:^(NSString *line) {
         if ([line stringsFromFirstMatchOfPattern:@"^/.*:[1-9]+[0-9]*: "]) {
             
@@ -611,19 +637,29 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
         }
         if (line) {
             NSLog(@"BUILD ERROR: %@", line);
+            [errorLines addObject:line];
+        } else if ([errorLines count] > 0) {
+            // publish it
+            NSString *errorString = [errorLines componentsJoinedByString:@"\n"];
+            FIntent *intent = [[FIntent alloc]
+                initBroadcastWithAction:[self rogerConstant:@"ACTION_BUILD_ERROR"]];
+            [intent setExtra:[self rogerConstant:@"EXTRA_ERROR"] string:errorString];
+            [self sendIntentToAll:intent];
         }
     }];
     
     [task launch];
     [task waitUntilExit];
 
+    [self cleanupFakeProjectAtPath:fakeProjectPath];
+
     if ([task terminationStatus]) {
         NSLog(@"failed to build package");
+        return NO;
     } else {
         NSLog(@"succeeded in building package");
+        return YES;
     }
-
-    [self cleanupFakeProjectAtPath:fakeProjectPath];
 }
 
 - (void)buildAppWithBuildFile:(NSString *)buildFile 

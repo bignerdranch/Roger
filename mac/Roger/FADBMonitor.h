@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 
 @class FADB;
+@class FIntent;
 
 @interface FADBMonitor : NSObject
 
@@ -17,6 +18,7 @@
 
 -(id)initWithAdb:(FADB *)adb;
 -(void)checkDevices;
+- (void)sendIntent:(FIntent *)intent;
 
 -(void)kill;
 
