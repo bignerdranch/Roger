@@ -47,12 +47,12 @@ var httpServer = http.createServer(function(request, response){
         });
         request.on('end', function () {
             var intent = JSON.parse(allData);
-            sys.puts('forwarding intent:' + sys.inspect(intent));
+            sys.puts('forwarding intent');
 
             clients.forEach(function(s) {
-                sys.puts("    sending intent to client");
+                sys.puts("    sending intent to client: " + sys.inspect(intent) + "");
                 s.write(allData);
-                s.end();
+                s.write("\nend intent\n");
             });
         });
 

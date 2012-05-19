@@ -83,24 +83,8 @@ public class RemoteIntentService extends IntentService {
             synchronized (data) {
                 data.desc = (ServerDescription)intent.getSerializableExtra(Constants.EXTRA_SERVER_DESCRIPTION);
             }
-            JSONIntent remoteIntent = getIntent();
-            if (remoteIntent != null) {
-                Log.i(TAG, "got a remote intent. firing it.");
-                try {
-                    Intent i = remoteIntent.getIntent();
-                    i.putExtra(Constants.EXTRA_SERVER_DESCRIPTION, data.desc);
-                    Log.i(TAG, "   intent: " + IntentUtils.getDescription(i) + "");
+            streamIntents();
 
-                    remoteIntent.fire(this, i);
-                } catch (JSONException je) {
-                    Log.e(TAG, "failed to fire remote intent", je);
-                }
-
-            } else {
-                Log.e(TAG, "got no remote intent");
-            }
-
-            // still connected, presumably
             Intent i = new Intent(this, this.getClass());
             i.setAction(Constants.ACTION_CONNECT);
             i.putExtra(Constants.EXTRA_SERVER_DESCRIPTION, data.desc);
@@ -114,7 +98,29 @@ public class RemoteIntentService extends IntentService {
 		}
 	}
 
-    private JSONIntent getIntent() throws IOException {
+    private JSONIntent getIntent(BufferedReader reader) throws IOException {
+        StringBuilder data = new StringBuilder();
+
+        String line;
+        while ((line = reader.readLine()) != null) {
+            if (line.startsWith("end intent")) {
+                break;
+            } else {
+                data.append(line);
+            }
+        }
+
+        try {
+            JSONObject object = (JSONObject)new JSONTokener(data.toString()).nextValue();
+
+            return new JSONIntent(object);
+        } catch (JSONException e) {
+            Log.i(TAG, "failed to parse incoming data. data: " + data + "", e);
+            return null;
+        }
+    }
+
+    private void streamIntents() throws IOException {
         String serverAddress = data.desc.getServerAddress();
 		URL remoteUrl = new URL(serverAddress);
 		Log.d(TAG, "Connecting to " + serverAddress);
@@ -130,21 +136,20 @@ public class RemoteIntentService extends IntentService {
 			input = data.conn.getInputStream();
 		}
 
-        StringBuilder data = new StringBuilder();
         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+        
+        JSONIntent intent = null;
+        while ((intent = getIntent(reader)) != null) {
+            Log.i(TAG, "got a remote intent. firing it.");
+            try {
+                Intent i = intent.getIntent();
+                i.putExtra(Constants.EXTRA_SERVER_DESCRIPTION, data.desc);
+                Log.i(TAG, "   intent: " + IntentUtils.getDescription(i) + "");
 
-        String line;
-        while ((line = reader.readLine()) != null) {
-            data.append(line);
-        }
-
-        try {
-            JSONObject object = (JSONObject)new JSONTokener(data.toString()).nextValue();
-
-            return new JSONIntent(object);
-        } catch (JSONException e) {
-            Log.i(TAG, "failed to parse incoming data. data: " + data + "", e);
-            return null;
+                intent.fire(this, i);
+            } catch (JSONException je) {
+                Log.e(TAG, "failed to fire remote intent", je);
+            }
         }
     }
 }

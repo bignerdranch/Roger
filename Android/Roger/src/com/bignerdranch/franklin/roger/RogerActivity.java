@@ -138,7 +138,7 @@ public class RogerActivity extends AutoFragmentActivity {
                 public BroadcastReceiver createReceiver() {
                     return new BroadcastReceiver() {
                         public void onReceive(Context c, Intent i) {
-                            String errorString = i.getStringExtra(Constants.EXTRA_ERROR);
+                            String errorString = i.getStringExtra(Constants.EXTRA_MESSAGE);
                             ErrorManager.show(c.getApplicationContext(), errorString);
                         }
                     };
@@ -199,6 +199,26 @@ public class RogerActivity extends AutoFragmentActivity {
                                     loadResource(desc);
                                 }
                             }
+                        }
+                    };
+                }
+            });
+
+            receivers.add(new ReceiverSet() {
+                public IntentFilter getFilter() {
+                    return new IntentFilter(Constants.ACTION_BUILD_START);
+                }
+
+                public int getSpan() {
+                    return RESUME;
+                }
+
+                public BroadcastReceiver createReceiver() {
+                    return new BroadcastReceiver() {
+                        public void onReceive(Context c, Intent i) {
+                            String message = i.getStringExtra(Constants.EXTRA_MESSAGE);
+                            Log.i(TAG, "displaying build start info: " + message + "");
+                            ErrorManager.showInfo(c.getApplicationContext(), message);
                         }
                     };
                 }

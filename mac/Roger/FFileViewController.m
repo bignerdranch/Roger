@@ -335,6 +335,12 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
     if (![self sdkPath]) return;
 
+    FIntent *beginBuild = [[FIntent alloc] 
+        initBroadcastWithAction:[self rogerConstant:@"ACTION_BUILD_START"]];
+    NSString *message = [NSString stringWithFormat:@"Building %@...", [path lastPathComponent]];
+    [beginBuild setExtra:[self rogerConstant:@"EXTRA_MESSAGE"] string:message];
+    [self sendIntentToAll:beginBuild];
+
     BOOL success = [self buildAppWithManifest:manifest resourceName:resourceName];
 
     if (!success) {
@@ -643,7 +649,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
             NSString *errorString = [errorLines componentsJoinedByString:@"\n"];
             FIntent *intent = [[FIntent alloc]
                 initBroadcastWithAction:[self rogerConstant:@"ACTION_BUILD_ERROR"]];
-            [intent setExtra:[self rogerConstant:@"EXTRA_ERROR"] string:errorString];
+            [intent setExtra:[self rogerConstant:@"EXTRA_MESSAGE"] string:errorString];
             [self sendIntentToAll:intent];
         }
     }];

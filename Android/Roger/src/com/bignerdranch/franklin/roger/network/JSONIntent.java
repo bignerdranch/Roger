@@ -129,4 +129,8 @@ public class JSONIntent {
             Log.e(TAG, "failed to fire intent", e);
         }
     }
+
+    public int hashCode() {
+        return source.hashCode();
+    }
 }
