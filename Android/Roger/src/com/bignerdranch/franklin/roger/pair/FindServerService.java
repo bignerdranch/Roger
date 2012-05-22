@@ -90,7 +90,7 @@ public class FindServerService extends IntentService {
     }
 
     private void broadcastSelf(MulticastSocket socket) throws IOException {
-        byte[] message = new byte[] { (byte)0xde, (byte)0xad, (byte)0xbe, (byte)0xef };
+        byte[] message = new byte[] { (byte)'r', (byte)'o', (byte)'g', (byte)'e' };
         InetAddress multicast = InetAddress.getByName("234.5.6.7");
         DatagramPacket packet = new DatagramPacket(message, message.length, multicast, OUTGOING_PORT);
         socket.send(packet);

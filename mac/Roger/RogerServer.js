@@ -102,6 +102,10 @@ sys.puts("Mobile server Running on " + hostname + ":" + mobilePort);
 // setup server discovery listener
 var broadcastServer = dgram.createSocket("udp4");
 broadcastServer.on("message", function(msg, rinfo) {
+    if (msg != "roge") {
+        return;
+    }
+
     // send back a response
 	sys.puts("received query from address " + rinfo.address + ", host name " + os.hostname() + ", sending response");
 
