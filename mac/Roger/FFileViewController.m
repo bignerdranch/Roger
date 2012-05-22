@@ -25,7 +25,6 @@
 
 - (BOOL)buildAppWithManifest:(NSString *)manifest resourceName:(FResourceName *)resName;
 
-- (void)sendIntentToAllWithTxnId:(FIntent *)intent;
 - (void)sendIntentToAll:(FIntent *)intent;
 - (void)sendToAdbApkPath:(NSString *)apkPath intent:(FIntent *)intent;
 - (void)sendToNodeApkPath:(NSString *)apkPath intent:(FIntent *)intent;
@@ -340,7 +339,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
         initBroadcastWithAction:[self rogerConstant:@"ACTION_BUILD_START"]];
     NSString *message = [NSString stringWithFormat:@"Building %@...", [path lastPathComponent]];
     [beginBuild setExtra:[self rogerConstant:@"EXTRA_MESSAGE"] string:message];
-    [self sendIntentToAllWithTxnId:beginBuild];
+    [self sendIntentToAll:beginBuild];
 
     BOOL success = [self buildAppWithManifest:manifest resourceName:resourceName];
 
@@ -397,17 +396,13 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     [self sendToNodeApkPath:apkPath intent:newLayoutIntent];
 }
 
-- (void)sendIntentToAllWithTxnId:(FIntent *)intent
+- (void)sendIntentToAll:(FIntent *)intent
 {
+    // any intent that goes everywhere needs deduping.
     [intent setExtra:[self rogerConstant:@"EXTRA_LAYOUT_TXN_ID"]
               number:[NSNumber numberWithInt:[self nextTxnId]]];
     [intent addCategory:[self rogerConstant:@"CATEGORY_DEDUPE"]];
 
-    [self sendIntentToAll:intent];
-}
-
-- (void)sendIntentToAll:(FIntent *)intent
-{
     [self.adbMonitor sendIntent:intent];
     [self.nodeServer sendIntent:intent];
 }
@@ -660,7 +655,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
             FIntent *intent = [[FIntent alloc]
                 initBroadcastWithAction:[self rogerConstant:@"ACTION_BUILD_ERROR"]];
             [intent setExtra:[self rogerConstant:@"EXTRA_MESSAGE"] string:errorString];
-            [self sendIntentToAllWithTxnId:intent];
+            [self sendIntentToAll:intent];
         }
     }];
     
