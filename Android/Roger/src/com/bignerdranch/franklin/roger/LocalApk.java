@@ -228,6 +228,11 @@ public abstract class LocalApk {
     //public LoadedApk(ActivityThread activityThread, String name,
     //        Context systemContext, ApplicationInfo info, CompatibilityInfo compatInfo) {
 
+    /**
+     * Create a package context off of an apk that is not actually installed. 
+     *
+     * The following code is extremely skeevy.
+     */
     public Context createPackageContext(Resources resources) {
         try {
             String contextImplName = "android.app.ContextImpl";
@@ -240,8 +245,8 @@ public abstract class LocalApk {
             Class<?> activityThreadClass = (Class<?>)cl.loadClass(activityThreadName);
 
             Log.i(TAG, "getting constructor and method");
-            Constructor<?> contextImplConstructor = Rxn.getConstructor(contextImplClass);
-            Method init = Rxn.getMethod(contextImplClass, "init", Resources.class, activityThreadClass);
+            Constructor<?> contextImplConstructor = Rxn.getConstructorThrows(contextImplClass);
+            Method init = Rxn.getMethodThrows(contextImplClass, "init", Resources.class, activityThreadClass);
 
             Log.i(TAG, "getting the activity thread");
             Context baseContext = findBaseContext(context);
@@ -252,26 +257,41 @@ public abstract class LocalApk {
             Context c = (Context)contextImplConstructor.newInstance();
             init.invoke(c, resources, activityThread);
 
-            // more setup to create a fake LoadedApk for mPackageInfo
-            Class<?> loadedApkClass = (Class<?>)cl.loadClass(loadedApkName);
-            Class<?> compatInfoClass = (Class<?>)cl.loadClass(compatibilityInfoName);
-            Constructor<?> loadedApkConstructor = Rxn.getConstructor(loadedApkClass, 
-                    activityThreadClass, String.class, Context.class, ApplicationInfo.class, compatInfoClass);
-
-            // find some compat info to use
-            Object rogerPackageInfo = Rxn.getFieldValue(baseContext, "mPackageInfo");
-            Object compatInfoHolder = Rxn.getFieldValue(rogerPackageInfo, "mCompatibilityInfo");
-            Object compatInfo = Rxn.invoke(compatInfoHolder, "get");
-
             // get resId
             Method getThemeResId = Rxn.getMethod(activity.getClass(), "getThemeResId");
-            int themeResId = (int)(Integer)getThemeResId.invoke(activity);
+            int themeResId;
+            if (getThemeResId == null) {
+                // try this guy
+                themeResId = (int)(Integer)Rxn.getFieldValue(activity, "mThemeResource");
+            } else {
+                themeResId = (int)(Integer)getThemeResId.invoke(activity);
+            }
 
             Context finalFakeContext = new LocalApkContext(c, themeResId);
             
-            // construct fake LoadedApk
-            Object fakeLoadedApk = loadedApkConstructor.newInstance(
-                    activityThread, packageName, c, finalFakeContext.getApplicationInfo(), compatInfo);
+            // more setup to create a fake LoadedApk for mPackageInfo
+            Class<?> loadedApkClass = (Class<?>)cl.loadClass(loadedApkName);
+            Constructor<?> loadedApkConstructor = Rxn.getConstructor(loadedApkClass, 
+                    activityThreadClass, String.class, Context.class, ApplicationInfo.class);
+            Object fakeLoadedApk = null;
+
+            if (loadedApkConstructor == null) {
+                Class<?> compatInfoClass = (Class<?>)cl.loadClass(compatibilityInfoName);
+                loadedApkConstructor = Rxn.getConstructorThrows(loadedApkClass, 
+                        activityThreadClass, String.class, Context.class, ApplicationInfo.class, compatInfoClass);
+
+                // find some compat info to use
+                Object rogerPackageInfo = Rxn.getFieldValue(baseContext, "mPackageInfo");
+                Object compatInfoHolder = Rxn.getFieldValue(rogerPackageInfo, "mCompatibilityInfo");
+                Object compatInfo = Rxn.invoke(compatInfoHolder, "get");
+
+                // construct fake LoadedApk
+                fakeLoadedApk = loadedApkConstructor.newInstance(
+                        activityThread, packageName, c, finalFakeContext.getApplicationInfo(), compatInfo);
+            } else {
+                loadedApkConstructor.newInstance(
+                        activityThread, packageName, c, finalFakeContext.getApplicationInfo());
+            }
 
             // then set it up on our fake system context to make it *not* a system
             // context? ooh, this is skeevy.

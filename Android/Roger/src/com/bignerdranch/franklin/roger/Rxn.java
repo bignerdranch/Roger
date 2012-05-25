@@ -38,23 +38,33 @@ public class Rxn {
         }
     }
 
-    // debugging
     public static void scan(Class<?> klass) {
+        scan(klass, true, true, true);
+    }
+
+    // debugging
+    public static void scan(Class<?> klass, boolean constructors, boolean fields, boolean methods) {
         Log.i(TAG, "scanning " + klass + "");
-        Log.i(TAG, "    constructors:");
-        for (Constructor<?> constructor : klass.getDeclaredConstructors()) {
-            Log.i(TAG, "        " + constructor + "");
+        if (constructors) {
+            Log.i(TAG, "    constructors:");
+            for (Constructor<?> constructor : klass.getDeclaredConstructors()) {
+                Log.i(TAG, "        " + constructor + "");
+            }
         }
-        Log.i(TAG, "    fields:");
-        for (Field field : klass.getDeclaredFields()) {
-            Log.i(TAG, "        " + field + "");
+        if (fields) {
+            Log.i(TAG, "    fields:");
+            for (Field field : klass.getDeclaredFields()) {
+                Log.i(TAG, "        " + field + "; name: " + field.getName() + "");
+            }
         }
-        Log.i(TAG, "    methods:");
-        for (Method method : klass.getDeclaredMethods()) {
-            Log.i(TAG, "        " + method + "");
+        if (methods) {
+            Log.i(TAG, "    methods:");
+            for (Method method : klass.getDeclaredMethods()) {
+                Log.i(TAG, "        " + method + "; name: " + method.getName() + "");
+            }
         }
         if (klass.getSuperclass() != null) {
-            scan(klass.getSuperclass());
+            scan(klass.getSuperclass(), constructors, fields, methods);
         }
     }
 
@@ -97,6 +107,15 @@ public class Rxn {
         }
     }
 
+    public static Method getMethodThrows(Class<?> klass, String name, Class<?>... paramTypes) {
+        Method m = getMethod(klass, name, paramTypes);
+        if (m == null) {
+            throw new RuntimeException("failed to find " + name);
+        } else {
+            return m;
+        }
+    }
+
     public static Method getMethod(Class<?> klass, String name, Class<?>... paramTypes) {
         for (Method method : klass.getDeclaredMethods()) {
             if (!method.getName().equals(name)) {
@@ -115,7 +134,16 @@ public class Rxn {
             return getMethod(klass.getSuperclass(), name, paramTypes);
         }
 
-        throw new RuntimeException("failed to find " + name);
+        return null;
+    }
+
+    public static <C> Constructor<C> getConstructorThrows(Class<C> klass, Class<?>... paramTypes) {
+        Constructor<C> constructor = getConstructor(klass, paramTypes);
+        if (constructor == null) {
+            throw new RuntimeException("failed to find constructor");
+        } else {
+            return constructor;
+        }
     }
 
     public static <C> Constructor<C> getConstructor(Class<C> klass, Class<?>... paramTypes) {
@@ -126,7 +154,7 @@ public class Rxn {
             }
         }
 
-        throw new RuntimeException("failed to find constructor");
+        return null;
     }
 
     public static void setFieldValue(Object o, String name, Object value) {
