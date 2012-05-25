@@ -95,13 +95,13 @@ public abstract class LocalApk {
             return theme;
         }
 
-        public Resources.Theme getTheme() {
-            if (Build.VERSION.SDK_INT < 11) {
-                return getThemeGingerbread();
-            } else {
-                return getThemePostAPI10();
-            }
-        }
+        //public Resources.Theme getTheme() {
+        //    if (Build.VERSION.SDK_INT < 11) {
+        //        return getThemeGingerbread();
+        //    } else {
+        //        return getThemePostAPI10();
+        //    }
+        //}
 
         @Override
         public String getPackageName() {
@@ -225,10 +225,15 @@ public abstract class LocalApk {
         return getLayoutInflaterHackingAroundCrap(original, c);
     }
 
+    //public LoadedApk(ActivityThread activityThread, String name,
+    //        Context systemContext, ApplicationInfo info, CompatibilityInfo compatInfo) {
+
     public Context createPackageContext(Resources resources) {
         try {
             String contextImplName = "android.app.ContextImpl";
             String activityThreadName = "android.app.ActivityThread";
+            String loadedApkName = "android.app.LoadedApk";
+            String compatibilityInfoName = "android.content.res.CompatibilityInfo";
 
             ClassLoader cl = ClassLoader.getSystemClassLoader();
             Class<?> contextImplClass = (Class<?>)cl.loadClass(contextImplName);
@@ -247,11 +252,32 @@ public abstract class LocalApk {
             Context c = (Context)contextImplConstructor.newInstance();
             init.invoke(c, resources, activityThread);
 
+            // more setup to create a fake LoadedApk for mPackageInfo
+            Class<?> loadedApkClass = (Class<?>)cl.loadClass(loadedApkName);
+            Class<?> compatInfoClass = (Class<?>)cl.loadClass(compatibilityInfoName);
+            Constructor<?> loadedApkConstructor = Rxn.getConstructor(loadedApkClass, 
+                    activityThreadClass, String.class, Context.class, ApplicationInfo.class, compatInfoClass);
+
+            // find some compat info to use
+            Object rogerPackageInfo = Rxn.getFieldValue(baseContext, "mPackageInfo");
+            Object compatInfoHolder = Rxn.getFieldValue(rogerPackageInfo, "mCompatibilityInfo");
+            Object compatInfo = Rxn.invoke(compatInfoHolder, "get");
+
             // get resId
             Method getThemeResId = Rxn.getMethod(activity.getClass(), "getThemeResId");
             int themeResId = (int)(Integer)getThemeResId.invoke(activity);
 
-            return new LocalApkContext(c, themeResId);
+            Context finalFakeContext = new LocalApkContext(c, themeResId);
+            
+            // construct fake LoadedApk
+            Object fakeLoadedApk = loadedApkConstructor.newInstance(
+                    activityThread, packageName, c, finalFakeContext.getApplicationInfo(), compatInfo);
+
+            // then set it up on our fake system context to make it *not* a system
+            // context? ooh, this is skeevy.
+            Rxn.setFieldValue(c, "mPackageInfo", fakeLoadedApk);
+
+            return finalFakeContext;
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }

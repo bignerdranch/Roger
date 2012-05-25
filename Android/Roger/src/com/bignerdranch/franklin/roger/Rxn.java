@@ -9,6 +9,14 @@ import android.util.Log;
 public class Rxn {
     private static final String TAG = "Rxn";
 
+    public static class Null {
+        public Class<?> type;
+
+        public Null(Class<?> type) {
+            this.type = type;
+        }
+    }
+
     public static void showAllFields(Object instance) {
         try {
         Class<?> klass = instance.getClass();
@@ -64,6 +72,29 @@ public class Rxn {
         }
 
         return equal;
+    }
+
+    public static Object invoke(Object target, String methodName, Object... params) {
+        Class<?>[] paramTypes = new Class<?>[params.length];
+
+        for (int i = 0; i < params.length; i++) {
+            if (params[i] instanceof Null) {
+                paramTypes[i] = ((Null)params[i]).type;
+                params[i] = null;
+            } else if (params[i] == null) {
+                throw new RuntimeException("Invalid argument. For null args, pass in Null(Class<?>) with arg type.");
+            } else {
+                paramTypes[i] = params[i].getClass();
+            }
+        }
+
+        Method method = getMethod(target.getClass(), methodName, paramTypes);
+
+        try {
+            return method.invoke(target, params);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static Method getMethod(Class<?> klass, String name, Class<?>... paramTypes) {
