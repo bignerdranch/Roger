@@ -1,44 +1,56 @@
-Failure for gingerbread emulator to load resources:
+2012/05/25: Running on android 2.2, emulator (probably applies to all releases, though)
 
-05-05 21:11:37.028 I/RogerActivity(  390): InflateException
-05-05 21:11:37.028 I/RogerActivity(  390): android.view.InflateException: Binary XML file line #12: Error inflating class <unknown>
-05-05 21:11:37.028 I/RogerActivity(  390): 	at android.view.LayoutInflater.createView(LayoutInflater.java:518)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at com.android.internal.policy.impl.PhoneLayoutInflater.onCreateView(PhoneLayoutInflater.java:56)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at android.view.LayoutInflater.createViewFromTag(LayoutInflater.java:568)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at android.view.LayoutInflater.rInflate(LayoutInflater.java:623)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at android.view.LayoutInflater.inflate(LayoutInflater.java:408)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at android.view.LayoutInflater.inflate(LayoutInflater.java:320)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at com.bignerdranch.franklin.roger.RogerActivity.loadLayout(RogerActivity.java:373)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at com.bignerdranch.franklin.roger.RogerActivity.loadResource(RogerActivity.java:282)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at com.bignerdranch.franklin.roger.RogerActivity.access$2(RogerActivity.java:269)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at com.bignerdranch.franklin.roger.RogerActivity$2.onReceive(RogerActivity.java:520)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at android.app.LoadedApk$ReceiverDispatcher$Args.run(LoadedApk.java:709)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at android.os.Handler.handleCallback(Handler.java:587)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at android.os.Handler.dispatchMessage(Handler.java:92)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at android.os.Looper.loop(Looper.java:130)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at android.app.ActivityThread.main(ActivityThread.java:3683)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at java.lang.reflect.Method.invokeNative(Native Method)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at java.lang.reflect.Method.invoke(Method.java:507)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:839)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:597)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at dalvik.system.NativeStart.main(Native Method)
-05-05 21:11:37.028 I/RogerActivity(  390): Caused by: java.lang.reflect.InvocationTargetException
-05-05 21:11:37.028 I/RogerActivity(  390): 	at java.lang.reflect.Constructor.constructNative(Native Method)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at java.lang.reflect.Constructor.newInstance(Constructor.java:415)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at android.view.LayoutInflater.createView(LayoutInflater.java:505)
-05-05 21:11:37.028 I/RogerActivity(  390): 	... 19 more
-05-05 21:11:37.028 I/RogerActivity(  390): Caused by: android.content.res.Resources$NotFoundException: File Yeah this is not a one week project. :) - Dianne Hackborn. Yeah this is not a one week project. :) - Dianne Hackborn. Yeah this is not a one week project. :) - Dianne Hackborn from drawable resource ID #0x7f050002
-05-05 21:11:37.028 I/RogerActivity(  390): 	at android.content.res.Resources.loadDrawable(Resources.java:1714)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at android.content.res.TypedArray.getDrawable(TypedArray.java:601)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at android.view.View.<init>(View.java:1951)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at android.view.ViewGroup.<init>(ViewGroup.java:292)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at android.widget.FrameLayout.<init>(FrameLayout.java:88)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at android.widget.FrameLayout.<init>(FrameLayout.java:84)
-05-05 21:11:37.028 I/RogerActivity(  390): 	... 22 more
-05-05 21:11:37.028 I/RogerActivity(  390): Caused by: java.io.FileNotFoundException: Yeah this is not a one week project. :) - Dianne Hackborn. Yeah this is not a one week project. :) - Dianne Hackborn. Yeah this is not a one week project. :) - Dianne Hackborn
-05-05 21:11:37.028 I/RogerActivity(  390): 	at android.content.res.AssetManager.openNonAssetNative(Native Method)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at android.content.res.AssetManager.openNonAsset(AssetManager.java:406)
-05-05 21:11:37.028 I/RogerActivity(  390): 	at android.content.res.Resources.loadDrawable(Resources.java:1706)
-05-05 21:11:37.028 I/RogerActivity(  390): 	... 27 more
-05-05 21:11:37.028 I/ErrorManager(  390): error toast: Yeah this is not a one week project. :) - Dianne Hackborn. Yeah this is not a one week project. :) - Dianne Hackborn. Yeah this is not a one week project. :) - Dianne Hackborn
+05-25 13:42:56.289 E/AndroidRuntime(  314): java.lang.RuntimeException: Error receiving broadcast Intent { act=com.bignerdranch.franklin.roger.ACTION_NEW_LAYOUT cat=[com.bignerdranch.franklin.roger.CATEGORY_LOCAL] (has extras) } in com.bignerdranch.franklin.roger.RogerActivity$Auto$7$1@44f062b8
+05-25 13:42:56.289 E/AndroidRuntime(  314): 	at android.app.ActivityThread$PackageInfo$ReceiverDispatcher$Args.run(ActivityThread.java:905)
+05-25 13:42:56.289 E/AndroidRuntime(  314): 	at android.os.Handler.handleCallback(Handler.java:587)
+05-25 13:42:56.289 E/AndroidRuntime(  314): 	at android.os.Handler.dispatchMessage(Handler.java:92)
+05-25 13:42:56.289 E/AndroidRuntime(  314): 	at android.os.Looper.loop(Looper.java:123)
+05-25 13:42:56.289 E/AndroidRuntime(  314): 	at android.app.ActivityThread.main(ActivityThread.java:4627)
+05-25 13:42:56.289 E/AndroidRuntime(  314): 	at java.lang.reflect.Method.invokeNative(Native Method)
+05-25 13:42:56.289 E/AndroidRuntime(  314): 	at java.lang.reflect.Method.invoke(Method.java:521)
+05-25 13:42:56.289 E/AndroidRuntime(  314): 	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:868)
+05-25 13:42:56.289 E/AndroidRuntime(  314): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:626)
+05-25 13:42:56.289 E/AndroidRuntime(  314): 	at dalvik.system.NativeStart.main(Native Method)
+05-25 13:42:56.289 E/AndroidRuntime(  314): Caused by: java.lang.RuntimeException: java.lang.ClassNotFoundException: android.app.LoadedApk in loader dalvik.system.PathClassLoader[.]
+05-25 13:42:56.289 E/AndroidRuntime(  314): 	at com.bignerdranch.franklin.roger.LocalApk.createPackageContext(LocalApk.java:287)
+05-25 13:42:56.289 E/AndroidRuntime(  314): 	at com.bignerdranch.franklin.roger.LocalApk.getLayoutInflater(LocalApk.java:224)
+05-25 13:42:56.289 E/AndroidRuntime(  314): 	at com.bignerdranch.franklin.roger.RogerActivity$Auto.loadLayout(RogerActivity.java:478)
+05-25 13:42:56.289 E/AndroidRuntime(  314): 	at com.bignerdranch.franklin.roger.RogerActivity$Auto.loadResource(RogerActivity.java:397)
+05-25 13:42:56.289 E/AndroidRuntime(  314): 	at com.bignerdranch.franklin.roger.RogerActivity$Auto.access$8(RogerActivity.java:393)
+05-25 13:42:56.289 E/AndroidRuntime(  314): 	at com.bignerdranch.franklin.roger.RogerActivity$Auto$7$1.onReceive(RogerActivity.java:199)
+05-25 13:42:56.289 E/AndroidRuntime(  314): 	at android.app.ActivityThread$PackageInfo$ReceiverDispatcher$Args.run(ActivityThread.java:892)
+05-25 13:42:56.289 E/AndroidRuntime(  314): 	... 9 more
+05-25 13:42:56.289 E/AndroidRuntime(  314): Caused by: java.lang.ClassNotFoundException: android.app.LoadedApk in loader dalvik.system.PathClassLoader[.]
+05-25 13:42:56.289 E/AndroidRuntime(  314): 	at dalvik.system.PathClassLoader.findClass(PathClassLoader.java:243)
+05-25 13:42:56.289 E/AndroidRuntime(  314): 	at java.lang.ClassLoader.loadClass(ClassLoader.java:573)
+05-25 13:42:56.289 E/AndroidRuntime(  314): 	at java.lang.ClassLoader.loadClass(ClassLoader.java:532)
+05-25 13:42:56.289 E/AndroidRuntime(  314): 	at com.bignerdranch.franklin.roger.LocalApk.createPackageContext(LocalApk.java:261)
+05-25 13:42:56.289 E/AndroidRuntime(  314): 	... 15 more
+
+Android 2.3.1 emulator:
+05-25 13:48:04.185 E/AndroidRuntime(  388): FATAL EXCEPTION: main
+05-25 13:48:04.185 E/AndroidRuntime(  388): java.lang.RuntimeException: Error receiving broadcast Intent { act=com.bignerdranch.franklin.roger.ACTION_NEW_LAYOUT cat=[com.bignerdranch.franklin.roger.CATEGORY_LOCAL] (has extras) } in com.bignerdranch.franklin.roger.RogerActivity$Auto$7$1@40545788
+05-25 13:48:04.185 E/AndroidRuntime(  388): 	at android.app.LoadedApk$ReceiverDispatcher$Args.run(LoadedApk.java:722)
+05-25 13:48:04.185 E/AndroidRuntime(  388): 	at android.os.Handler.handleCallback(Handler.java:587)
+05-25 13:48:04.185 E/AndroidRuntime(  388): 	at android.os.Handler.dispatchMessage(Handler.java:92)
+05-25 13:48:04.185 E/AndroidRuntime(  388): 	at android.os.Looper.loop(Looper.java:123)
+05-25 13:48:04.185 E/AndroidRuntime(  388): 	at android.app.ActivityThread.main(ActivityThread.java:3647)
+05-25 13:48:04.185 E/AndroidRuntime(  388): 	at java.lang.reflect.Method.invokeNative(Native Method)
+05-25 13:48:04.185 E/AndroidRuntime(  388): 	at java.lang.reflect.Method.invoke(Method.java:507)
+05-25 13:48:04.185 E/AndroidRuntime(  388): 	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:839)
+05-25 13:48:04.185 E/AndroidRuntime(  388): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:597)
+05-25 13:48:04.185 E/AndroidRuntime(  388): 	at dalvik.system.NativeStart.main(Native Method)
+05-25 13:48:04.185 E/AndroidRuntime(  388): Caused by: java.lang.RuntimeException: java.lang.RuntimeException: failed to find constructor
+05-25 13:48:04.185 E/AndroidRuntime(  388): 	at com.bignerdranch.franklin.roger.LocalApk.createPackageContext(LocalApk.java:287)
+05-25 13:48:04.185 E/AndroidRuntime(  388): 	at com.bignerdranch.franklin.roger.LocalApk.getLayoutInflater(LocalApk.java:224)
+05-25 13:48:04.185 E/AndroidRuntime(  388): 	at com.bignerdranch.franklin.roger.RogerActivity$Auto.loadLayout(RogerActivity.java:478)
+05-25 13:48:04.185 E/AndroidRuntime(  388): 	at com.bignerdranch.franklin.roger.RogerActivity$Auto.loadResource(RogerActivity.java:397)
+05-25 13:48:04.185 E/AndroidRuntime(  388): 	at com.bignerdranch.franklin.roger.RogerActivity$Auto.access$8(RogerActivity.java:393)
+05-25 13:48:04.185 E/AndroidRuntime(  388): 	at com.bignerdranch.franklin.roger.RogerActivity$Auto$7$1.onReceive(RogerActivity.java:199)
+05-25 13:48:04.185 E/AndroidRuntime(  388): 	at android.app.LoadedApk$ReceiverDispatcher$Args.run(LoadedApk.java:709)
+05-25 13:48:04.185 E/AndroidRuntime(  388): 	... 9 more
+05-25 13:48:04.185 E/AndroidRuntime(  388): Caused by: java.lang.RuntimeException: failed to find constructor
+05-25 13:48:04.185 E/AndroidRuntime(  388): 	at com.bignerdranch.franklin.roger.Rxn.getConstructor(Rxn.java:129)
+05-25 13:48:04.185 E/AndroidRuntime(  388): 	at com.bignerdranch.franklin.roger.LocalApk.createPackageContext(LocalApk.java:263)
+05-25 13:48:04.185 E/AndroidRuntime(  388): 	... 15 more
 
