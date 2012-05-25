@@ -16,13 +16,14 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.WindowManager;
 
 public abstract class LocalApk {
-    private class LocalApkContext extends ContextWrapper {
-        private LocalApkContext(Context c) {
-            super(c);
+    private class LocalApkContext extends ContextThemeWrapper {
+        private LocalApkContext(Context c, int themeRes) {
+            super(c, themeRes);
         }
 
         Resources.Theme theme = null;
@@ -272,6 +273,10 @@ public abstract class LocalApk {
             }
         }
 
+        if (klass.getSuperclass() != null) {
+            return getMethod(klass.getSuperclass(), name, paramTypes);
+        }
+
         throw new RuntimeException("failed to find " + name);
     }
 
@@ -379,7 +384,11 @@ public abstract class LocalApk {
             Context c = (Context)contextImplConstructor.newInstance();
             init.invoke(c, resources, activityThread);
 
-            return new LocalApkContext(c);
+            // get resId
+            Method getThemeResId = getMethod(activity.getClass(), "getThemeResId");
+            int themeResId = (int)(Integer)getThemeResId.invoke(activity);
+
+            return new LocalApkContext(c, themeResId);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
