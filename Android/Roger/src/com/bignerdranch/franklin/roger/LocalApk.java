@@ -43,7 +43,7 @@ public abstract class LocalApk {
                 // well what if we don't use a theme for our own app?
                 // call to populate mThemeResource
                 activity.getTheme();
-                Object v = getFieldValue(activity, "mThemeResource");
+                Object v = Rxn.getFieldValue(activity, "mThemeResource");
                 int resId = (int)(Integer)v;
                 Log.i(TAG, "getDefaultThemeResource: " + resId + "");
                 return resId;
@@ -81,7 +81,7 @@ public abstract class LocalApk {
         private Resources.Theme getThemePostAPI10() {
             // hack around it?
             if (theme == null) {
-                Method selectDefaultTheme = getMethod(Resources.class, 
+                Method selectDefaultTheme = Rxn.getMethod(Resources.class, 
                         "selectDefaultTheme", int.class, int.class);
                 try {
                     themeResource = (int)(Integer)selectDefaultTheme.invoke(null, 
@@ -137,8 +137,8 @@ public abstract class LocalApk {
             //info.installLocation = PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
 
             if (Build.VERSION.SDK_INT >= 9) {
-                Object value = getFieldValue(containingInfo, "nativeLibraryDir");
-                setFieldValue(info, "nativeLibraryDir", value);
+                Object value = Rxn.getFieldValue(containingInfo, "nativeLibraryDir");
+                Rxn.setFieldValue(info, "nativeLibraryDir", value);
             }
 
             return info;
@@ -168,7 +168,7 @@ public abstract class LocalApk {
         try {
         	Constructor<AssetManager> con = amClass.getConstructor();
             
-            Method m = amClass.getMethod("addAssetPath", String.class);
+            Method m = Rxn.getMethod(amClass, "addAssetPath", String.class);
             AssetManager am = con.newInstance();
 
             m.invoke(am, getFile().getPath());
@@ -189,66 +189,9 @@ public abstract class LocalApk {
         return resources;
     }
 
-    public void showAllFields(Object instance) {
-        try {
-        Class<?> klass = instance.getClass();
-
-        Log.i(TAG, "showing everything for instance: " + instance + "");
-        while (klass != null) {
-            Log.i(TAG, "   for class: " + klass.getName() + "");
-            for (Field field : klass.getDeclaredFields()) {
-                field.setAccessible(true);
-                
-                Log.i(TAG, "    field name: " + field.getName() + " class: " + field.getType().getName() + 
-                        "\n        value: " + field.get(instance) + "");
-            }
-
-            klass = klass.getSuperclass();
-        }
-        } catch (Exception ex) {
-            Log.i(TAG, "exception while showing all fields", ex);
-        }
-    }
-
-    // debugging
-    private void scan(Class<?> klass) {
-        Log.i(TAG, "scanning " + klass + "");
-        Log.i(TAG, "    constructors:");
-        for (Constructor<?> constructor : klass.getDeclaredConstructors()) {
-            Log.i(TAG, "        " + constructor + "");
-        }
-        Log.i(TAG, "    fields:");
-        for (Field field : klass.getDeclaredFields()) {
-            Log.i(TAG, "        " + field + "");
-        }
-        Log.i(TAG, "    methods:");
-        for (Method method : klass.getDeclaredMethods()) {
-            Log.i(TAG, "        " + method + "");
-        }
-        if (klass.getSuperclass() != null) {
-            scan(klass.getSuperclass());
-        }
-    }
-
-    private boolean areEqual(Class<?>[] a, Class<?>[] b) {
-        if (a == null && b == null) return true;
-        if (a == null || b == null) return false;
-        if (a.length != b.length) return false;
-
-        boolean equal = true;
-        for (int i = 0; i < a.length; i++) {
-            if (!a[i].equals(b[i])) {
-                equal = false;
-                break;
-            }
-        }
-
-        return equal;
-    }
-
     private Context findBaseContext(Context c) {
         if (c instanceof ContextWrapper) {
-            Field f = getField(ContextWrapper.class, "mBase");
+            Field f = Rxn.getField(ContextWrapper.class, "mBase");
             try {
                 return findBaseContext((Context)f.get(c));
             } catch (Exception e) {
@@ -259,85 +202,10 @@ public abstract class LocalApk {
         }
     }
 
-    private Method getMethod(Class<?> klass, String name, Class<?>... paramTypes) {
-        for (Method method : klass.getDeclaredMethods()) {
-            if (!method.getName().equals(name)) {
-                continue;
-            }
-
-            Class<?>[] methodParamTypes = method.getParameterTypes();
-
-            if (areEqual(methodParamTypes, paramTypes)) {
-                method.setAccessible(true);
-                return method;
-            }
-        }
-
-        if (klass.getSuperclass() != null) {
-            return getMethod(klass.getSuperclass(), name, paramTypes);
-        }
-
-        throw new RuntimeException("failed to find " + name);
-    }
-
-    private <C> Constructor<C> getConstructor(Class<C> klass, Class<?>... paramTypes) {
-        for (Constructor<C> constructor : klass.getDeclaredConstructors()) {
-            if (areEqual(paramTypes, constructor.getParameterTypes())) {
-                constructor.setAccessible(true);
-                return constructor;
-            }
-        }
-
-        throw new RuntimeException("failed to find constructor");
-    }
-
-    private void setFieldValue(Object o, String name, Object value) {
-        Field f = getField(o.getClass(), name);
-        try {
-            f.set(o, value);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private Object getFieldValue(Class<?> klass, String name) {
-        Field f = getField(klass, name);
-        try {
-            return f.get(null);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private Object getFieldValue(Object o, String name) {
-        Field f = getField(o.getClass(), name);
-        try {
-            return f.get(o);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private Field getField(Class<?> klass, String name) {
-        for (Field field : klass.getDeclaredFields()) {
-            if (field.getName().equals(name)) {
-                field.setAccessible(true);
-                return field;
-            }
-        }
-
-        Class<?> superclass = klass.getSuperclass();
-        if (superclass != null) {
-            return getField(superclass, name);
-        }
-
-        throw new RuntimeException("failed to find field " + name);
-    }
-
     public LayoutInflater getLayoutInflaterHackingAroundCrap(LayoutInflater original, Context c) {
         LayoutInflater inflater = getLayoutInflaterUsingCloneInContext(original, c);
 
-        setFieldValue(inflater, "mContext", c);
+        Rxn.setFieldValue(inflater, "mContext", c);
 
         return inflater;
     }
@@ -346,7 +214,7 @@ public abstract class LocalApk {
         Log.i(TAG, "and calling getApplicationInfo");
 
         LayoutInflater inflater = original.cloneInContext(c);
-        showAllFields(inflater);
+        Rxn.showAllFields(inflater);
 
         return inflater;
     }
@@ -355,11 +223,6 @@ public abstract class LocalApk {
         Resources r = getResources();
         Context c = createPackageContext(r);
         return getLayoutInflaterHackingAroundCrap(original, c);
-    }
-
-    private Class<?> getReflectedClass(String name) throws ClassNotFoundException {
-        ClassLoader cl = ClassLoader.getSystemClassLoader();
-        return cl.loadClass(name);
     }
 
     public Context createPackageContext(Resources resources) {
@@ -372,12 +235,12 @@ public abstract class LocalApk {
             Class<?> activityThreadClass = (Class<?>)cl.loadClass(activityThreadName);
 
             Log.i(TAG, "getting constructor and method");
-            Constructor<?> contextImplConstructor = getConstructor(contextImplClass);
-            Method init = getMethod(contextImplClass, "init", Resources.class, activityThreadClass);
+            Constructor<?> contextImplConstructor = Rxn.getConstructor(contextImplClass);
+            Method init = Rxn.getMethod(contextImplClass, "init", Resources.class, activityThreadClass);
 
             Log.i(TAG, "getting the activity thread");
             Context baseContext = findBaseContext(context);
-            Field field = getField(baseContext.getClass(), "mMainThread");
+            Field field = Rxn.getField(baseContext.getClass(), "mMainThread");
             Object activityThread = field.get(baseContext);
 
             Log.i(TAG, "got everything, it looks like");
@@ -385,7 +248,7 @@ public abstract class LocalApk {
             init.invoke(c, resources, activityThread);
 
             // get resId
-            Method getThemeResId = getMethod(activity.getClass(), "getThemeResId");
+            Method getThemeResId = Rxn.getMethod(activity.getClass(), "getThemeResId");
             int themeResId = (int)(Integer)getThemeResId.invoke(activity);
 
             return new LocalApkContext(c, themeResId);
@@ -393,6 +256,4 @@ public abstract class LocalApk {
             throw new RuntimeException(ex);
         }
     }
-    
-    
 }
