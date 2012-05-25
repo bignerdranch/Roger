@@ -28,6 +28,8 @@ Features
 Getting Started
 ---------------
 
+0. Install node on your machine. As of right now, node needs to live where
+    homebrew installs it (/usr/local/bin/node). 
 1. Install Android Roger on your devices or emulators, and install Mac Roger
 on your Mac.
 2. Run Mac Roger, open preferences, and select your Android SDK folder.
