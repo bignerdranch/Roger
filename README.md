@@ -24,7 +24,6 @@ Features
 * Modify container layout params on the fly
 * Support for SDK 9-15 (v2.3 - v4.0)
 
-
 Getting Started
 ---------------
 
@@ -46,6 +45,25 @@ For ADB:
 
 Now, work as you had before Roger entered your life. As you save edits to XML
 files, Roger will show you what you are working on close to real time.
+
+Rationale
+---------
+
+One might reasonably ask why we think this tool is a great idea. Google has its own
+visual layout editor, after all. Why not use that? Or if you feel it's not good 
+enough, why not work on that?
+
+The visual layout editor in ADT continues to make progress. We don't feel that it
+will ever get where we need it to go, though. Why?  We don't think that 
+WYSIWIG is the right approach for editing layout XML. Structure is too important.
+When you think, "How can I get my layout file to look like this?" you immediately
+think of which layouts you will use and in what way you will use them. In a visual
+editing mode, too much of this information is lost, and it is hard to know what you're
+doing.
+
+It's a lot like HTML, is what we're saying. You have a variety of targets, and
+structure is significant. We'd rather have structural editing with instant
+preview in that situation than WYSIWIG.  So that's what Roger does.
 
 How Does It Work
 ----------------
