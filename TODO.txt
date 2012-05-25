@@ -1,10 +1,11 @@
 To do:
 
 - Fix theme support for SDK_INT < 11 in LocalApk
+    (install as regular android packages?)
 - Improve client feedback 
-    - notify when build starts
+    **- notify when build starts
     - download progress barf
-    - notify build errors
+    **- notify build errors (will probably need more work)
 - Handle layouts with custom classes somehow
 
 Ideas for new features:
