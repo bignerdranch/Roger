@@ -26,9 +26,6 @@ public abstract class LocalApk {
             super(c, themeRes);
         }
 
-        Resources.Theme theme = null;
-        int themeResource = 0;
-
         @Override
         public Object getSystemService(String name) {
             try {
@@ -37,71 +34,6 @@ public abstract class LocalApk {
                 throw e;
             }
         }
-
-        private int getDefaultThemeResource() {
-            try {
-                // well what if we don't use a theme for our own app?
-                // call to populate mThemeResource
-                activity.getTheme();
-                Object v = Rxn.getFieldValue(activity, "mThemeResource");
-                int resId = (int)(Integer)v;
-                Log.i(TAG, "getDefaultThemeResource: " + resId + "");
-                return resId;
-            } catch (Exception ex) {
-                Log.i(TAG, "failed to get default theme resource", ex);
-                return 0;
-            }
-        }
-
-        private Resources.Theme getThemeGingerbread() {
-            // would be really awesome to be able to fix the default
-            // theme handling here. -BP
-            //
-            // corresponding code from android source:
-            //
-            //if (mThemeResource == 0) {
-            //    mThemeResource = com.android.internal.R.style.Theme;
-            //}
-            //mTheme = mResources.newTheme();
-            //mTheme.applyStyle(mThemeResource, true);
-            //
-
-            if (theme == null) {
-                if (themeResource == 0) {
-                    themeResource = getDefaultThemeResource();
-                }
-                theme = getResources().newTheme();
-                theme.applyStyle(0, true);
-            }
-
-            return theme;
-        }
-        
-
-        private Resources.Theme getThemePostAPI10() {
-            // hack around it?
-            if (theme == null) {
-                Method selectDefaultTheme = Rxn.getMethod(Resources.class, 
-                        "selectDefaultTheme", int.class, int.class);
-                try {
-                    themeResource = (int)(Integer)selectDefaultTheme.invoke(null, 
-                            themeResource, getApplicationInfo().targetSdkVersion);
-                    theme = getResources().newTheme();
-                    theme.applyStyle(themeResource, true);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            return theme;
-        }
-
-        //public Resources.Theme getTheme() {
-        //    if (Build.VERSION.SDK_INT < 11) {
-        //        return getThemeGingerbread();
-        //    } else {
-        //        return getThemePostAPI10();
-        //    }
-        //}
 
         @Override
         public String getPackageName() {
@@ -166,11 +98,13 @@ public abstract class LocalApk {
         Resources resources = null;
         
         try {
+            Log.i(TAG, "creating AssetManager");
         	Constructor<AssetManager> con = amClass.getConstructor();
             
             Method m = Rxn.getMethod(amClass, "addAssetPath", String.class);
             AssetManager am = con.newInstance();
 
+            Log.i(TAG, "adding asset path to AssetManager");
             m.invoke(am, getFile().getPath());
 
             DisplayMetrics metrics = new DisplayMetrics();
@@ -181,6 +115,7 @@ public abstract class LocalApk {
             Configuration configuration = context.getResources()
                 .getConfiguration();
 
+            Log.i(TAG, "creating resources");
             resources = new Resources(am, metrics, configuration);
         } catch (Exception e) {
             Log.i(TAG, "failure to do something or another", e);
@@ -202,7 +137,7 @@ public abstract class LocalApk {
         }
     }
 
-    public LayoutInflater getLayoutInflaterHackingAroundCrap(LayoutInflater original, Context c) {
+    public LayoutInflater getLayoutInflaterSettingPrivateContext(LayoutInflater original, Context c) {
         LayoutInflater inflater = getLayoutInflaterUsingCloneInContext(original, c);
 
         Rxn.setFieldValue(inflater, "mContext", c);
@@ -222,18 +157,10 @@ public abstract class LocalApk {
     public LayoutInflater getLayoutInflater(LayoutInflater original) {
         Resources r = getResources();
         Context c = createPackageContext(r);
-        return getLayoutInflaterHackingAroundCrap(original, c);
+        return getLayoutInflaterSettingPrivateContext(original, c);
     }
 
-    //public LoadedApk(ActivityThread activityThread, String name,
-    //        Context systemContext, ApplicationInfo info, CompatibilityInfo compatInfo) {
-
-    /**
-     * Create a package context off of an apk that is not actually installed. 
-     *
-     * The following code is extremely skeevy.
-     */
-    public Context createPackageContext(Resources resources) {
+    private Context createPackageContextICS(Resources resources) {
         try {
             String contextImplName = "android.app.ContextImpl";
             String activityThreadName = "android.app.ActivityThread";
@@ -259,39 +186,24 @@ public abstract class LocalApk {
 
             // get resId
             Method getThemeResId = Rxn.getMethod(activity.getClass(), "getThemeResId");
-            int themeResId;
-            if (getThemeResId == null) {
-                // try this guy
-                themeResId = (int)(Integer)Rxn.getFieldValue(activity, "mThemeResource");
-            } else {
-                themeResId = (int)(Integer)getThemeResId.invoke(activity);
-            }
+            int themeResId = (int)(Integer)getThemeResId.invoke(activity);
 
             Context finalFakeContext = new LocalApkContext(c, themeResId);
             
             // more setup to create a fake LoadedApk for mPackageInfo
             Class<?> loadedApkClass = (Class<?>)cl.loadClass(loadedApkName);
-            Constructor<?> loadedApkConstructor = Rxn.getConstructor(loadedApkClass, 
-                    activityThreadClass, String.class, Context.class, ApplicationInfo.class);
-            Object fakeLoadedApk = null;
+            Class<?> compatInfoClass = (Class<?>)cl.loadClass(compatibilityInfoName);
+            Constructor<?> loadedApkConstructor = Rxn.getConstructorThrows(loadedApkClass, 
+                    activityThreadClass, String.class, Context.class, ApplicationInfo.class, compatInfoClass);
 
-            if (loadedApkConstructor == null) {
-                Class<?> compatInfoClass = (Class<?>)cl.loadClass(compatibilityInfoName);
-                loadedApkConstructor = Rxn.getConstructorThrows(loadedApkClass, 
-                        activityThreadClass, String.class, Context.class, ApplicationInfo.class, compatInfoClass);
+            // find some compat info to use
+            Object rogerPackageInfo = Rxn.getFieldValue(baseContext, "mPackageInfo");
+            Object compatInfoHolder = Rxn.getFieldValue(rogerPackageInfo, "mCompatibilityInfo");
+            Object compatInfo = Rxn.invoke(compatInfoHolder, "get");
 
-                // find some compat info to use
-                Object rogerPackageInfo = Rxn.getFieldValue(baseContext, "mPackageInfo");
-                Object compatInfoHolder = Rxn.getFieldValue(rogerPackageInfo, "mCompatibilityInfo");
-                Object compatInfo = Rxn.invoke(compatInfoHolder, "get");
-
-                // construct fake LoadedApk
-                fakeLoadedApk = loadedApkConstructor.newInstance(
-                        activityThread, packageName, c, finalFakeContext.getApplicationInfo(), compatInfo);
-            } else {
-                loadedApkConstructor.newInstance(
-                        activityThread, packageName, c, finalFakeContext.getApplicationInfo());
-            }
+            // construct fake LoadedApk
+            Object fakeLoadedApk = loadedApkConstructor.newInstance(
+                    activityThread, packageName, c, finalFakeContext.getApplicationInfo(), compatInfo);
 
             // then set it up on our fake system context to make it *not* a system
             // context? ooh, this is skeevy.
@@ -300,6 +212,166 @@ public abstract class LocalApk {
             return finalFakeContext;
         } catch (Exception ex) {
             throw new RuntimeException(ex);
+        }
+    }
+
+    private Context createPackageContextHoneycomb(Resources resources) {
+        try {
+            String contextImplName = "android.app.ContextImpl";
+            String activityThreadName = "android.app.ActivityThread";
+            String loadedApkName = "android.app.LoadedApk";
+
+            ClassLoader cl = ClassLoader.getSystemClassLoader();
+            Class<?> contextImplClass = (Class<?>)cl.loadClass(contextImplName);
+            Class<?> activityThreadClass = (Class<?>)cl.loadClass(activityThreadName);
+
+            Log.i(TAG, "getting constructor and method");
+            Constructor<?> contextImplConstructor = Rxn.getConstructorThrows(contextImplClass);
+            Method init = Rxn.getMethodThrows(contextImplClass, "init", Resources.class, activityThreadClass);
+
+            Log.i(TAG, "getting the activity thread");
+            Context baseContext = findBaseContext(context);
+            Field field = Rxn.getField(baseContext.getClass(), "mMainThread");
+            Object activityThread = field.get(baseContext);
+
+            Log.i(TAG, "got everything, it looks like");
+            Context c = (Context)contextImplConstructor.newInstance();
+            init.invoke(c, resources, activityThread);
+
+            // get resId
+            Method getThemeResId = Rxn.getMethod(activity.getClass(), "getThemeResId");
+            int themeResId = (int)(Integer)getThemeResId.invoke(activity);
+
+            Context finalFakeContext = new LocalApkContext(c, themeResId);
+            
+            // more setup to create a fake LoadedApk for mPackageInfo
+            Class<?> loadedApkClass = (Class<?>)cl.loadClass(loadedApkName);
+            Constructor<?> loadedApkConstructor = Rxn.getConstructor(loadedApkClass, 
+                    activityThreadClass, String.class, Context.class, ApplicationInfo.class);
+            Object fakeLoadedApk = loadedApkConstructor.newInstance(
+                    activityThread, packageName, c, finalFakeContext.getApplicationInfo());
+
+            // then set it up on our fake system context to make it *not* a system
+            // context? ooh, this is skeevy.
+            Rxn.setFieldValue(c, "mPackageInfo", fakeLoadedApk);
+
+            return finalFakeContext;
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private Context createPackageContextFroyo(Resources resources) {
+        try {
+            Log.i(TAG, "creating froyo package context");
+            String contextImplName = "android.app.ContextImpl";
+            String activityThreadName = "android.app.ActivityThread";
+
+            ClassLoader cl = ClassLoader.getSystemClassLoader();
+            Class<?> contextImplClass = (Class<?>)cl.loadClass(contextImplName);
+            Class<?> activityThreadClass = (Class<?>)cl.loadClass(activityThreadName);
+
+            Log.i(TAG, "getting constructor and method");
+            Constructor<?> contextImplConstructor = Rxn.getConstructorThrows(contextImplClass);
+            Method init = Rxn.getMethodThrows(contextImplClass, "init", Resources.class, activityThreadClass);
+
+            Log.i(TAG, "getting the activity thread");
+            Context baseContext = findBaseContext(context);
+            Field field = Rxn.getField(baseContext.getClass(), "mMainThread");
+            Object activityThread = field.get(baseContext);
+
+            Log.i(TAG, "got everything, it looks like");
+            Context c = (Context)contextImplConstructor.newInstance();
+            init.invoke(c, resources, activityThread);
+
+            // get resId
+            int themeResId = (int)(Integer)Rxn.getFieldValue(activity, "mThemeResource");
+
+            Context finalFakeContext = new LocalApkContext(c, themeResId);
+            
+            // force our fake system context to have a layout inflater
+            LayoutInflater originalInflater = activity.getLayoutInflater();
+            LayoutInflater inflater = getLayoutInflaterSettingPrivateContext(originalInflater, finalFakeContext);
+            Rxn.setFieldValue(c, "mLayoutInflater", inflater);
+
+            return finalFakeContext;
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private Context createPackageContextGingerbread(Resources resources) {
+        try {
+            String contextImplName = "android.app.ContextImpl";
+            String activityThreadName = "android.app.ActivityThread";
+            String loadedApkName = "android.app.LoadedApk";
+
+            ClassLoader cl = ClassLoader.getSystemClassLoader();
+            Class<?> contextImplClass = (Class<?>)cl.loadClass(contextImplName);
+            Class<?> activityThreadClass = (Class<?>)cl.loadClass(activityThreadName);
+
+            Log.i(TAG, "getting constructor and method");
+            Constructor<?> contextImplConstructor = Rxn.getConstructorThrows(contextImplClass);
+            Method init = Rxn.getMethodThrows(contextImplClass, "init", Resources.class, activityThreadClass);
+
+            Log.i(TAG, "getting the activity thread");
+            Context baseContext = findBaseContext(context);
+            Field field = Rxn.getField(baseContext.getClass(), "mMainThread");
+            Object activityThread = field.get(baseContext);
+
+            Log.i(TAG, "got everything, it looks like");
+            Context c = (Context)contextImplConstructor.newInstance();
+            init.invoke(c, resources, activityThread);
+
+            // get resId
+            int themeResId = (int)(Integer)Rxn.getFieldValue(activity, "mThemeResource");
+
+            Context finalFakeContext = new LocalApkContext(c, themeResId);
+            
+            // more setup to create a fake LoadedApk for mPackageInfo
+            Class<?> loadedApkClass = (Class<?>)cl.loadClass(loadedApkName);
+            Constructor<?> loadedApkConstructor = Rxn.getConstructor(loadedApkClass, 
+                    activityThreadClass, String.class, Context.class, ApplicationInfo.class);
+            Object fakeLoadedApk = loadedApkConstructor.newInstance(
+                    activityThread, packageName, c, finalFakeContext.getApplicationInfo());
+
+            // then set it up on our fake system context to make it *not* a system
+            // context? ooh, this is skeevy.
+            Rxn.setFieldValue(c, "mPackageInfo", fakeLoadedApk);
+
+            return finalFakeContext;
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    /**
+     * Create a package context off of an apk that is not actually installed. 
+     *
+     * The following code is extremely skeevy.
+     */
+    public Context createPackageContext(Resources resources) {
+        switch (Build.VERSION.SDK_INT) {
+            case Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1:
+            case Build.VERSION_CODES.ICE_CREAM_SANDWICH:
+            default:
+                return createPackageContextICS(resources);
+            case Build.VERSION_CODES.HONEYCOMB_MR2:
+            case Build.VERSION_CODES.HONEYCOMB_MR1:
+            case Build.VERSION_CODES.HONEYCOMB:
+                return createPackageContextHoneycomb(resources);
+            case Build.VERSION_CODES.GINGERBREAD_MR1:
+            case Build.VERSION_CODES.GINGERBREAD:
+                return createPackageContextGingerbread(resources);
+            case Build.VERSION_CODES.FROYO:
+            case Build.VERSION_CODES.ECLAIR_MR1:
+            case Build.VERSION_CODES.ECLAIR_0_1:
+            case Build.VERSION_CODES.ECLAIR:
+            case Build.VERSION_CODES.DONUT:
+            case Build.VERSION_CODES.CUPCAKE:
+            case Build.VERSION_CODES.BASE_1_1:
+            case Build.VERSION_CODES.BASE:
+                return createPackageContextFroyo(resources);
         }
     }
 }
