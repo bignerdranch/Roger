@@ -147,10 +147,10 @@ public class Rxn {
     }
 
     public static <C> Constructor<C> getConstructor(Class<C> klass, Class<?>... paramTypes) {
-        for (Constructor<C> constructor : klass.getDeclaredConstructors()) {
+        for (Constructor<?> constructor : klass.getDeclaredConstructors()) {
             if (areEqual(paramTypes, constructor.getParameterTypes())) {
                 constructor.setAccessible(true);
-                return constructor;
+                return (Constructor<C>)constructor;
             }
         }
 
