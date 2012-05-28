@@ -19,4 +19,6 @@
 
 - (IBAction)showPreferencePanel:(id)sender;
 
+- (void)restartServer;
+
 @end

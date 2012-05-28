@@ -18,6 +18,7 @@
 
 - (NSString *)serverPath;
 - (NSString *)currentMulticastAddress;
+- (void)showNodeErrorDialog;
 
 @end
 
@@ -34,6 +35,7 @@ static NSString* const serverUrl = @"http://localhost:8081/sendIntent";
     if ((self = [super init])) {
         self.ipAddress = ipAddress;
         self.fileServerPath = fileServerPath;
+        unableToStart = NO;
 
         if (![self startServer]) {
             self = nil;
@@ -56,6 +58,11 @@ static NSString* const serverUrl = @"http://localhost:8081/sendIntent";
 
 - (BOOL)startServer
 {
+    if (unableToStart) {
+        NSLog(@"Not restarting server. Unable to start");
+        return NO;
+    }
+    
     if (!self.ipAddress) {
         NSLog(@"unable to start server - no wifi ip address");
         return NO;
@@ -75,13 +82,18 @@ static NSString* const serverUrl = @"http://localhost:8081/sendIntent";
     [args addObject:self.ipAddress];
     [args addObject:[self currentMulticastAddress]];
     [args addObject:self.fileServerPath];
-    [nodeTask setLaunchPath:@"/usr/local/bin/node"];
+    [nodeTask setLaunchPath:[[NSUserDefaults standardUserDefaults] stringForKey:@"NodeDirKey"]]; //@"/usr/local/bin/node"];
     [nodeTask setArguments:args];
     self.taskInput = [NSPipe pipe];
     [nodeTask setStandardInput:self.taskInput];
     
     FTaskStream *taskStream = [[FTaskStream alloc] initWithUnlaunchedTask:nodeTask];
     [taskStream addLogEventsWithPrefix:@"NODE"];
+    [taskStream addOutputEvent:@"NODE ERROR" withBlock:^(NSString *line) {
+        unableToStart = YES;
+        [self showNodeErrorDialog];
+    }];
+    
     [taskStream addOutputEvent:@"." withBlock:^(NSString *line) {
         if (!line) {
             [self startServer];
@@ -91,6 +103,16 @@ static NSString* const serverUrl = @"http://localhost:8081/sendIntent";
     [nodeTask launch];
 
     return YES;
+}
+
+- (void)showNodeErrorDialog
+{
+    NSAlert *alert = [NSAlert alertWithMessageText:@"Unable to start the Node.js server" 
+                                     defaultButton:@"OK" 
+                                   alternateButton:nil 
+                                       otherButton:nil 
+                         informativeTextWithFormat:@"Do you have the correct path to the server in the preferences?"];
+    [alert runModal];
 }
 
 - (void)sendIntent:(FIntent *)intent

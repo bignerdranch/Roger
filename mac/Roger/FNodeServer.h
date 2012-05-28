@@ -13,7 +13,9 @@
 
 @class FIntent;
 
-@interface FNodeServer : NSObject
+@interface FNodeServer : NSObject {
+    BOOL unableToStart;
+}
 
 -(id)initWithIpAddress:(NSString *)ipAddress fileServerPath:(NSString *)fileServerPath;
 - (void)sendIntent:(FIntent *)intent;
