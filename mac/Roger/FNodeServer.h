@@ -19,4 +19,6 @@
 - (void)sendIntent:(FIntent *)intent;
 - (NSString *)urlPathForFile:(NSString *)fileName;
 
+@property (nonatomic, readonly, strong) NSArray *remoteDeviceSerialList;
+
 @end

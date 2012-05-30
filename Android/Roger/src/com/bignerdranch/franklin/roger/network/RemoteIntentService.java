@@ -1,9 +1,11 @@
 package com.bignerdranch.franklin.roger.network;
 
 import java.io.BufferedReader;
+import java.io.EOFException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -25,7 +27,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
+import android.os.Build;
+
 import android.support.v4.util.LruCache;
+
+import android.telephony.TelephonyManager;
 
 import android.util.Log;
 
@@ -114,7 +120,11 @@ public class RemoteIntentService extends IntentService {
             synchronized (data) {
                 data.desc = (ServerDescription)intent.getSerializableExtra(Constants.EXTRA_SERVER_DESCRIPTION);
             }
-            streamIntents();
+            try {
+                streamIntents();
+            } catch (EOFException e) {
+                Log.i(TAG, "disconnected on EOF, reconnecting");
+            }
 
             Intent i = new Intent(this, this.getClass());
             i.setAction(Constants.ACTION_CONNECT);
@@ -159,7 +169,7 @@ public class RemoteIntentService extends IntentService {
                 Log.i(TAG, "intent is dupe, txnId: " + txnId);
                 return true;
             } else {
-                Log.i(TAG, "intent is not dupe adding to cache, txnId: " + txnId);
+                Log.i(TAG, "intent is not dupe. adding to cache, txnId: " + txnId);
                 intentCache.put(txnId, i);
                 return false;
             }
@@ -189,19 +199,32 @@ public class RemoteIntentService extends IntentService {
         }
     }
 
+    private String getDeviceId() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+            return Build.SERIAL;
+        } else {
+            TelephonyManager tm = (TelephonyManager)getSystemService(TELEPHONY_SERVICE);
+            return tm.getDeviceId();
+        }
+    }
+
     private void streamIntents() throws IOException {
-        String serverAddress = data.desc.getServerAddress();
+        String deviceId = getDeviceId();
+        String serverAddress = data.desc.getIntentServerAddress(deviceId);
 		URL remoteUrl = new URL(serverAddress);
 		Log.d(TAG, "Connecting to " + serverAddress);
 
 		InputStream input;
+        OutputStream output;
 		synchronized (data) {
             validateData();
 			data.conn = (HttpURLConnection) remoteUrl.openConnection();
+            data.conn.setDoOutput(true);
 			data.conn.connect();
             ConnectionHelper.getInstance(this)
                 .setConnectionSuccess(data.desc);
 
+            output = data.conn.getOutputStream();
 			input = data.conn.getInputStream();
 		}
 

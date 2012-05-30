@@ -1,5 +1,4 @@
-var sys = require("util"),
-net = require("net"),  
+var util = require("util"),
 http = require("http"),  
 path = require("path"),  
 dgram = require("dgram"),  
@@ -15,9 +14,33 @@ hostname = process.argv[2];
 multicast = process.argv[3];
 fileDirectory = process.argv[4];
 
-sys.puts("address for server: " + hostname);
-sys.puts("multicast address for server: " + multicast);
+util.puts("address for server: " + hostname);
+util.puts("multicast address for server: " + multicast);
+
+// Marker function for communications that are significant to the Mac OS client.
+// Usually this means they will be parsed.
+var protocolOutput = function(s) {
+    util.puts(s);
+};
+
 var clients = [];
+var reportClients = function() {
+    protocolOutput("begin current client list:");
+    clients.forEach(function (c) {
+        protocolOutput(c.name);
+    });
+    protocolOutput("end current client list.");
+};
+
+var addClient = function(client) {
+    clients.push(client);
+    reportClients();
+};
+
+var removeClient = function(client) {
+    clients.remove(client);
+    reportClients();
+};
 var files = {};
 var fileIndex = 0;
 
@@ -32,13 +55,19 @@ Array.prototype.remove = function(e) {
     }
 };
 
+setInterval(function () {
+    clients.forEach(function(c) {
+        c.cxn.write('\n');
+    });
+}, 5000);
+
 var httpServer = http.createServer(function(request, response){  
     var parts = url.parse(request.url, true);
-    sys.puts("got path: " + parts.pathname + " query: " + sys.inspect(parts.query));
+    util.puts("got path: " + parts.pathname + " query: " + util.inspect(parts.query));
     var pathname = parts.pathname;
 
     if (pathname.match(/^\/sendIntent$/)) {
-        sys.puts("got intent");
+        util.puts("got intent");
         request.setEncoding('utf-8');
         var allData = "";
         
@@ -47,57 +76,53 @@ var httpServer = http.createServer(function(request, response){
         });
         request.on('end', function () {
             var intent = JSON.parse(allData);
-            sys.puts('forwarding intent');
+            util.puts('forwarding intent');
 
-            clients.forEach(function(s) {
-                sys.puts("    sending intent to client: " + sys.inspect(intent) + "");
-                s.write(allData);
-                s.write("\nend intent\n");
+            clients.forEach(function(c) {
+                util.puts("    sending intent to client " + c.name + ": " + util.inspect(intent) + "");
+                c.cxn.write(allData);
+                c.cxn.write("\nend intent\n");
             });
         });
+    } else if (pathname.match(/^\/streamIntents/)) {
+        var client = {
+            name : parts.query.deviceId,
+            cxn : response
+        };
 
+        // leave the response open for long polling
+        addClient(client);
+
+        response.on('timeout', function () {
+            util.puts('timeout occurred' + new Error().stack);
+        });
+
+        response.on('close', function () {
+            removeClient(client);
+            util.puts("Removed mobile client. Total: " + clients.length);
+            client.cxn.end();
+        });
     } else if (pathname.match(/^\/file\//)) {
         var subPath = pathname.replace(/^\/file\//, "");
         var localPath = path.join(fileDirectory, subPath);
 
-        sys.puts("sending " + localPath + " to a client");
+        util.puts("sending " + localPath + " to a client");
         response.writeHead(200, {
             'Transfer-Encoding' : 'chunked',
             'Content-Encoding' : 'application/octet-stream'
         });
 
         var readStream = filesys.createReadStream(localPath);
-        sys.pump(readStream, response, function (err) {
+        util.pump(readStream, response, function (err) {
             if (err) {
-                sys.puts("error writing " + localPath + " to client: " + err);
+                util.puts("error writing " + localPath + " to client: " + err);
             }
         });
     }
 });
 httpServer.listen(port);  
 
-sys.puts("Server Running on " + port);
-
-// server to send intents through - clients long poll on this guy
-var intentServer = net.createServer(function (stream) {
-    clients.push(stream);
-
-    stream.setTimeout(0);
-    stream.setEncoding("utf8");
-
-    stream.addListener("connect", function () {
-        sys.puts("Added mobile client. Total: " + clients.length);
-        stream.pipe(stream);
-    });
-
-    stream.addListener("end", function() {
-        clients.remove(stream);
-        sys.puts("Removed mobile client. Total: " + clients.length);
-        stream.end();
-    });
-});
-intentServer.listen(mobilePort, hostname);
-sys.puts("Mobile server Running on " + hostname + ":" + mobilePort);
+util.puts("Server Running on " + port);
 
 // setup server discovery listener
 var broadcastServer = dgram.createSocket("udp4");
@@ -107,12 +132,12 @@ broadcastServer.on("message", function(msg, rinfo) {
     }
 
     // send back a response
-	sys.puts("received query from address " + rinfo.address + ", host name " + os.hostname() + ", sending response");
+	util.puts("received query from address " + rinfo.address + ", host name " + os.hostname() + ", sending response");
 
     var message = new Buffer("SECRETS!" + os.hostname());
     broadcastServer.send(message, 0, message.length, multicastPort, rinfo.address, function (err, bytes) {
         if (err) {
-            sys.puts("error sending udp message: " + err);
+            util.puts("error sending udp message: " + err);
         }
     });
 });

@@ -25,6 +25,7 @@ static NSString* const serverUrl = @"http://localhost:8081/sendIntent";
 
 @implementation FNodeServer
 
+@synthesize remoteDeviceSerialList=_remoteDeviceSerialList;
 @synthesize taskInput=_taskInput;
 @synthesize ipAddress=_ipAddress;
 @synthesize fileServerPath=_fileServerPath;
@@ -80,11 +81,30 @@ static NSString* const serverUrl = @"http://localhost:8081/sendIntent";
     self.taskInput = [NSPipe pipe];
     [nodeTask setStandardInput:self.taskInput];
     
+    __block NSMutableArray *workingRemoteDeviceSerialList = nil;
+
     FTaskStream *taskStream = [[FTaskStream alloc] initWithUnlaunchedTask:nodeTask];
     [taskStream addLogEventsWithPrefix:@"NODE"];
+    
+    [taskStream addOutputEvent:@"end current client list." withBlock:^(NSString *line) {
+        if (line && workingRemoteDeviceSerialList) {
+            _remoteDeviceSerialList = workingRemoteDeviceSerialList;
+            NSLog(@"new remoteDeviceSerialList: %@", self.remoteDeviceSerialList);
+            workingRemoteDeviceSerialList = nil;
+        }
+    }];
+
     [taskStream addOutputEvent:@"." withBlock:^(NSString *line) {
-        if (!line) {
+        if (line && workingRemoteDeviceSerialList) {
+            [workingRemoteDeviceSerialList addObject:line];
+        } else if (!line) {
             [self startServer];
+        }
+    }];
+
+    [taskStream addOutputEvent:@"begin current client list:" withBlock:^(NSString *line) {
+        if (line) {
+            workingRemoteDeviceSerialList = [[NSMutableArray alloc] init];
         }
     }];
 
@@ -101,8 +121,9 @@ static NSString* const serverUrl = @"http://localhost:8081/sendIntent";
     NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:reqUrl]]; 
     [req setHTTPMethod:@"POST"];
     [req setHTTPBody:[intent json]];
-    [NSURLConnection sendAsynchronousRequest:req queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
-        
+    [NSURLConnection sendAsynchronousRequest:req 
+                                       queue:[NSOperationQueue mainQueue] 
+                           completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
         if (error) {
             NSLog(@"Unable to send to server: %@", error);
         }

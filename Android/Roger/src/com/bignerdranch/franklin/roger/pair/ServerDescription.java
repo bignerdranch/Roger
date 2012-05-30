@@ -5,6 +5,8 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import android.net.Uri;
+
 import android.util.Log;
 
 public class ServerDescription implements Serializable {
@@ -38,6 +40,10 @@ public class ServerDescription implements Serializable {
             Log.e(TAG, "do not want", uhe);
             return null;
         }
+    }
+
+    public String getIntentServerAddress(String deviceId) {
+        return "http://" + getHostAddress() + ":8081/streamIntents?deviceId=" + Uri.encode(deviceId);
     }
 
     public String getServerAddress() {
