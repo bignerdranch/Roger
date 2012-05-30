@@ -641,6 +641,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     // rewrite error lines
     NSMutableArray *errorLines = [[NSMutableArray alloc] init];
     [taskStream addErrorEvent:@"." withBlock:^(NSString *line) {
+        // reformat XML errors to strip out non-project portions of the filepath
         if ([line stringsFromFirstMatchOfPattern:@"^/.*:[1-9]+[0-9]*: "]) {
             
             line = [line stringByReplacingPattern:@"^/.*/(res/[^/]*/[^.]*\\.xml)"
