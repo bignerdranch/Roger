@@ -18,8 +18,8 @@
     controller = [[FFileViewController alloc] initWithNibName:@"FFileViewController" bundle:nil];
     [_window setContentView:[controller view]];
 
-    NSDictionary *appDefaults = [NSDictionary
-        dictionaryWithObject:@"" forKey:@"SdkDirKey"];
+    NSDictionary *appDefaults = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:@"", @"/usr/local/bin/node", nil]
+                                                            forKeys:[NSArray arrayWithObjects:@"SdkDirKey", @"NodeDirKey", nil]];
 
     [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
     
@@ -40,6 +40,11 @@
     }
 
     [pref showWindow:self];
+}
+
+- (void)restartServer
+{
+    [controller restartServer];
 }
 
 @end

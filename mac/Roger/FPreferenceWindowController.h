@@ -13,9 +13,13 @@
 }
 
 @property (nonatomic, strong) IBOutlet NSTextField *sdkPathField;
+@property (nonatomic, strong) IBOutlet NSTextField *nodePathField;
 @property (nonatomic, copy) NSString *sdkPath;
+@property (nonatomic, copy) NSString *nodePath;
 
 - (IBAction)selectSdkClicked:(id)sender;
+- (IBAction)selectNodePathClicked:(id)sender;
+- (IBAction)resetNodePath:(id)sender;
 - (void)updatePath;
 
 @end

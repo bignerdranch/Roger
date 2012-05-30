@@ -59,5 +59,6 @@
 
 - (void)startServer;
 - (void)stopServer;
+- (void)restartServer;
 
 @end

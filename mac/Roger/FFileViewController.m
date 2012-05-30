@@ -732,6 +732,14 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     [nodeTask terminate];
 }
 
+- (void)restartServer
+{
+    [self stopServer];
+    
+    self.nodeServer = nil;
+    [self startServer];
+}
+
 - (NSString *)currentIPAddress
 {
     if (ipAddress) {
