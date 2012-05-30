@@ -101,16 +101,12 @@ static NSString* const serverUrl = @"http://localhost:8081/sendIntent";
         }
     }];
 
-    [taskStream addOutputEvent:@"NODE ERROR" withBlock:^(NSString *line) {
-        unableToStart = YES;
-        [self showNodeErrorDialog];
-    }];
-    
     [taskStream addOutputEvent:@"." withBlock:^(NSString *line) {
         if (line && workingRemoteDeviceSerialList) {
             [workingRemoteDeviceSerialList addObject:line];
         } else if (!line) {
-            [self startServer];
+            unableToStart = YES;
+            [self showNodeErrorDialog];
         }
     }];
 
