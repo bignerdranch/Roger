@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		361B445B1540A56200C4F80B /* AndroidManifest.xml in Resources */ = {isa = PBXBuildFile; fileRef = 361B445A1540A56200C4F80B /* AndroidManifest.xml */; };
 		362A7AA01540643700CA25C6 /* build_fake_package.sh in Resources */ = {isa = PBXBuildFile; fileRef = 362A7A9F1540643700CA25C6 /* build_fake_package.sh */; };
 		362A7AA215406FFE00CA25C6 /* en1_addr.sh in Resources */ = {isa = PBXBuildFile; fileRef = 362A7AA115406FFE00CA25C6 /* en1_addr.sh */; };
 		3680B88A1549CED8005CD1B3 /* publish_apk_to_adb_devices.sh in Resources */ = {isa = PBXBuildFile; fileRef = 3680B8891549CED8005CD1B3 /* publish_apk_to_adb_devices.sh */; };
@@ -32,6 +31,7 @@
 		36EEAE6E155FF9450066AB57 /* FADB.m in Sources */ = {isa = PBXBuildFile; fileRef = 36EEAE6D155FF9450066AB57 /* FADB.m */; };
 		36F0822415648CDA00771500 /* FNodeServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 36F0822315648CDA00771500 /* FNodeServer.m */; };
 		36F0822715649B1500771500 /* FTaskCorral.m in Sources */ = {isa = PBXBuildFile; fileRef = 36F0822615649B1500771500 /* FTaskCorral.m */; };
+		36F9A78A1576F5240052217F /* RogerActivity-debug.apk in Resources */ = {isa = PBXBuildFile; fileRef = 36F9A7891576F5240052217F /* RogerActivity-debug.apk */; };
 		8342C50B153F7274007B2447 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8342C50A153F7274007B2447 /* Cocoa.framework */; };
 		8342C515153F7274007B2447 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8342C513153F7274007B2447 /* InfoPlist.strings */; };
 		8342C517153F7274007B2447 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8342C516153F7274007B2447 /* main.m */; };
@@ -41,14 +41,12 @@
 		8342C533153F73E6007B2447 /* FFileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8342C531153F73E6007B2447 /* FFileViewController.m */; };
 		8342C534153F73E6007B2447 /* FFileViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8342C532153F73E6007B2447 /* FFileViewController.xib */; };
 		8395D944154771E70023F804 /* RogerIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 8395D943154771E70023F804 /* RogerIcon.icns */; };
-		83FEA52815407D8900B40A11 /* RogerServer.js in Sources */ = {isa = PBXBuildFile; fileRef = 83FEA52715407D8900B40A11 /* RogerServer.js */; };
 		83FEA52B1540826600B40A11 /* RogerServer.js in Resources */ = {isa = PBXBuildFile; fileRef = 83FEA52715407D8900B40A11 /* RogerServer.js */; };
 		83FEA53515410BA700B40A11 /* FPreferenceWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83FEA53315410BA600B40A11 /* FPreferenceWindowController.m */; };
 		83FEA53615410BA700B40A11 /* FPreferenceWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 83FEA53415410BA700B40A11 /* FPreferenceWindowController.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		361B445A1540A56200C4F80B /* AndroidManifest.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = AndroidManifest.xml; path = scripting/AndroidManifest.xml; sourceTree = "<group>"; };
 		362A7A9D15405D2000CA25C6 /* scripting */ = {isa = PBXFileReference; lastKnownFileType = folder; path = scripting; sourceTree = SOURCE_ROOT; };
 		362A7A9F1540643700CA25C6 /* build_fake_package.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = build_fake_package.sh; path = scripting/build_fake_package.sh; sourceTree = "<group>"; };
 		362A7AA115406FFE00CA25C6 /* en1_addr.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = en1_addr.sh; path = scripting/en1_addr.sh; sourceTree = "<group>"; };
@@ -97,6 +95,7 @@
 		36F0822315648CDA00771500 /* FNodeServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FNodeServer.m; sourceTree = "<group>"; };
 		36F0822515649B1500771500 /* FTaskCorral.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FTaskCorral.h; sourceTree = "<group>"; };
 		36F0822615649B1500771500 /* FTaskCorral.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FTaskCorral.m; sourceTree = "<group>"; };
+		36F9A7891576F5240052217F /* RogerActivity-debug.apk */ = {isa = PBXFileReference; lastKnownFileType = file; name = "RogerActivity-debug.apk"; path = "../Android/Roger/bin/RogerActivity-debug.apk"; sourceTree = "<group>"; };
 		8342C506153F7274007B2447 /* Roger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Roger.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8342C50A153F7274007B2447 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		8342C50D153F7274007B2447 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -115,7 +114,6 @@
 		8342C532153F73E6007B2447 /* FFileViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FFileViewController.xib; sourceTree = "<group>"; };
 		8395D943154771E70023F804 /* RogerIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = RogerIcon.icns; sourceTree = "<group>"; };
 		83FEA52715407D8900B40A11 /* RogerServer.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = RogerServer.js; sourceTree = "<group>"; };
-		83FEA52C1540B31400B40A11 /* AndroidManifest.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = AndroidManifest.xml; path = scripting/AndroidManifest.xml; sourceTree = "<group>"; };
 		83FEA53215410BA600B40A11 /* FPreferenceWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPreferenceWindowController.h; sourceTree = "<group>"; };
 		83FEA53315410BA600B40A11 /* FPreferenceWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPreferenceWindowController.m; sourceTree = "<group>"; };
 		83FEA53415410BA700B40A11 /* FPreferenceWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FPreferenceWindowController.xib; sourceTree = "<group>"; };
@@ -184,11 +182,10 @@
 		8342C4FB153F7274007B2447 = {
 			isa = PBXGroup;
 			children = (
+				36F9A7891576F5240052217F /* RogerActivity-debug.apk */,
 				36EEAE06155F1ABD0066AB57 /* CoreFoundation.framework */,
 				3680B8891549CED8005CD1B3 /* publish_apk_to_adb_devices.sh */,
 				8395D943154771E70023F804 /* RogerIcon.icns */,
-				361B445A1540A56200C4F80B /* AndroidManifest.xml */,
-				83FEA52C1540B31400B40A11 /* AndroidManifest.xml */,
 				362A7AA115406FFE00CA25C6 /* en1_addr.sh */,
 				362A7A9F1540643700CA25C6 /* build_fake_package.sh */,
 				8342C510153F7274007B2447 /* Roger */,
@@ -283,6 +280,7 @@
 			buildPhases = (
 				8342C502153F7274007B2447 /* Sources */,
 				8342C503153F7274007B2447 /* Frameworks */,
+				36F9A7881576F3460052217F /* ShellScript */,
 				8342C504153F7274007B2447 /* Resources */,
 			);
 			buildRules = (
@@ -333,14 +331,30 @@
 				8342C534153F73E6007B2447 /* FFileViewController.xib in Resources */,
 				362A7AA01540643700CA25C6 /* build_fake_package.sh in Resources */,
 				362A7AA215406FFE00CA25C6 /* en1_addr.sh in Resources */,
-				361B445B1540A56200C4F80B /* AndroidManifest.xml in Resources */,
 				83FEA53615410BA700B40A11 /* FPreferenceWindowController.xib in Resources */,
 				3680B88A1549CED8005CD1B3 /* publish_apk_to_adb_devices.sh in Resources */,
 				8395D944154771E70023F804 /* RogerIcon.icns in Resources */,
+				36F9A78A1576F5240052217F /* RogerActivity-debug.apk in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		36F9A7881576F3460052217F /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\n\nant -buildfile \"../Android/Roger/build.xml\" debug\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		8342C502153F7274007B2447 /* Sources */ = {
@@ -350,7 +364,6 @@
 				8342C517153F7274007B2447 /* main.m in Sources */,
 				8342C51E153F7274007B2447 /* FAppDelegate.m in Sources */,
 				8342C533153F73E6007B2447 /* FFileViewController.m in Sources */,
-				83FEA52815407D8900B40A11 /* RogerServer.js in Sources */,
 				83FEA53515410BA700B40A11 /* FPreferenceWindowController.m in Sources */,
 				369D989F1544800900616DF5 /* FakeProjectBuilder.m in Sources */,
 				369D98A31544881500616DF5 /* FResourceIndex.m in Sources */,
