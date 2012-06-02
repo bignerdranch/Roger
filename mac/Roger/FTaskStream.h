@@ -6,7 +6,8 @@
 //  FTaskStream plugs in to its task's stdin and stdout. When a line is read
 //  for an input, it attempts to match each event's regex against the line.
 //  For each matching event, the associated block is run. If multiple
-//  events match, all matching events are run in the order they are added.
+//  events match, all matching events are run in the order they were added
+//  to the FTaskStream instance.
 //
 //  Finally, on EOF all blocks are run with a "nil" value for line.
 //
