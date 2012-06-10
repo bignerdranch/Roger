@@ -22,21 +22,14 @@ Features
 * ADB or WiFi connection
 * View layouts and XML drawables
 * Modify container layout params on the fly
-* Support for SDK 9-15 (v2.3 - v4.0)
+* Support for SDK 8-15 (Android v2.2 - v4.0)
 
 Getting Started
 ---------------
 
-Prerequisites:
-
-1. For now, you need XCode installed.
-2. You need to have the Android SDK installed.
-
-Given that:
-
-0. Pull up mac/Roger/Roger.xcodeproj and run.
+0. Open mac/Roger/Roger.xcodeproj in Xcode and run.
 1. In Roger, open preferences, and select your Android SDK folder.
-2. Connect a device or emulator. Select "yes" to install and start
+2. Connect any number of devices or emulators. Select "yes" to install and start
     the Android Roger client.
 
 Now, work as you had before Roger entered your life. As you save edits to XML
@@ -45,21 +38,11 @@ files, Roger will show you what you are working on close to real time.
 Rationale
 ---------
 
-One might reasonably ask why we think this tool is a great idea. Google has its own
-visual layout editor, after all. Why not use that? Or if you feel it's not good 
-enough, why not work on that?
-
-The visual layout editor in ADT continues to make progress. We don't feel that it
-will ever get where we need it to go, though. Why?  We don't think that 
-WYSIWIG is the right approach for editing layout XML. Structure is too important.
-When you think, "How can I get my layout file to look like this?" you immediately
-think of which layouts you will use and in what way you will use them. In a visual
-editing mode, too much of this information is lost, and it is hard to know what you're
-doing.
-
-It's a lot like HTML, is what we're saying. You have a variety of targets, and
-structure is significant. We'd rather have structural editing with instant
-preview in that situation than WYSIWIG.  So that's what Roger does.
+We wrote this tool to scratch our own itch. We all edit XML by hand, deploying
+to devices on a variety of versions of Android. Seeing the results of our work
+was tiresome at best, and downright infuriating when the problem was version or
+device specific. Roger solves these problems nicely, without getting in the way
+of our existing workflow.
 
 How Does It Work
 ----------------
@@ -73,40 +56,35 @@ As a result, the views you see in Roger are identical to what you see when you i
 in your own application. And because not every resource is included, Roger can also be much faster than building
 and running your entire app.
 
-Roger loads the apks it builds by reflecting on classes and doing inappropriate things with the runtime.
-This is probably why it is not the most stable tool in the world at the moment.
-
-
 Arbitrary Questions
 -------------------
 
 ### Android versions?
 
-Right now, the build target for the client is v2.1. Layouts do not actually
-load on v2.1, though. Works against v2.2 onwards on the emulator. I can make no
-guarantee about specific devices, apart from the devices I have personal experience
-with (Nexus S w/ICS, Xoom w/3.2, emulators 2.2+). 
+Roger currently supports everything from v2.2 on up. No guarantee about
+specific devices, apart from the devices we have personal experience with
+(Nexus S w/ICS, Xoom w/3.2, emulators 2.2+). Roger does inappropriate things 
+with reflection to do its things, so device-specific problems are not out of
+the realm of possibility.
 
 ### Emulators?
 
-~~Not at the moment. Sorry.~~ Woop, this works now. Not over WiFi or other networks, though. Emulators
-are supported exclusively over ADB.
+Yes. Emulators do not support WiFi.
 
 ### So Roger supports both ADB and WiFi. Which should I use?
 
-ADB is more reliable right now, but WiFi is faster. I usually end up being lazy and letting the WiFi
-connection lapse.
+Roger will attempt to use both wherever it can. WiFi is usually faster, but if ADB 
+loads quicker it will try to cancel the WiFi download.
 
 ### Themes?
 
-There is currently no support for application or activity specific themese.
-Honeycomb and later use the default theme, previous versions currently have no
-theme at all.  The lack of a default theme causes lots of minor irritations
-(e.g., "Where are my RadioButton graphics?" The answer is "Nowhere.").
+There is currently no support for application or activity specific themes.
+Layouts will load with the same theme as Roger (which is the default theme for 
+targetSdkVersion=15).
 
 ### Libraries?
 
-Haven't tried it, but almost certainly no.
+No.
 
 ### Custom view subclasses?
 
@@ -126,18 +104,7 @@ this:
 
     </FrameLayout>
 
-### Any container layout besides FrameLayout?
+### Roger seems to put my inflated layout inside a FrameLayout. Will Roger
+### use a different layout than this?
 
 Nope. Use the same workaround as above for this.
-
-### How stable is it?
-
-Ehh. It makes Android native code explode every now and then, causing
-Roger to disappear without warning. Just restart the client if that 
-happens.
-
-### What will happen if git creates a bunch of new layout files?
-
-Roger will display one of the new files that was created, but it should
-handle it okay.
-
