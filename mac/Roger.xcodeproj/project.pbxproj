@@ -49,6 +49,7 @@
 		36F0822415648CDA00771500 /* FNodeServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 36F0822315648CDA00771500 /* FNodeServer.m */; };
 		36F0822715649B1500771500 /* FTaskCorral.m in Sources */ = {isa = PBXBuildFile; fileRef = 36F0822615649B1500771500 /* FTaskCorral.m */; };
 		36F16E0115843D2100C5686F /* reinstall_roger_client.sh in Resources */ = {isa = PBXBuildFile; fileRef = 36F16E0015843D2100C5686F /* reinstall_roger_client.sh */; };
+		36F16E031584470500C5686F /* node in Resources */ = {isa = PBXBuildFile; fileRef = 36F16E021584470500C5686F /* node */; };
 		36F9A78A1576F5240052217F /* RogerActivity-debug.apk in Resources */ = {isa = PBXBuildFile; fileRef = 36F9A7891576F5240052217F /* RogerActivity-debug.apk */; };
 		36F9A78E1577087E0052217F /* FDevices.m in Sources */ = {isa = PBXBuildFile; fileRef = 36F9A78D1577087E0052217F /* FDevices.m */; };
 		36F9A791157708940052217F /* FDevice.m in Sources */ = {isa = PBXBuildFile; fileRef = 36F9A790157708930052217F /* FDevice.m */; };
@@ -129,6 +130,7 @@
 		36F0822515649B1500771500 /* FTaskCorral.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FTaskCorral.h; sourceTree = "<group>"; };
 		36F0822615649B1500771500 /* FTaskCorral.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FTaskCorral.m; sourceTree = "<group>"; };
 		36F16E0015843D2100C5686F /* reinstall_roger_client.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = reinstall_roger_client.sh; path = scripting/reinstall_roger_client.sh; sourceTree = SOURCE_ROOT; };
+		36F16E021584470500C5686F /* node */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = node; sourceTree = "<group>"; };
 		36F9A7891576F5240052217F /* RogerActivity-debug.apk */ = {isa = PBXFileReference; lastKnownFileType = file; name = "RogerActivity-debug.apk"; path = "../../Android/Roger/bin/RogerActivity-debug.apk"; sourceTree = "<group>"; };
 		36F9A78C1577087E0052217F /* FDevices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FDevices.h; sourceTree = "<group>"; };
 		36F9A78D1577087E0052217F /* FDevices.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FDevices.m; sourceTree = "<group>"; };
@@ -264,6 +266,7 @@
 		36F0822015648CBA00771500 /* Server */ = {
 			isa = PBXGroup;
 			children = (
+				36F16E021584470500C5686F /* node */,
 				36F0822215648CDA00771500 /* FNodeServer.h */,
 				36F0822315648CDA00771500 /* FNodeServer.m */,
 			);
@@ -423,6 +426,7 @@
 				8395D944154771E70023F804 /* RogerIcon.icns in Resources */,
 				36F9A78A1576F5240052217F /* RogerActivity-debug.apk in Resources */,
 				36F16E0115843D2100C5686F /* reinstall_roger_client.sh in Resources */,
+				36F16E031584470500C5686F /* node in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

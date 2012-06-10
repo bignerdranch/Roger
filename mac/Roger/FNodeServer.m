@@ -18,8 +18,9 @@
 @property (nonatomic, readwrite, strong) NSArray *remoteDeviceSerialList;
 @property (nonatomic, strong) NSMutableArray *workingRemoteDeviceSerialList;
 
+@property (readonly) NSString *serverPath;
+@property (readonly) NSString *nodeExecutablePath;
 
-- (NSString *)serverPath;
 - (NSString *)currentMulticastAddress;
 - (void)showNodeErrorDialog;
 
@@ -56,6 +57,12 @@ static NSString* const serverUrl = @"http://localhost:8081/sendIntent";
     return [bundle pathForResource:@"RogerServer" ofType:@"js"];
 }
 
+- (NSString *)nodeExecutablePath
+{
+    NSBundle *bundle = [NSBundle mainBundle];
+    return [bundle pathForResource:@"node" ofType:@""];
+}
+
 - (NSString *)currentMulticastAddress
 {
     return @"234.5.6.7";
@@ -87,7 +94,8 @@ static NSString* const serverUrl = @"http://localhost:8081/sendIntent";
     [args addObject:self.ipAddress];
     [args addObject:[self currentMulticastAddress]];
     [args addObject:self.fileServerPath];
-    [nodeTask setLaunchPath:[[NSUserDefaults standardUserDefaults] stringForKey:@"NodeDirKey"]]; //@"/usr/local/bin/node"];
+    //[nodeTask setLaunchPath:[[NSUserDefaults standardUserDefaults] stringForKey:@"NodeDirKey"]]; //@"/usr/local/bin/node"];
+    [nodeTask setLaunchPath:self.nodeExecutablePath];
     [nodeTask setArguments:args];
     self.taskInput = [NSPipe pipe];
     [nodeTask setStandardInput:self.taskInput];
