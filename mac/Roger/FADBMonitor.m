@@ -80,10 +80,10 @@
         return;
     }
 
-    [self checkDevices];
+    [self checkDevicesWithPing:NO];
 }
 
--(void)checkDevices
+-(void)checkDevicesWithPing:(BOOL)withPing
 {
     [self.adb listDevicesWithBlock:^(NSArray *deviceNames) {
         NSMutableSet *unconnectedDevices = [[NSSet setWithArray:deviceNames] mutableCopy];
@@ -91,7 +91,11 @@
         @synchronized (self.connections) {
             for (FADBConnection *connection in self.connections) {
                 [unconnectedDevices removeObject:connection.serial];
+                if (withPing) {
+                    [connection pingWithTimeout:YES];
+                }
             }
+
         }
 
         for (NSString *name in unconnectedDevices) {

@@ -110,7 +110,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
 - (IBAction) checkDevicesButtonClicked:(id)sender
 {
-    [self.adbMonitor checkDevices];
+    [self.adbMonitor checkDevicesWithPing:YES];
 }
 
 - (void) awakeFromNib

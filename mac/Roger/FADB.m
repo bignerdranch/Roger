@@ -14,6 +14,7 @@
 @interface FADB ()
 
 @property (readonly) NSString *clientApkPath;
+@property (readonly) NSString *reinstallClientScriptPath;
 
 @end
 
@@ -188,14 +189,32 @@
     return [bundle pathForResource:@"RogerActivity-debug" ofType:@"apk"];
 }
 
+- (NSString *)reinstallClientScriptPath
+{
+    NSBundle *bundle = [NSBundle mainBundle];
+    return [bundle pathForResource:@"reinstall_roger_client" ofType:@"sh"];
+}
+
 - (void)reinstallClientOnDevice:(FADBDevice *)device 
                      completion:(void (^)(BOOL))completion
 {
     completion = [completion copy];
     __block BOOL succeeded = NO;
 
-    NSTask *task = [self adbTaskWithArgs:[NSArray arrayWithObjects:@"-s", device.serial, @"install", @"-r", self.clientApkPath, nil]];
+    NSMutableDictionary *env = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+        nil];
+
+    NSArray *args = [NSArray arrayWithObjects:
+        device.serial, self.clientApkPath, @"com.bignerdranch.franklin.roger", self.adbPath, nil];
+    NSTask *task = [[NSTask alloc] init];
+    [task setLaunchPath:self.reinstallClientScriptPath];
+    [task setCurrentDirectoryPath:NSHomeDirectory()];
+    [task setEnvironment:env];
+    [task setArguments:args];
+    [task setStandardInput:[NSPipe pipe]];
+
     FTaskStream *taskStream = [FTaskStream taskStreamForUnlaunchedTask:task];
+    [taskStream addLogEventsWithPrefix:[NSString stringWithFormat:@"Reinstall Roger (%@)", device.serial]];
     [taskStream addOutputEvent:@"^Success" withBlock:^(NSString *line) {
         if (line) {
             succeeded = YES;

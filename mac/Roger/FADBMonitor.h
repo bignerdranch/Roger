@@ -20,7 +20,7 @@
 @property (nonatomic, assign) id<FADBMonitorDelegate> delegate;
 
 -(id)initWithAdb:(FADB *)adb;
--(void)checkDevices;
+-(void)checkDevicesWithPing:(BOOL)withPing;
 - (void)sendIntent:(FIntent *)intent;
 
 -(void)kill;
