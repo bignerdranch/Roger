@@ -105,15 +105,16 @@
         if (line && self.parsingPing) {
             self.parsingPing = NO;
             [self.pingTimeoutTimer invalidate];
+            self.pingTimeoutTimer = nil;
             [self.delegate adbConnection:self pingResponseDevice:[self device]];
         }
     }];
 
     // now go ahead and ping our device
-    [self ping];
+    [self pingWithTimeout:YES];
 }
 
--(void)ping
+-(void)pingWithTimeout:(BOOL)withTimeout
 {
     FIntent *pingIntent = [[FIntent alloc]
         initBroadcastWithAction:@"com.bignerdranch.franklin.roger.ACTION_PING"];
@@ -121,19 +122,23 @@
                   number:[NSNumber numberWithInt:self.connectionTime]];
 
     [self.adb sendIntent:pingIntent toDevice:self.serial completion:nil];
-    self.pingTimeoutTimer = [NSTimer 
-        scheduledTimerWithTimeInterval:2.0
-                                target:self
-                              selector:@selector(pingTimeout:)
-                              userInfo:nil
-                               repeats:NO];
+    if (withTimeout) {
+        self.pingTimeoutTimer = [NSTimer 
+            scheduledTimerWithTimeInterval:2.0
+                                    target:self
+                                  selector:@selector(pingTimeout:)
+                                  userInfo:nil
+                                   repeats:NO];
+    }
 }
 
 - (void)pingTimeout:(NSTimer *)timer
 {
+    NSLog(@"Ping timed out.");
     // we got nothing back from the ping, but go ahead and give a ping
     // response. this will yield an FADBDevice without much in it.
     [self.delegate adbConnection:self pingResponseDevice:[self device]];
+    self.pingTimeoutTimer = nil;
 }
 
 - (FADBDevice *)device

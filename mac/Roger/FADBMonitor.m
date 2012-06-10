@@ -104,7 +104,7 @@
 {
     @synchronized (self.connections) {
         for (FADBConnection *connection in self.connections) {
-            [connection ping];
+            [connection pingWithTimeout:NO];
         }
     }
 }

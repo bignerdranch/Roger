@@ -17,7 +17,7 @@
 + (FADBConnection *)connectionWithADB:(FADB *)adb serial:(NSString *)serial;
 
 - (void)connect;
-- (void)ping;
+- (void)pingWithTimeout:(BOOL)withTimeout;
 
 @property (nonatomic, weak) id<FADBConnectionDelegate> delegate;
 @property (readonly) NSString *serial;

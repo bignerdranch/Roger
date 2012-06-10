@@ -848,6 +848,14 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     }
 }
 
+- (void)pingDeviceDelayed:(NSTimer *)timer
+{
+    FADBDevice *device = timer.userInfo;
+    // and ping it - no timeout, b/c apparently it takes a while
+    // for this ping to come back
+    [device.connection pingWithTimeout:NO];
+}
+
 - (void)reinstallRogerClient:(FADBDevice *)device
 {
     NSLog(@"reinstalling roger client on device: %@", device);
@@ -858,8 +866,11 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
             NSLog(@"installed roger client on %@, starting activity", device);
             // start up the main activity
             [self.adb startRogerOnDevice:device];
-            // and ping it
-            [device.connection ping];
+            [NSTimer scheduledTimerWithTimeInterval:5.0
+                                            target:self
+                                          selector:@selector(pingDeviceDelayed:)
+                                          userInfo:device
+                                           repeats:NO];
         } else {
             NSLog(@"failed to install roger client on %@", device);
         }
