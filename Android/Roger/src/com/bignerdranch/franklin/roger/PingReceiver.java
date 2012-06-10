@@ -18,17 +18,23 @@ public class PingReceiver extends BroadcastReceiver {
     public void onReceive(Context c, Intent i) {
         if (Constants.ACTION_PING.equals(i.getAction())) {
             File externalFilesDir = PingReceiver.getExternalFilesDir(c);
+            int txnId = i.getIntExtra(Constants.EXTRA_LAYOUT_TXN_ID, 0);
+            Log.i(TAG, "begin ping {" + txnId + "}");
 
             if (externalFilesDir == null) {
                 Log.i(TAG, "no external files dir");
             } else {
                 Log.i(TAG, "external files dir ::::= " + externalFilesDir.getPath());
             }
+
+            Log.i(TAG, "git android hash: {" + RogerBuild.CLIENT_VERSION_ID + "}");
+
+            Log.i(TAG, "end ping");
         }
     }
 
     public static File getExternalFilesDir(Context c) {
-        if (Build.VERSION.SDK_INT >= 8) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
             Log.i(TAG, "using Froyo method");
             return c.getExternalFilesDir(null);
         } else {

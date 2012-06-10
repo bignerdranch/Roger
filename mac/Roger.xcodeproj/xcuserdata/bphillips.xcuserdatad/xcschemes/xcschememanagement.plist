@@ -4,6 +4,11 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>Android Client.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
 		<key>Roger.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -12,6 +17,16 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>3677DF6215842FD80037343E</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>36F16DF7158430C200C5686F</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>8342C505153F7274007B2447</key>
 		<dict>
 			<key>primary</key>

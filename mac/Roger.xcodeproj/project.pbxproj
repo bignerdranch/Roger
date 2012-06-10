@@ -6,10 +6,27 @@
 	objectVersion = 46;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		36F16DF7158430C200C5686F /* Android Client */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 36F16DF8158430C200C5686F /* Build configuration list for PBXAggregateTarget "Android Client" */;
+			buildPhases = (
+				36F16DFB158430C800C5686F /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = "Android Client";
+			productName = "Android Client";
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		362A7AA01540643700CA25C6 /* build_fake_package.sh in Resources */ = {isa = PBXBuildFile; fileRef = 362A7A9F1540643700CA25C6 /* build_fake_package.sh */; };
 		362A7AA215406FFE00CA25C6 /* en1_addr.sh in Resources */ = {isa = PBXBuildFile; fileRef = 362A7AA115406FFE00CA25C6 /* en1_addr.sh */; };
-		3680B88A1549CED8005CD1B3 /* publish_apk_to_adb_devices.sh in Resources */ = {isa = PBXBuildFile; fileRef = 3680B8891549CED8005CD1B3 /* publish_apk_to_adb_devices.sh */; };
+		3677DF3C157A63330037343E /* RogerModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 3677DF3A157A63330037343E /* RogerModel.xcdatamodeld */; };
+		3677DF3E157A6F9C0037343E /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8342C50E153F7274007B2447 /* CoreData.framework */; };
+		3677DF41157A7E2E0037343E /* DeviceSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = 3677DF40157A7E2E0037343E /* DeviceSettings.m */; };
+		3677DF45157C2FC20037343E /* FADBConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 3677DF44157C2FC20037343E /* FADBConnection.m */; };
 		369D989F1544800900616DF5 /* FakeProjectBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = 369D989E1544800900616DF5 /* FakeProjectBuilder.m */; };
 		369D98A31544881500616DF5 /* FResourceIndex.m in Sources */ = {isa = PBXBuildFile; fileRef = 369D98A21544881500616DF5 /* FResourceIndex.m */; };
 		369D98A615448B8D00616DF5 /* FResourceName.m in Sources */ = {isa = PBXBuildFile; fileRef = 369D98A515448B8D00616DF5 /* FResourceName.m */; };
@@ -31,7 +48,10 @@
 		36EEAE6E155FF9450066AB57 /* FADB.m in Sources */ = {isa = PBXBuildFile; fileRef = 36EEAE6D155FF9450066AB57 /* FADB.m */; };
 		36F0822415648CDA00771500 /* FNodeServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 36F0822315648CDA00771500 /* FNodeServer.m */; };
 		36F0822715649B1500771500 /* FTaskCorral.m in Sources */ = {isa = PBXBuildFile; fileRef = 36F0822615649B1500771500 /* FTaskCorral.m */; };
+		36F16E0115843D2100C5686F /* reinstall_roger_client.sh in Resources */ = {isa = PBXBuildFile; fileRef = 36F16E0015843D2100C5686F /* reinstall_roger_client.sh */; };
 		36F9A78A1576F5240052217F /* RogerActivity-debug.apk in Resources */ = {isa = PBXBuildFile; fileRef = 36F9A7891576F5240052217F /* RogerActivity-debug.apk */; };
+		36F9A78E1577087E0052217F /* FDevices.m in Sources */ = {isa = PBXBuildFile; fileRef = 36F9A78D1577087E0052217F /* FDevices.m */; };
+		36F9A791157708940052217F /* FDevice.m in Sources */ = {isa = PBXBuildFile; fileRef = 36F9A790157708930052217F /* FDevice.m */; };
 		8342C50B153F7274007B2447 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8342C50A153F7274007B2447 /* Cocoa.framework */; };
 		8342C515153F7274007B2447 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8342C513153F7274007B2447 /* InfoPlist.strings */; };
 		8342C517153F7274007B2447 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8342C516153F7274007B2447 /* main.m */; };
@@ -46,11 +66,25 @@
 		83FEA53615410BA700B40A11 /* FPreferenceWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 83FEA53415410BA700B40A11 /* FPreferenceWindowController.xib */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		36F16DFC158430F900C5686F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8342C4FD153F7274007B2447 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 36F16DF7158430C200C5686F;
+			remoteInfo = "Android Client";
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
-		362A7A9D15405D2000CA25C6 /* scripting */ = {isa = PBXFileReference; lastKnownFileType = folder; path = scripting; sourceTree = SOURCE_ROOT; };
-		362A7A9F1540643700CA25C6 /* build_fake_package.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = build_fake_package.sh; path = scripting/build_fake_package.sh; sourceTree = "<group>"; };
-		362A7AA115406FFE00CA25C6 /* en1_addr.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = en1_addr.sh; path = scripting/en1_addr.sh; sourceTree = "<group>"; };
-		3680B8891549CED8005CD1B3 /* publish_apk_to_adb_devices.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = publish_apk_to_adb_devices.sh; path = scripting/publish_apk_to_adb_devices.sh; sourceTree = "<group>"; };
+		362A7A9F1540643700CA25C6 /* build_fake_package.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = build_fake_package.sh; path = ../scripting/build_fake_package.sh; sourceTree = "<group>"; };
+		362A7AA115406FFE00CA25C6 /* en1_addr.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; name = en1_addr.sh; path = ../scripting/en1_addr.sh; sourceTree = "<group>"; };
+		3677DF3B157A63330037343E /* RogerModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = RogerModel.xcdatamodel; sourceTree = "<group>"; };
+		3677DF3F157A7E2E0037343E /* DeviceSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceSettings.h; sourceTree = "<group>"; };
+		3677DF40157A7E2E0037343E /* DeviceSettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DeviceSettings.m; sourceTree = "<group>"; };
+		3677DF42157BCBD20037343E /* RogerBuild.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RogerBuild.h; sourceTree = "<group>"; };
+		3677DF43157C2FC20037343E /* FADBConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FADBConnection.h; sourceTree = "<group>"; };
+		3677DF44157C2FC20037343E /* FADBConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FADBConnection.m; sourceTree = "<group>"; };
 		369D989D1544800900616DF5 /* FakeProjectBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FakeProjectBuilder.h; sourceTree = "<group>"; };
 		369D989E1544800900616DF5 /* FakeProjectBuilder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FakeProjectBuilder.m; sourceTree = "<group>"; };
 		369D98A11544881500616DF5 /* FResourceIndex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FResourceIndex.h; sourceTree = "<group>"; };
@@ -63,7 +97,6 @@
 		36E98EEA154C541600D48A46 /* NSString+Regexen.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+Regexen.m"; sourceTree = "<group>"; };
 		36EEAE00155EA0E70066AB57 /* FTaskStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FTaskStream.h; sourceTree = "<group>"; };
 		36EEAE01155EA0E70066AB57 /* FTaskStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FTaskStream.m; sourceTree = "<group>"; };
-		36EEAE06155F1ABD0066AB57 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		36EEAE1C155F4A960066AB57 /* FIntent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FIntent.h; sourceTree = "<group>"; };
 		36EEAE1D155F4A960066AB57 /* FIntent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FIntent.m; sourceTree = "<group>"; };
 		36EEAE2F155F554C0066AB57 /* CDataScanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CDataScanner.h; sourceTree = "<group>"; };
@@ -95,7 +128,12 @@
 		36F0822315648CDA00771500 /* FNodeServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FNodeServer.m; sourceTree = "<group>"; };
 		36F0822515649B1500771500 /* FTaskCorral.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FTaskCorral.h; sourceTree = "<group>"; };
 		36F0822615649B1500771500 /* FTaskCorral.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FTaskCorral.m; sourceTree = "<group>"; };
-		36F9A7891576F5240052217F /* RogerActivity-debug.apk */ = {isa = PBXFileReference; lastKnownFileType = file; name = "RogerActivity-debug.apk"; path = "../Android/Roger/bin/RogerActivity-debug.apk"; sourceTree = "<group>"; };
+		36F16E0015843D2100C5686F /* reinstall_roger_client.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = reinstall_roger_client.sh; path = scripting/reinstall_roger_client.sh; sourceTree = SOURCE_ROOT; };
+		36F9A7891576F5240052217F /* RogerActivity-debug.apk */ = {isa = PBXFileReference; lastKnownFileType = file; name = "RogerActivity-debug.apk"; path = "../../Android/Roger/bin/RogerActivity-debug.apk"; sourceTree = "<group>"; };
+		36F9A78C1577087E0052217F /* FDevices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FDevices.h; sourceTree = "<group>"; };
+		36F9A78D1577087E0052217F /* FDevices.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FDevices.m; sourceTree = "<group>"; };
+		36F9A78F157708930052217F /* FDevice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FDevice.h; sourceTree = "<group>"; };
+		36F9A790157708930052217F /* FDevice.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FDevice.m; sourceTree = "<group>"; };
 		8342C506153F7274007B2447 /* Roger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Roger.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8342C50A153F7274007B2447 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		8342C50D153F7274007B2447 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -112,7 +150,7 @@
 		8342C530153F73E6007B2447 /* FFileViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FFileViewController.h; sourceTree = "<group>"; };
 		8342C531153F73E6007B2447 /* FFileViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FFileViewController.m; sourceTree = "<group>"; };
 		8342C532153F73E6007B2447 /* FFileViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FFileViewController.xib; sourceTree = "<group>"; };
-		8395D943154771E70023F804 /* RogerIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = RogerIcon.icns; sourceTree = "<group>"; };
+		8395D943154771E70023F804 /* RogerIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = RogerIcon.icns; sourceTree = SOURCE_ROOT; };
 		83FEA52715407D8900B40A11 /* RogerServer.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = RogerServer.js; sourceTree = "<group>"; };
 		83FEA53215410BA600B40A11 /* FPreferenceWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPreferenceWindowController.h; sourceTree = "<group>"; };
 		83FEA53315410BA600B40A11 /* FPreferenceWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPreferenceWindowController.m; sourceTree = "<group>"; };
@@ -124,6 +162,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3677DF3E157A6F9C0037343E /* CoreData.framework in Frameworks */,
 				8342C50B153F7274007B2447 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -131,6 +170,58 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		36AE13BE1577BF8C0039A24B /* Task Tools */ = {
+			isa = PBXGroup;
+			children = (
+				36AE13C01577C2D70039A24B /* Scripts */,
+				36F0822515649B1500771500 /* FTaskCorral.h */,
+				36F0822615649B1500771500 /* FTaskCorral.m */,
+				36EEAE00155EA0E70066AB57 /* FTaskStream.h */,
+				36EEAE01155EA0E70066AB57 /* FTaskStream.m */,
+			);
+			name = "Task Tools";
+			sourceTree = "<group>";
+		};
+		36AE13C01577C2D70039A24B /* Scripts */ = {
+			isa = PBXGroup;
+			children = (
+				36F16E0015843D2100C5686F /* reinstall_roger_client.sh */,
+				362A7AA115406FFE00CA25C6 /* en1_addr.sh */,
+				362A7A9F1540643700CA25C6 /* build_fake_package.sh */,
+			);
+			name = Scripts;
+			sourceTree = "<group>";
+		};
+		36AE13C11577C3120039A24B /* Android Tools */ = {
+			isa = PBXGroup;
+			children = (
+				369D98A815448F3900616DF5 /* NSString+Resources.h */,
+				369D98A915448F3900616DF5 /* NSString+Resources.m */,
+				36EEAE1C155F4A960066AB57 /* FIntent.h */,
+				36EEAE1D155F4A960066AB57 /* FIntent.m */,
+				369D989D1544800900616DF5 /* FakeProjectBuilder.h */,
+				369D989E1544800900616DF5 /* FakeProjectBuilder.m */,
+				369D98A11544881500616DF5 /* FResourceIndex.h */,
+				369D98A21544881500616DF5 /* FResourceIndex.m */,
+				369D98A415448B8D00616DF5 /* FResourceName.h */,
+				369D98A515448B8D00616DF5 /* FResourceName.m */,
+			);
+			name = "Android Tools";
+			sourceTree = "<group>";
+		};
+		36AE13C21577C35C0039A24B /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				8342C530153F73E6007B2447 /* FFileViewController.h */,
+				8342C531153F73E6007B2447 /* FFileViewController.m */,
+				8342C532153F73E6007B2447 /* FFileViewController.xib */,
+				83FEA53215410BA600B40A11 /* FPreferenceWindowController.h */,
+				83FEA53315410BA600B40A11 /* FPreferenceWindowController.m */,
+				83FEA53415410BA700B40A11 /* FPreferenceWindowController.xib */,
+			);
+			name = Controllers;
+			sourceTree = "<group>";
+		};
 		36EEAE0E155F30350066AB57 /* TouchJSON */ = {
 			isa = PBXGroup;
 			children = (
@@ -179,15 +270,25 @@
 			name = Server;
 			sourceTree = "<group>";
 		};
+		36F9A78B157708460052217F /* Device Management */ = {
+			isa = PBXGroup;
+			children = (
+				36F9A78C1577087E0052217F /* FDevices.h */,
+				36F9A78D1577087E0052217F /* FDevices.m */,
+				36F9A78F157708930052217F /* FDevice.h */,
+				36F9A790157708930052217F /* FDevice.m */,
+				3677DF3A157A63330037343E /* RogerModel.xcdatamodeld */,
+				3677DF3F157A7E2E0037343E /* DeviceSettings.h */,
+				3677DF40157A7E2E0037343E /* DeviceSettings.m */,
+				3677DF43157C2FC20037343E /* FADBConnection.h */,
+				3677DF44157C2FC20037343E /* FADBConnection.m */,
+			);
+			name = "Device Management";
+			sourceTree = "<group>";
+		};
 		8342C4FB153F7274007B2447 = {
 			isa = PBXGroup;
 			children = (
-				36F9A7891576F5240052217F /* RogerActivity-debug.apk */,
-				36EEAE06155F1ABD0066AB57 /* CoreFoundation.framework */,
-				3680B8891549CED8005CD1B3 /* publish_apk_to_adb_devices.sh */,
-				8395D943154771E70023F804 /* RogerIcon.icns */,
-				362A7AA115406FFE00CA25C6 /* en1_addr.sh */,
-				362A7A9F1540643700CA25C6 /* build_fake_package.sh */,
 				8342C510153F7274007B2447 /* Roger */,
 				8342C509153F7274007B2447 /* Frameworks */,
 				8342C507153F7274007B2447 /* Products */,
@@ -224,36 +325,19 @@
 		8342C510153F7274007B2447 /* Roger */ = {
 			isa = PBXGroup;
 			children = (
+				36AE13C21577C35C0039A24B /* Controllers */,
+				36AE13C11577C3120039A24B /* Android Tools */,
+				36AE13BE1577BF8C0039A24B /* Task Tools */,
+				36F9A78B157708460052217F /* Device Management */,
 				36F0822015648CBA00771500 /* Server */,
 				36EEAE6B155FF74B0066AB57 /* ADB */,
 				36EEAE0E155F30350066AB57 /* TouchJSON */,
-				369D989D1544800900616DF5 /* FakeProjectBuilder.h */,
-				369D989E1544800900616DF5 /* FakeProjectBuilder.m */,
-				362A7A9D15405D2000CA25C6 /* scripting */,
 				8342C51C153F7274007B2447 /* FAppDelegate.h */,
 				8342C51D153F7274007B2447 /* FAppDelegate.m */,
 				8342C51F153F7274007B2447 /* MainMenu.xib */,
 				8342C511153F7274007B2447 /* Supporting Files */,
-				8342C530153F73E6007B2447 /* FFileViewController.h */,
-				8342C531153F73E6007B2447 /* FFileViewController.m */,
-				8342C532153F73E6007B2447 /* FFileViewController.xib */,
-				83FEA53215410BA600B40A11 /* FPreferenceWindowController.h */,
-				83FEA53315410BA600B40A11 /* FPreferenceWindowController.m */,
-				83FEA53415410BA700B40A11 /* FPreferenceWindowController.xib */,
-				369D98A11544881500616DF5 /* FResourceIndex.h */,
-				369D98A21544881500616DF5 /* FResourceIndex.m */,
-				369D98A415448B8D00616DF5 /* FResourceName.h */,
-				369D98A515448B8D00616DF5 /* FResourceName.m */,
-				369D98A815448F3900616DF5 /* NSString+Resources.h */,
-				369D98A915448F3900616DF5 /* NSString+Resources.m */,
 				36E98EE9154C541600D48A46 /* NSString+Regexen.h */,
 				36E98EEA154C541600D48A46 /* NSString+Regexen.m */,
-				36EEAE00155EA0E70066AB57 /* FTaskStream.h */,
-				36EEAE01155EA0E70066AB57 /* FTaskStream.m */,
-				36EEAE1C155F4A960066AB57 /* FIntent.h */,
-				36EEAE1D155F4A960066AB57 /* FIntent.m */,
-				36F0822515649B1500771500 /* FTaskCorral.h */,
-				36F0822615649B1500771500 /* FTaskCorral.m */,
 			);
 			path = Roger;
 			sourceTree = "<group>";
@@ -261,6 +345,9 @@
 		8342C511153F7274007B2447 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				3677DF42157BCBD20037343E /* RogerBuild.h */,
+				36F9A7891576F5240052217F /* RogerActivity-debug.apk */,
+				8395D943154771E70023F804 /* RogerIcon.icns */,
 				83FEA52715407D8900B40A11 /* RogerServer.js */,
 				8342C512153F7274007B2447 /* Roger-Info.plist */,
 				8342C513153F7274007B2447 /* InfoPlist.strings */,
@@ -280,12 +367,12 @@
 			buildPhases = (
 				8342C502153F7274007B2447 /* Sources */,
 				8342C503153F7274007B2447 /* Frameworks */,
-				36F9A7881576F3460052217F /* ShellScript */,
 				8342C504153F7274007B2447 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				36F16DFD158430F900C5686F /* PBXTargetDependency */,
 			);
 			name = Roger;
 			productName = Roger;
@@ -315,6 +402,7 @@
 			projectRoot = "";
 			targets = (
 				8342C505153F7274007B2447 /* Roger */,
+				36F16DF7158430C200C5686F /* Android Client */,
 			);
 		};
 /* End PBXProject section */
@@ -332,16 +420,16 @@
 				362A7AA01540643700CA25C6 /* build_fake_package.sh in Resources */,
 				362A7AA215406FFE00CA25C6 /* en1_addr.sh in Resources */,
 				83FEA53615410BA700B40A11 /* FPreferenceWindowController.xib in Resources */,
-				3680B88A1549CED8005CD1B3 /* publish_apk_to_adb_devices.sh in Resources */,
 				8395D944154771E70023F804 /* RogerIcon.icns in Resources */,
 				36F9A78A1576F5240052217F /* RogerActivity-debug.apk in Resources */,
+				36F16E0115843D2100C5686F /* reinstall_roger_client.sh in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		36F9A7881576F3460052217F /* ShellScript */ = {
+		36F16DFB158430C800C5686F /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -352,7 +440,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\n\nant -buildfile \"../Android/Roger/build.xml\" debug\n";
+			shellScript = "cd $SOURCE_ROOT/Roger\n\n./generate_android_client_version.sh\n\ncd $SOURCE_ROOT/../Android/Roger\nrm -rf bin\nant -lib libs debug\n\n\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -386,10 +474,23 @@
 				36EEAE6E155FF9450066AB57 /* FADB.m in Sources */,
 				36F0822415648CDA00771500 /* FNodeServer.m in Sources */,
 				36F0822715649B1500771500 /* FTaskCorral.m in Sources */,
+				36F9A78E1577087E0052217F /* FDevices.m in Sources */,
+				36F9A791157708940052217F /* FDevice.m in Sources */,
+				3677DF3C157A63330037343E /* RogerModel.xcdatamodeld in Sources */,
+				3677DF41157A7E2E0037343E /* DeviceSettings.m in Sources */,
+				3677DF45157C2FC20037343E /* FADBConnection.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		36F16DFD158430F900C5686F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 36F16DF7158430C200C5686F /* Android Client */;
+			targetProxy = 36F16DFC158430F900C5686F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		8342C513153F7274007B2447 /* InfoPlist.strings */ = {
@@ -419,6 +520,20 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		36F16DF9158430C200C5686F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		36F16DFA158430C200C5686F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		8342C522153F7274007B2447 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -491,6 +606,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		36F16DF8158430C200C5686F /* Build configuration list for PBXAggregateTarget "Android Client" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				36F16DF9158430C200C5686F /* Debug */,
+				36F16DFA158430C200C5686F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		8342C500153F7274007B2447 /* Build configuration list for PBXProject "Roger" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -510,6 +633,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		3677DF3A157A63330037343E /* RogerModel.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				3677DF3B157A63330037343E /* RogerModel.xcdatamodel */,
+			);
+			currentVersion = 3677DF3B157A63330037343E /* RogerModel.xcdatamodel */;
+			path = RogerModel.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 8342C4FD153F7274007B2447 /* Project object */;
 }

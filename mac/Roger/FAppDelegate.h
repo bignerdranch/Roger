@@ -7,6 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import <CoreData/CoreData.h>
 #import "FFileViewController.h"
 #import "FPreferenceWindowController.h"
 
@@ -16,6 +17,9 @@
 }
 
 @property (assign) IBOutlet NSWindow *window;
+@property (nonatomic, strong, readonly) NSManagedObjectContext *managedObjectContext;
+@property (nonatomic, strong, readonly) NSManagedObjectModel *managedObjectModel;
+@property (nonatomic, strong, readonly) NSPersistentStoreCoordinator *persistentStoreCoordinator;
 
 - (IBAction)showPreferencePanel:(id)sender;
 

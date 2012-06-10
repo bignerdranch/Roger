@@ -8,11 +8,16 @@
 
 #import <Foundation/Foundation.h>
 
+@class FADBConnection;
+
 @interface FADBDevice : NSObject
 
 @property (readonly) NSString *serial;
 @property (readonly) NSString *externalStoragePath;
+@property (readonly) NSString *clientId;
+@property (nonatomic, weak, readonly) FADBConnection *connection;
 
--(id)initWithSerial:(NSString *)serial storagePath:(NSString *)storagePath;
+-(id)initWithSerial:(NSString *)serial storagePath:(NSString *)storagePath clientId:(NSString *)clientId 
+         connection:(FADBConnection *)connection;
 
 @end

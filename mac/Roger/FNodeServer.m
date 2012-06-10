@@ -15,6 +15,9 @@
 @property (retain) NSPipe *taskInput;
 @property (copy) NSString *ipAddress;
 @property (copy) NSString *fileServerPath;
+@property (nonatomic, readwrite, strong) NSArray *remoteDeviceSerialList;
+@property (nonatomic, strong) NSMutableArray *workingRemoteDeviceSerialList;
+
 
 - (NSString *)serverPath;
 - (NSString *)currentMulticastAddress;
@@ -30,6 +33,7 @@ static NSString* const serverUrl = @"http://localhost:8081/sendIntent";
 @synthesize taskInput=_taskInput;
 @synthesize ipAddress=_ipAddress;
 @synthesize fileServerPath=_fileServerPath;
+@synthesize workingRemoteDeviceSerialList=_workingRemoteDeviceSerialList;
 
 -(id)initWithIpAddress:(NSString *)ipAddress fileServerPath:(NSString *)fileServerPath
 {
@@ -88,22 +92,20 @@ static NSString* const serverUrl = @"http://localhost:8081/sendIntent";
     self.taskInput = [NSPipe pipe];
     [nodeTask setStandardInput:self.taskInput];
     
-    __block NSMutableArray *workingRemoteDeviceSerialList = nil;
-
     FTaskStream *taskStream = [[FTaskStream alloc] initWithUnlaunchedTask:nodeTask];
     [taskStream addLogEventsWithPrefix:@"NODE"];
     
     [taskStream addOutputEvent:@"end current client list." withBlock:^(NSString *line) {
-        if (line && workingRemoteDeviceSerialList) {
-            _remoteDeviceSerialList = workingRemoteDeviceSerialList;
+        if (line && self.workingRemoteDeviceSerialList) {
+            self.remoteDeviceSerialList = self.workingRemoteDeviceSerialList;
             NSLog(@"new remoteDeviceSerialList: %@", self.remoteDeviceSerialList);
-            workingRemoteDeviceSerialList = nil;
+            self.workingRemoteDeviceSerialList = nil;
         }
     }];
 
     [taskStream addOutputEvent:@"." withBlock:^(NSString *line) {
-        if (line && workingRemoteDeviceSerialList) {
-            [workingRemoteDeviceSerialList addObject:line];
+        if (line && self.workingRemoteDeviceSerialList) {
+            [self.workingRemoteDeviceSerialList addObject:line];
         } else if (!line) {
             unableToStart = YES;
             [self showNodeErrorDialog];
@@ -112,7 +114,7 @@ static NSString* const serverUrl = @"http://localhost:8081/sendIntent";
 
     [taskStream addOutputEvent:@"begin current client list:" withBlock:^(NSString *line) {
         if (line) {
-            workingRemoteDeviceSerialList = [[NSMutableArray alloc] init];
+            self.workingRemoteDeviceSerialList = [[NSMutableArray alloc] init];
         }
     }];
 

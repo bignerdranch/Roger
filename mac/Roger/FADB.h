@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 
 @class FIntent;
+@class FADBDevice;
 
 @interface FADB : NSObject
 
@@ -22,6 +23,9 @@
          toDevicePath:(NSString *)devicePath
                device:(NSString *)serial
            completion:(void (^)(void))completion;
+- (void)reinstallClientOnDevice:(FADBDevice *)device 
+                     completion:(void (^)(BOOL))completion;
+- (void)startRogerOnDevice:(FADBDevice *)device;
 - (void)sendIntent:(FIntent *)intent toDevice:(NSString *)serial completion:(void(^)(void))completion;
 - (void)listDevicesWithBlock:(void (^)(NSArray *devices))block;
 

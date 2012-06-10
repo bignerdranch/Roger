@@ -9,6 +9,13 @@
 #import "FADB.h"
 #import "FIntent.h"
 #import "FTaskStream.h"
+#import "FADBDevice.h"
+
+@interface FADB ()
+
+@property (readonly) NSString *clientApkPath;
+
+@end
 
 @implementation FADB
 
@@ -171,6 +178,44 @@
             block(results);
         }
     }];
+
+    [task launch];
+}
+
+- (NSString *)clientApkPath
+{
+    NSBundle *bundle = [NSBundle mainBundle];
+    return [bundle pathForResource:@"RogerActivity-debug" ofType:@"apk"];
+}
+
+- (void)reinstallClientOnDevice:(FADBDevice *)device 
+                     completion:(void (^)(BOOL))completion
+{
+    completion = [completion copy];
+    __block BOOL succeeded = NO;
+
+    NSTask *task = [self adbTaskWithArgs:[NSArray arrayWithObjects:@"-s", device.serial, @"install", @"-r", self.clientApkPath, nil]];
+    FTaskStream *taskStream = [FTaskStream taskStreamForUnlaunchedTask:task];
+    [taskStream addOutputEvent:@"^Success" withBlock:^(NSString *line) {
+        if (line) {
+            succeeded = YES;
+            completion(YES);
+        } else if (!succeeded) {
+            completion(NO);
+        }
+    }];
+
+    [task launch];
+}
+
+- (void)startRogerOnDevice:(FADBDevice *)device
+{
+    NSArray *args = [NSArray arrayWithObjects:
+        @"-s", device.serial, @"shell", @"am", @"start", @"-n", @"com.bignerdranch.franklin.roger/.RogerActivity", nil];
+
+    NSTask *task = [self adbTaskWithArgs:args];
+    FTaskStream *taskStream = [FTaskStream taskStreamForUnlaunchedTask:task];
+    [taskStream addLogEventsWithPrefix:[NSString stringWithFormat:@"Start RogerActivity %@", device.serial]];
 
     [task launch];
 }

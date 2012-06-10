@@ -11,12 +11,17 @@
 #import "FADBDevice.h"
 #import "FIntent.h"
 #import "FTaskStream.h"
+#import "RogerBuild.h"
+#import "NSString+Regexen.h"
+#import "FADBConnection.h"
 
-@interface FADBMonitor ()
+#import "RogerBuild.h"
 
-@property (nonatomic, strong) NSMutableSet *connectedDeviceNames;
-@property (nonatomic, strong) NSMutableDictionary *deviceMap;
+@interface FADBMonitor () <FADBConnectionDelegate>
+
+@property (nonatomic, strong) NSMutableSet *connections;
 @property (assign) BOOL dead;
+@property (assign) int lastPingTime;
 
 -(void)checkDevices:(NSTimer *)timer;
 -(void)connect:(NSString *)deviceName;
@@ -27,17 +32,17 @@
 
 @synthesize adb=_adb;
 @dynamic devices;
+@synthesize delegate=_delegate;
 
-@synthesize connectedDeviceNames=_connectedDevices;
-@synthesize deviceMap=_deviceMap;
+@synthesize connections=_connections;
 @synthesize dead=_dead;
+@synthesize lastPingTime=_lastPingTime;
 
 -(id)initWithAdb:(FADB *)adb
 {
     if ((self = [super init])) {
         _adb = adb;
-        self.connectedDeviceNames = [[NSMutableSet alloc] init];
-        self.deviceMap = [[NSMutableDictionary alloc] init];
+        self.connections = [[NSMutableSet alloc] init];
         [NSTimer scheduledTimerWithTimeInterval:1.0
                                          target:self 
                                        selector:@selector(checkDevices:)
@@ -52,8 +57,12 @@
 {
     NSMutableArray *result = [[NSMutableArray alloc] init];
 
-    for (FADBDevice *device in [self.deviceMap objectEnumerator]) {
-        [result addObject:device];
+    for (FADBConnection *connection in self.connections) {
+        FADBDevice *device = [connection device];
+        // only add devices that have reported a real storage path
+        if (device.externalStoragePath) {
+            [result addObject:device];
+        }
     }
 
     return result;
@@ -77,86 +86,41 @@
 -(void)checkDevices
 {
     [self.adb listDevicesWithBlock:^(NSArray *deviceNames) {
-        NSMutableArray *newConnections = [[NSMutableArray alloc] init];
+        NSMutableSet *unconnectedDevices = [[NSSet setWithArray:deviceNames] mutableCopy];
 
-        @synchronized (self.connectedDeviceNames) {
-            for (NSString *name in deviceNames) {
-                if (![self.connectedDeviceNames containsObject:name]) {
-                    [newConnections addObject:name];
-                    [self.connectedDeviceNames addObject:name];
-                }
+        @synchronized (self.connections) {
+            for (FADBConnection *connection in self.connections) {
+                [unconnectedDevices removeObject:connection.serial];
             }
         }
 
-        for (NSString *name in newConnections) {
+        for (NSString *name in unconnectedDevices) {
             [self connect:name];
         }
     }];
 }
 
--(void)pingDeviceName:(NSString *)name
-{
-    FIntent *pingIntent = [[FIntent alloc]
-        initBroadcastWithAction:@"com.bignerdranch.franklin.roger.ACTION_PING"];
-
-    [self.adb sendIntent:pingIntent toDevice:name completion:nil];
-}
-
 -(void)pingConnectedDevices
 {
-    @synchronized (self.connectedDeviceNames) {
-        for (NSString *name in self.connectedDeviceNames) {
-            [self pingDeviceName:name];
+    @synchronized (self.connections) {
+        for (FADBConnection *connection in self.connections) {
+            [connection ping];
         }
     }
 }
 
+-(BOOL)checkLineForTxnId:(NSString *)line
+{
+    NSString *lastTxnId = [NSString stringWithFormat:@"{%d}", self.lastPingTime];
+    return [line rangeOfString:lastTxnId].location != NSNotFound;
+}
+
 -(void)connect:(NSString *)name
 {
-    NSLog(@"ADBMonitor: attempting to connect to new device: %@", name);
-
-    // run logcat
-    NSArray *args = [NSArray arrayWithObjects:
-        @"-s", name, @"logcat", nil];
-
-    void (^disconnect)(void) = ^{
-        NSLog(@"ADBMonitor: disconnected from %@", name);
-        @synchronized (self.connectedDeviceNames) {
-            [self.connectedDeviceNames removeObject:name];
-            [self.deviceMap removeObjectForKey:name];
-        }
-    };
-    // run logcat... (may want to preserve this task later)
-    NSTask *task = [self.adb runAdbTaskWithArgs:args
-                                      logPrefix:nil //ugh, don't log this
-                                     completion:disconnect];
-    FTaskStream *stream = [FTaskStream taskStreamForLaunchedTask:task];
-    //[stream addLogEventsWithPrefix:@"ADBMonitor connection"];
-    // when we see no external files dir, unmap the device
-    [stream addOutputEvent:@"no external files dir" withBlock:^(NSString *line) {
-        if (line) {
-            [self.deviceMap removeObjectForKey:name];
-        }
-    }];
-    // and when we do find one, map it
-    [stream addOutputEvent:@"external files dir ::::= " withBlock:^(NSString *line) {
-        if (line) {
-            line = [line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-            NSArray *components = [line componentsSeparatedByString:@" ::::= "];
-            if ([components count] == 2) {
-                NSString *storagePath = [components objectAtIndex:1];
-                FADBDevice *device = [[FADBDevice alloc] 
-                    initWithSerial:name
-                       storagePath:storagePath];
-
-                NSLog(@"added device: %@", device);
-                [self.deviceMap setObject:device forKey:name];
-            }
-        }
-    }];
-
-    // now go ahead and ping the device
-    [self pingDeviceName:name];
+    FADBConnection *connection = [FADBConnection connectionWithADB:self.adb serial:name];
+    [self.connections addObject:connection];
+    connection.delegate = self;
+    [connection connect];
 }
 
 - (void)sendIntent:(FIntent *)intent
@@ -166,6 +130,23 @@
     }
 }
 
+#pragma mark ADBConnectionDelegate
+
+- (void)adbConnection:(FADBConnection *)connection pingResponseDevice:(FADBDevice *)device
+{
+    NSLog(@"got a ping response: %@", device);
+    NSLog(@"device clientId: %@ our clientId: %@",
+            device.clientId, kClientVersionId);
+    if (![device.clientId isEqualToString:kClientVersionId]) {
+        NSLog(@"    device is out of date");
+        [self.delegate adbMonitor:self outOfDateDeviceDetected:device];
+    }
+}
+
+- (void)adbConnectionDisconnected:(FADBConnection *)connection
+{
+    [self.connections removeObject:connection];
+}
 
 -(void)dealloc
 {

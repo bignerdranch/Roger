@@ -7,6 +7,7 @@
 //
 
 #import "FFileViewController.h"
+#import "FAppDelegate.h"
 #import "FakeProjectBuilder.h"
 #import "FResourceName.h"
 #import "FTaskStream.h"
@@ -14,14 +15,17 @@
 #import "FIntent.h"
 #import "FADB.h"
 #import "FADBMonitor.h"
+#import "FADBConnection.h"
 #import "FADBDevice.h"
 #import "FNodeServer.h"
+#import "DeviceSettings.h"
 
-@interface FFileViewController ()
+@interface FFileViewController () <FADBMonitorDelegate>
 
 @property (nonatomic, strong) FADB *adb;
 @property (nonatomic, strong) FADBMonitor *adbMonitor;
 @property (nonatomic, strong) FNodeServer *nodeServer;
+@property (nonatomic, strong) NSManagedObjectContext *objectContext;
 
 - (BOOL)buildAppWithManifest:(NSString *)manifest resourceName:(FResourceName *)resName;
 
@@ -68,6 +72,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 @synthesize adb=_adb;
 @synthesize adbMonitor=_adbMonitor;
 @synthesize nodeServer=_nodeServer;
+@synthesize objectContext=_objectContext;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -76,6 +81,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
         fm = [NSFileManager defaultManager];
         [self setAdb:[[FADB alloc] init]];
         [self setAdbMonitor:[[FADBMonitor alloc] initWithAdb:[self adb]]];
+        self.adbMonitor.delegate = self;
         [self setApkPath:[[self fileServerPath] stringByAppendingPathComponent:@"stripped.apk"]];
         [self setSdkPath:[[NSUserDefaults standardUserDefaults] stringForKey:@"SdkDirKey"]];
         if (![self sdkPath]) [self setSdkPath:@""];
@@ -113,6 +119,9 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 	appStartedTimestamp = [NSDate date];
     pathModificationDates = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"pathModificationDates"] mutableCopy];
 	lastEventId = [[NSUserDefaults standardUserDefaults] objectForKey:@"lastEventId"];
+
+    FAppDelegate *appDelegate = [[NSApplication sharedApplication] delegate];
+    self.objectContext = appDelegate.managedObjectContext;
     
     [self hideStatus];
 	[self initializeEventStream];
@@ -562,12 +571,6 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     return [bundle pathForResource:@"AndroidManifest" ofType:@"xml"];
 }
 
-- (NSString *)publishApkToAdbDevicesPath
-{
-    NSBundle *bundle = [NSBundle mainBundle];
-    return [bundle pathForResource:@"publish_apk_to_adb_devices" ofType:@"sh"];
-}
-
 - (NSString *)ipAddressScriptPath
 {
     NSBundle *bundle = [NSBundle mainBundle];
@@ -788,6 +791,79 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
         return [dateFormatter stringFromDate:date];
     }
 
+}
+
+- (DeviceSettings *)settingsForSerial:(NSString *)serial
+{
+    NSError *error = nil;
+
+    NSFetchRequest *request = [NSFetchRequest fetchRequestWithEntityName:@"DeviceSettings"];
+    request.predicate = [NSPredicate predicateWithFormat:@"serial like[cd] %@", serial];
+    NSArray *results = [self.objectContext executeFetchRequest:request error:&error];
+
+    if (results && [results count] > 0) {
+        DeviceSettings *settings = [results objectAtIndex:0];
+        return settings;
+    } else if (results) {
+        return nil;
+    } else {
+        NSLog(@"error fetching settings for serial: %@, error: %@", serial, error);
+        return nil;
+    }
+}
+
+- (void)adbMonitor:(FADBMonitor *)adbMonitor outOfDateDeviceDetected:(FADBDevice *)device
+{
+    DeviceSettings *settings = [self settingsForSerial:device.serial];
+
+    if (!settings) {
+        // ask user
+        NSLog(@"fresh device detected: %@", device);
+        NSAlert *alert = [NSAlert
+            alertWithMessageText:@"New device detected"
+                   defaultButton:@"Yes"
+                 alternateButton:@"No"
+                     otherButton:nil
+       informativeTextWithFormat:@"Detected new device with serial number %@. Do you want to use this device with Roger?", 
+           device.serial];
+        BOOL manageDevice = NO;
+        switch ([alert runModal]) {
+            case NSAlertDefaultReturn:
+                manageDevice = YES;
+                break;
+            case NSAlertAlternateReturn:
+            default:
+                break;
+        }
+
+        settings = [NSEntityDescription 
+            insertNewObjectForEntityForName:@"DeviceSettings" 
+                     inManagedObjectContext:self.objectContext];
+        settings.serial = device.serial;
+        settings.managed = [NSNumber numberWithBool:manageDevice];
+    }
+
+    if (settings.managed) {
+        [self reinstallRogerClient:device];
+    }
+}
+
+- (void)reinstallRogerClient:(FADBDevice *)device
+{
+    NSLog(@"reinstalling roger client on device: %@", device);
+
+    [self.adb reinstallClientOnDevice:device 
+                     completion:^(BOOL succeeded) {
+        if (succeeded) {
+            NSLog(@"installed roger client on %@, starting activity", device);
+            // start up the main activity
+            [self.adb startRogerOnDevice:device];
+            // and ping it
+            [device.connection ping];
+        } else {
+            NSLog(@"failed to install roger client on %@", device);
+        }
+    }];
 }
 
 -(void)dealloc
