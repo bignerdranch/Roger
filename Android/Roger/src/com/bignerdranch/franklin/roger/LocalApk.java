@@ -149,7 +149,6 @@ public abstract class LocalApk {
         Log.i(TAG, "and calling getApplicationInfo");
 
         LayoutInflater inflater = original.cloneInContext(c);
-        Rxn.showAllFields(inflater);
 
         return inflater;
     }
