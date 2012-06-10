@@ -27,21 +27,19 @@ Features
 Getting Started
 ---------------
 
-0. Install node on your machine. As of right now, node needs to live where
+Prerequisites:
+
+0. You need to have node installed on your machine. As of right now, node needs to live where
     homebrew installs it (/usr/local/bin/node). 
-1. Install Android Roger on your devices or emulators, and install Mac Roger
-on your Mac.
-2. Run Mac Roger, open preferences, and select your Android SDK folder.
+1. For now, you need XCode installed.
+2. You need to have the Android SDK installed.
 
-Then, for wifi:
+Given that:
 
-3. Connect your devices to the same wifi network as your Mac.
-4. Run Android Roger for it to connect. Tap Menu->Refresh if it 
-   doesn't find your machine or if you ever need to reconnect.
-
-For ADB:
-
-3. Connect your devices or emulators to ADB and run Roger.
+0. Pull up mac/Roger/Roger.xcodeproj and run.
+1. In Roger, open preferences, and select your Android SDK folder.
+2. Connect a device or emulator. Select "yes" to install and start
+    the Android Roger client.
 
 Now, work as you had before Roger entered your life. As you save edits to XML
 files, Roger will show you what you are working on close to real time.
