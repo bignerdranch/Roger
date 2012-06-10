@@ -29,8 +29,6 @@ Getting Started
 
 Prerequisites:
 
-0. You need to have node installed on your machine. As of right now, node needs to live where
-    homebrew installs it (/usr/local/bin/node). 
 1. For now, you need XCode installed.
 2. You need to have the Android SDK installed.
 
