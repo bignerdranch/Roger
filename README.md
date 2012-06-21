@@ -3,7 +3,7 @@
 Roger
 =====
 
-Roger is an Android visual resource viewer that dramatically shortens your
+Roger is an Android visual resource viewer for OS X that dramatically shortens your
 edit-compile-test loop. Run the server on your MacBook; run the client on one
 or more devices. Every time you save a layout file or xml drawable, Roger will
 show it to you on your devices. You can then futz around with it - rotate your
@@ -56,6 +56,15 @@ As a result, the views you see in Roger are identical to what you see when you i
 in your own application. And because not every resource is included, Roger can also be much faster than building
 and running your entire app.
 
+Feedback
+--------
+
+We would love any feedback you have on this project. If you have any problems with Roger, please throw them 
+into Issues as quickly as possible! We would also love to hear any suggestions for how to make Roger 
+better and more useful. 
+
+Bill Phillips - phillips@bignerdranch.com
+
 Arbitrary Questions
 -------------------
 
@@ -104,7 +113,6 @@ this:
 
     </FrameLayout>
 
-### Roger seems to put my inflated layout inside a FrameLayout. Will Roger
-### use a different layout than this?
+### Roger seems to put my inflated layout inside a FrameLayout. Will Roger use a different layout than this?
 
 Nope. Use the same workaround as above for this.
