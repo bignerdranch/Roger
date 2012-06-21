@@ -26,6 +26,12 @@
     NSString *dir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
     NSURL *storeURL = [NSURL fileURLWithPath:[dir stringByAppendingPathComponent:@"Roger.sqlite"]];
 
+    NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:
+
+        [NSNumber numberWithBool:YES], NSMigratePersistentStoresAutomaticallyOption,
+        [NSNumber numberWithBool:YES], NSInferMappingModelAutomaticallyOption,
+        nil];
+
     NSError *err = nil;
     _persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] 
         initWithManagedObjectModel:self.managedObjectModel];
@@ -34,7 +40,7 @@
             addPersistentStoreWithType:NSSQLiteStoreType
                          configuration:nil
                                    URL:storeURL
-                               options:nil
+                               options:options
                                  error:&err]) {
 
         NSLog(@"Failed to add persistent store: %@, %@", err, [err userInfo]);

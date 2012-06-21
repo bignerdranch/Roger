@@ -35,8 +35,6 @@
 @property (nonatomic, copy) NSString *sdkPath;
 @property (nonatomic, copy) NSString *apkPath;
 
-- (IBAction) checkDevicesButtonClicked:(id)sender;
-
 - (void) registerDefaults;
 - (void) initializeEventStream;
 - (void) addModifiedFilesAtPath: (NSString *)path;

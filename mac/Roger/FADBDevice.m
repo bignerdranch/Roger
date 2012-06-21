@@ -8,6 +8,7 @@
 
 #import "FADBDevice.h"
 #import "FADBConnection.h"
+#import "RogerBuild.h"
 
 @interface FADBDevice ()
 
@@ -33,6 +34,11 @@
     }
     
     return self;
+}
+
+-(BOOL)hasLatestClient
+{
+    return [self.clientId isEqualToString:kClientVersionId];
 }
 
 -(NSString *)description

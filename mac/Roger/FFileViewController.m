@@ -17,6 +17,7 @@
 #import "FADBMonitor.h"
 #import "FADBConnection.h"
 #import "FADBDevice.h"
+#import "FDevices.h"
 #import "FNodeServer.h"
 #import "DeviceSettings.h"
 
@@ -26,6 +27,7 @@
 @property (nonatomic, strong) FADBMonitor *adbMonitor;
 @property (nonatomic, strong) FNodeServer *nodeServer;
 @property (nonatomic, strong) NSManagedObjectContext *objectContext;
+@property (nonatomic, strong) FDevices *devicesBinding;
 
 - (BOOL)buildAppWithManifest:(NSString *)manifest resourceName:(FResourceName *)resName;
 
@@ -73,6 +75,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 @synthesize adbMonitor=_adbMonitor;
 @synthesize nodeServer=_nodeServer;
 @synthesize objectContext=_objectContext;
+@synthesize devicesBinding=_devicesBinding;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -108,11 +111,6 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     return _sdkPath;
 }
 
-- (IBAction) checkDevicesButtonClicked:(id)sender
-{
-    [self.adbMonitor checkDevicesWithPing:YES];
-}
-
 - (void) awakeFromNib
 {
 	[self registerDefaults];
@@ -122,6 +120,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
     FAppDelegate *appDelegate = [[NSApplication sharedApplication] delegate];
     self.objectContext = appDelegate.managedObjectContext;
+    self.devicesBinding = [FDevices sharedInstance];
     
     [self hideStatus];
 	[self initializeEventStream];
@@ -816,7 +815,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 {
     DeviceSettings *settings = [self settingsForSerial:device.serial];
 
-    if (!settings) {
+    if (!settings || !settings.wasSetByUser) {
         // ask user
         NSLog(@"fresh device detected: %@", device);
         NSAlert *alert = [NSAlert
@@ -840,10 +839,10 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
             insertNewObjectForEntityForName:@"DeviceSettings" 
                      inManagedObjectContext:self.objectContext];
         settings.serial = device.serial;
-        settings.managed = [NSNumber numberWithBool:manageDevice];
+        settings.managedByUser = manageDevice;
     }
 
-    if (settings.managed) {
+    if (settings.managedByUser) {
         [self reinstallRogerClient:device];
     }
 }
@@ -874,6 +873,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
         } else {
             NSLog(@"failed to install roger client on %@", device);
         }
+        [self.adbMonitor refreshConnections];
     }];
 }
 

@@ -9,6 +9,7 @@
 #import "FNodeServer.h"
 #import "FTaskStream.h"
 #import "FIntent.h"
+#import "FDEvices.h"
 
 @interface FNodeServer ()
 
@@ -108,6 +109,8 @@ static NSString* const serverUrl = @"http://localhost:8081/sendIntent";
             self.remoteDeviceSerialList = self.workingRemoteDeviceSerialList;
             NSLog(@"new remoteDeviceSerialList: %@", self.remoteDeviceSerialList);
             self.workingRemoteDeviceSerialList = nil;
+            [[FDevices sharedInstance] 
+                latestWifiConnections:self.remoteDeviceSerialList];
         }
     }];
 

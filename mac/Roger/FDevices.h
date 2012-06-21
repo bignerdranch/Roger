@@ -7,7 +7,17 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "FDevice.h"
 
 @interface FDevices : NSObject
+
+@property (nonatomic, strong) NSMutableArray *devices;
+
++ (FDevices *)sharedInstance;
+
+// An array of NSString serial numbers.
+-(void)latestWifiConnections:(NSArray *)wifiConnections;
+// An array of NSString serial numbers.
+-(void)latestAdbConnections:(NSArray *)adbConnections;
 
 @end

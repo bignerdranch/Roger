@@ -11,6 +11,7 @@
 #import "FADBDevice.h"
 #import "FIntent.h"
 #import "FTaskStream.h"
+#import "FDevices.h"
 #import "RogerBuild.h"
 #import "NSString+Regexen.h"
 #import "FADBConnection.h"
@@ -134,6 +135,21 @@
     }
 }
 
+-(void)refreshConnections
+{
+    NSMutableArray *connectedSerials = [[NSMutableArray alloc] init];
+
+    for (FADBConnection *connection in self.connections) {
+        NSString *serial = connection.device.serial;
+        if (serial) {
+            [connectedSerials addObject:serial];
+        }
+    }
+
+    [[FDevices sharedInstance] 
+        latestAdbConnections:connectedSerials];
+}
+
 #pragma mark ADBConnectionDelegate
 
 - (void)adbConnection:(FADBConnection *)connection pingResponseDevice:(FADBDevice *)device
@@ -141,15 +157,17 @@
     NSLog(@"got a ping response: %@", device);
     NSLog(@"device clientId: %@ our clientId: %@",
             device.clientId, kClientVersionId);
-    if (![device.clientId isEqualToString:kClientVersionId]) {
+    if (!device.hasLatestClient) {
         NSLog(@"    device is out of date");
         [self.delegate adbMonitor:self outOfDateDeviceDetected:device];
     }
+    [self refreshConnections];
 }
 
 - (void)adbConnectionDisconnected:(FADBConnection *)connection
 {
     [self.connections removeObject:connection];
+    [self refreshConnections];
 }
 
 -(void)dealloc

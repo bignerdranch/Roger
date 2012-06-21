@@ -15,6 +15,7 @@
 @property (readonly) NSString *serial;
 @property (readonly) NSString *externalStoragePath;
 @property (readonly) NSString *clientId;
+@property (nonatomic, readonly) BOOL hasLatestClient;
 @property (nonatomic, weak, readonly) FADBConnection *connection;
 
 -(id)initWithSerial:(NSString *)serial storagePath:(NSString *)storagePath clientId:(NSString *)clientId 

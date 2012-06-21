@@ -9,10 +9,20 @@
 #import <Foundation/Foundation.h>
 #import <CoreData/CoreData.h>
 
+typedef enum _DeviceSettingsManaged {
+    kDeviceSettingsManaged_Unset,
+    kDeviceSettingsManaged_Managed,
+    kDeviceSettingsManaged_Unmanaged 
+} DeviceSettingsManaged;
 
 @interface DeviceSettings : NSManagedObject
 
+// internal storage
 @property (nonatomic, retain) NSNumber * managed;
 @property (nonatomic, retain) NSString * serial;
+
+// public interface
+@property (nonatomic, assign) BOOL wasSetByUser;
+@property (nonatomic, assign) BOOL managedByUser;
 
 @end

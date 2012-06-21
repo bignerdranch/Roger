@@ -22,6 +22,7 @@
 -(id)initWithAdb:(FADB *)adb;
 -(void)checkDevicesWithPing:(BOOL)withPing;
 - (void)sendIntent:(FIntent *)intent;
+-(void)refreshConnections;
 
 -(void)kill;
 
